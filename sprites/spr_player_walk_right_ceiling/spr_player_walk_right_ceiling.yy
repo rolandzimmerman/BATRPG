@@ -1,10 +1,10 @@
 {
   "$GMSprite":"",
-  "%Name":"babybat",
+  "%Name":"spr_player_walk_right_ceiling",
   "bboxMode":0,
   "bbox_bottom":95,
-  "bbox_left":0,
-  "bbox_right":153,
+  "bbox_left":12,
+  "bbox_right":141,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -13,7 +13,7 @@
   "For3D":false,
   "frames":[
     {"$GMSpriteFrame":"","%Name":"c609a9d3-56c4-46e0-b237-4467571e6ee7","name":"c609a9d3-56c4-46e0-b237-4467571e6ee7","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"","%Name":"19462822-907d-428d-8c0d-3cb53fc23323","name":"19462822-907d-428d-8c0d-3cb53fc23323","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"","%Name":"417bbedd-a9c1-4ebf-9eaf-430f234e2ee8","name":"417bbedd-a9c1-4ebf-9eaf-430f234e2ee8","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
@@ -22,19 +22,19 @@
   "layers":[
     {"$GMImageLayer":"","%Name":"1e1ee928-88a8-444b-af8f-aae2bf8675bd","blendMode":0,"displayName":"default","isLocked":false,"name":"1e1ee928-88a8-444b-af8f-aae2bf8675bd","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
-  "name":"babybat",
+  "name":"spr_player_walk_right_ceiling",
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"Bat",
-    "path":"folders/Sprites/Bat.yy",
+    "name":"Sprites",
+    "path":"folders/Sprites.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
   "resourceVersion":"2.0",
   "sequence":{
     "$GMSequence":"v1",
-    "%Name":"babybat",
+    "%Name":"spr_player_walk_right_ceiling",
     "autoRecord":true,
     "backdropHeight":768,
     "backdropImageOpacity":0.5,
@@ -58,7 +58,7 @@
       "resourceType":"KeyframeStore<MomentsEventKeyframe>",
       "resourceVersion":"2.0",
     },
-    "name":"babybat",
+    "name":"spr_player_walk_right_ceiling",
     "playback":1,
     "playbackSpeed":2.0,
     "playbackSpeedType":0,
@@ -72,11 +72,11 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"c609a9d3-56c4-46e0-b237-4467571e6ee7","path":"sprites/babybat/babybat.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"c609a9d3-56c4-46e0-b237-4467571e6ee7","path":"sprites/spr_player_walk_right_ceiling/spr_player_walk_right_ceiling.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"98a1877e-80d9-4b62-bc17-e5a440381cc0","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"19462822-907d-428d-8c0d-3cb53fc23323","path":"sprites/babybat/babybat.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"e19a3a05-56db-49ec-a04a-41cc718f8817","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"417bbedd-a9c1-4ebf-9eaf-430f234e2ee8","path":"sprites/spr_player_walk_right_ceiling/spr_player_walk_right_ceiling.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"5e9ee384-945d-433e-a903-db65c8fddb77","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

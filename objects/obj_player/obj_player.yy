@@ -34,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_player_idle_down",
-    "path":"sprites/spr_player_idle_down/spr_player_idle_down.yy",
+    "name":"babybat",
+    "path":"sprites/babybat/babybat.yy",
   },
   "spriteMaskId":null,
   "visible":true,

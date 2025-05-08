@@ -1,6 +1,8 @@
 /// obj_player :: Create Event
 persistent = true;
+
 // === Restore Position if returning from battle ===
+// This should be checked early.
 if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
     show_debug_message("✅ Restoring player position from global.return_x/y...");
     x = global.return_x;
@@ -9,101 +11,128 @@ if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
     // Prevent reuse after respawn
     global.return_x = undefined;
     global.return_y = undefined;
-    global.original_room = undefined;
+    global.original_room = undefined; // Also clear the original room reference
 }
 
 show_debug_message("--- obj_player Create Event RUNNING (Instance ID: " + string(id) + ") ---");
 
-// === Flappy Bird Movement Variables ===
-v_speed = 0;          // Current vertical speed
-gravity_force = 0.4;  // How much gravity pulls the player down per step (adjust for feel)
-flap_strength = -8;   // How much upward force is applied on a flap (negative is up, adjust for feel)
-max_v_speed_fall = 8; // Maximum speed the player can fall at (adjust for feel)
+// === Movement Physics & State Variables ===
+v_speed = 0;                // Current vertical speed
+gravity_force = 0.4;        // Downward acceleration per step (adjust for feel)
+flap_strength = -8;         // Upward velocity applied on flap (negative is up, adjust for feel)
+max_v_speed_fall = 8;       // Maximum speed the player can fall at (adjust for feel)
+horizontal_move_speed = 5;  // Player-controlled horizontal speed
+face_dir = 1;               // Player's horizontal facing: 1 for right, -1 for left (default to right)
 
-// === Horizontal Movement Variable ===
-horizontal_move_speed = 5; // Player-controlled horizontal speed
-
-// Movement & world setup
+// === World Interaction & Collision ===
 tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col"));
-if (tilemap == -1) show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' not found!");
-if (script_exists(scr_InitRoomMap)) scr_InitRoomMap();
+if (tilemap == -1) {
+    show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' not found!");
+}
+if (script_exists(scr_InitRoomMap)) { // Check if the room initialization script exists
+    scr_InitRoomMap();
+}
 
-// (Rest of your Create Event code remains the same)
-// ... Persistent data setup ...
-// ... Overworld/battle temp vars ...
-
-// Persistent data setup
+// === Persistent RPG Data Setup ===
+// This ensures player stats and party info are initialized or loaded.
 if (!variable_instance_exists(id, "persistent_data_initialized")) {
-    persistent_data_initialized = true;
+    persistent_data_initialized = true; // Flag to run this block only once per instance lifetime if not persistent globally
 
-    var _hero_key = "hero";
+    var _hero_key = "hero"; // Define the key for the main character
+
+    // Initialize party members array if it doesn't exist or isn't an array
     if (!variable_global_exists("party_members") || !is_array(global.party_members)) {
-        global.party_members = [_hero_key];
-    } else if (array_get_index(global.party_members, _hero_key) == -1) {
+        global.party_members = [_hero_key]; // Start with the hero
+    } else if (array_get_index(global.party_members, _hero_key) == -1) { // Add hero if not already in party
         array_push(global.party_members, _hero_key);
     }
 
+    // Initialize party stats data structure (DS Map) if it doesn't exist
     if (!variable_global_exists("party_current_stats") || !ds_exists(global.party_current_stats, ds_type_map)) {
         global.party_current_stats = ds_map_create();
     }
 
+    // Check if this is a new game start to initialize hero stats
     var _is_new_game = (variable_global_exists("start_as_new_game")) ? global.start_as_new_game : true;
+
     if (_is_new_game && !ds_map_exists(global.party_current_stats, _hero_key)) {
+        // Fetch base character data, or use defaults if script/data is missing
         var _base_data = script_exists(scr_FetchCharacterInfo) ? scr_FetchCharacterInfo(_hero_key) : undefined;
-        if (!is_struct(_base_data)) {
+
+        if (!is_struct(_base_data)) { // Default base data if fetching fails
             _base_data = {
-                name:"Hero", class:"Hero",
-                hp:40, maxhp:40, mp:20, maxmp:20,
-                atk:10, def:5, matk:8, mdef:4, spd:7, luk:5,
-                level:1, xp:0, xp_require:100,
-                overdrive:0, overdrive_max:100,
-                skills:[],
-                equipment:{ weapon:noone, offhand:noone, armor:noone, helm:noone, accessory:noone },
-                resistances:{ physical:0 },
-                character_key:_hero_key
+                name: "Hero", class: "Hero",
+                hp: 40, maxhp: 40, mp: 20, maxmp: 20,
+                atk: 10, def: 5, matk: 8, mdef: 4, spd: 7, luk: 5,
+                level: 1, xp: 0, xp_require: 100, // xp_require might be dynamic
+                overdrive: 0, overdrive_max: 100,
+                skills: [], // Array of skill IDs or structs
+                equipment: { weapon: noone, offhand: noone, armor: noone, helm: noone, accessory: noone },
+                resistances: { physical: 0 /* other resistances */ },
+                character_key: _hero_key
             };
         }
 
-        var _skills = variable_struct_exists(_base_data, "skills") && is_array(_base_data.skills) ? variable_clone(_base_data.skills, true) : [];
-        var _equip = variable_struct_exists(_base_data, "equipment") && is_struct(_base_data.equipment) ? variable_clone(_base_data.equipment, true) : {};
-        var _resist = variable_struct_exists(_base_data, "resistances") && is_struct(_base_data.resistances) ? variable_clone(_base_data.resistances, true) : {};
-        var _xp_req = script_exists(scr_GetXPForLevel) ? scr_GetXPForLevel(2) : 100;
+        // Deep clone mutable parts like arrays and structs if they come from base_data
+        var _skills = (variable_struct_exists(_base_data, "skills") && is_array(_base_data.skills)) ? variable_clone(_base_data.skills, true) : [];
+        var _equip = (variable_struct_exists(_base_data, "equipment") && is_struct(_base_data.equipment)) ? variable_clone(_base_data.equipment, true) : {};
+        var _resist = (variable_struct_exists(_base_data, "resistances") && is_struct(_base_data.resistances)) ? variable_clone(_base_data.resistances, true) : {};
 
+        // XP requirement for next level (level 2)
+        var _xp_req = script_exists(scr_GetXPForLevel) ? scr_GetXPForLevel(2) : (_base_data.xp_require ?? 100);
+
+        // Construct the current stats struct for the hero
         var _hero_stats = {
             maxhp: _base_data.maxhp ?? 40,
             maxmp: _base_data.maxmp ?? 20,
-            hp: _base_data.maxhp ?? 40,
-            mp: _base_data.maxmp ?? 20,
-            atk:_base_data.atk, def:_base_data.def, matk:_base_data.matk, mdef:_base_data.mdef,
-            spd:_base_data.spd, luk:_base_data.luk,
-            level:_base_data.level, xp:_base_data.xp, xp_require:_xp_req,
-            skills:_skills,
-            equipment:_equip,
-            resistances:_resist,
-            overdrive:_base_data.overdrive ?? 0,
-            overdrive_max:_base_data.overdrive_max ?? 100,
-            name:_base_data.name ?? "Hero",
-            class:_base_data.class ?? "Adventurer",
-            character_key:_hero_key
+            hp: _base_data.hp ?? _base_data.maxhp ?? 40, // Current HP, defaults to max HP
+            mp: _base_data.mp ?? _base_data.maxmp ?? 20, // Current MP, defaults to max MP
+            atk: _base_data.atk ?? 10,
+            def: _base_data.def ?? 5,
+            matk: _base_data.matk ?? 8,
+            mdef: _base_data.mdef ?? 4,
+            spd: _base_data.spd ?? 7,
+            luk: _base_data.luk ?? 5,
+            level: _base_data.level ?? 1,
+            xp: _base_data.xp ?? 0,
+            xp_require: _xp_req,
+            skills: _skills,
+            equipment: _equip,
+            resistances: _resist,
+            overdrive: _base_data.overdrive ?? 0,
+            overdrive_max: _base_data.overdrive_max ?? 100,
+            name: _base_data.name ?? "Hero",
+            class: _base_data.class ?? "Adventurer",
+            character_key: _hero_key
         };
+
         ds_map_add(global.party_current_stats, _hero_key, _hero_stats);
+        // Potentially mark that new game initialization is done
+        // global.start_as_new_game = false; // If this var controls it
     }
 }
 
-// Overworld/battle temp vars
-combat_state = "idle";
-origin_x = x; origin_y = y;
-target_for_attack = noone;
-attack_fx_sprite = spr_pow;
-attack_fx_sound = snd_punch;
-attack_animation_finished = false;
-stored_action_for_anim = undefined;
-sprite_assigned = false;
-turnCounter = 0;
-attack_anim_speed = 0.5;
-idle_sprite = sprite_index;
-attack_sprite_asset = -1;
-casting_sprite_asset = -1;
-item_sprite_asset = -1;
-sprite_before_attack = sprite_index;
-original_scale = image_xscale;
+// === Overworld/Battle Temporary Variables ===
+// These are related to combat states and animations, mostly for turn-based battles.
+combat_state = "idle";         // Player's state in combat (e.g., "idle", "attacking", "casting")
+origin_x = x;                  // Original x position (can be used for returning after an attack animation)
+origin_y = y;                  // Original y position
+target_for_attack = noone;     // Stores the instance ID of the current attack target
+attack_fx_sprite = spr_pow;    // Default sprite for attack visual effect
+attack_fx_sound = snd_punch;   // Default sound for attack impact
+attack_animation_finished = false; // Flag for attack animation completion
+stored_action_for_anim = undefined; // Stores action data if animation needs it later
+sprite_assigned = false;       // General purpose flag for sprite assignment logic
+turnCounter = 0;               // Generic turn counter, if needed outside battle system
+attack_anim_speed = 0.5;       // Default speed for attack animations
+idle_sprite = sprite_index;    // Stores the default idle sprite (might change with new movement)
+attack_sprite_asset = -1;      // Asset index for attack-specific sprite
+casting_sprite_asset = -1;     // Asset index for casting-specific sprite
+item_sprite_asset = -1;        // Asset index for item-use-specific sprite
+sprite_before_attack = sprite_index; // Stores sprite before an action like attacking
+original_scale = image_xscale; // Stores original image scale for temporary changes
+
+// IMPORTANT: No call to scr_player_movement_flappy() here.
+// Movement logic is handled in the Step Event.
+
+show_debug_message("--- obj_player Create Event FINISHED ---");

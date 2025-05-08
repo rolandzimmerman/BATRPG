@@ -23,114 +23,91 @@ if (pause_input && !instance_exists(obj_pause_menu)) {
 
 // --- Dialog Check ---
 if (instance_exists(obj_dialog)) {
-    // Optional: Gravity while dialog is up
-    // v_speed += gravity_force;
-    // v_speed = clamp(v_speed, flap_strength * 1.2, max_v_speed_fall);
-    // var _v_collisions_dialog = move_and_collide(0, v_speed, tilemap);
-    // if (array_length(_v_collisions_dialog) > 0) {
-    //     v_speed = 0;
-    // }
+    // Optional: You might want to call a simplified physics script here if gravity should still apply
+    // For now, just exit to prevent all player-controlled actions.
     exit;
 }
 
-// --- Player Input ---
 // Horizontal Movement Input
 var key_x_keyboard = keyboard_check(ord("D")) - keyboard_check(ord("A"));
 var joy_x_gamepad = gamepad_axis_value(0, gp_axislh);
 if (abs(joy_x_gamepad) < 0.25) joy_x_gamepad = 0; // Deadzone
-
 var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad);
-var current_h_speed = dir_x * horizontal_move_speed;
 
-// Flap Input (Using Space and Gamepad Face Button 1, 'A' is now for left movement)
-var key_flap_keyboard = keyboard_check_pressed(vk_space);
-var key_flap_gamepad = gamepad_button_check_pressed(0, gp_face1); // Typically 'A' on Xbox, 'X' on PlayStation
-var key_flap = key_flap_keyboard || key_flap_gamepad;
+// Flap Input (for physics)
+var key_flap_pressed_keyboard = keyboard_check_pressed(vk_space);
+var key_flap_pressed_gamepad = gamepad_button_check_pressed(0, gp_face1);
+var key_flap_initiated_this_step = key_flap_pressed_keyboard || key_flap_pressed_gamepad;
 
-// NPC Interaction Input (Ensure this is a distinct key)
-var interact_check_key = keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(0, gp_face3); // Example: Enter or 'Y'/Triangle
-var npc_at_player = instance_place(x, y, obj_npc_parent);
-var can_interact_with_npc = instance_exists(npc_at_player) && variable_instance_exists(npc_at_player, "can_talk") && npc_at_player.can_talk;
+// NPC Interaction Input & State Setup
+// These three lines MUST come before you use 'can_interact_with_npc' or 'interact_check_key' in decisions
+var interact_check_key = keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(0, gp_face3); // Defines the interaction key press
+var npc_at_player = instance_place(x, y, obj_npc_parent); // Finds if an NPC is at the player's position
+var can_interact_with_npc = instance_exists(npc_at_player) && variable_instance_exists(npc_at_player, "can_talk") && npc_at_player.can_talk; // Defines whether interaction is possible
 
-// --- Process Actions ---
-if (can_interact_with_npc && interact_check_key) {
-    with (npc_at_player) event_perform(ev_other, ev_user0);
-    // Optionally halt player physics during interaction
-    // v_speed = 0;
-    // current_h_speed = 0;
-} else if (key_flap) {
-    v_speed = flap_strength;
-    // audio_play_sound(snd_flap, 0, false); // Optional: flap sound
-}
-
-// --- Apply Gravity ---
-v_speed += gravity_force;
-v_speed = clamp(v_speed, flap_strength * 1.5, max_v_speed_fall); // Clamp overall vertical speed
-
-// --- Movement & Collision ---
-// Horizontal Collision
-if (current_h_speed != 0 && variable_instance_exists(id, "tilemap") && tilemap != -1) {
-    var _h_collisions = move_and_collide(current_h_speed, 0, tilemap);
-    if (array_length(_h_collisions) > 0) {
-        // Horizontal collision occurred.
-        // show_debug_message("Horizontal Collision with tile.");
-        // For Flappy Bird, hitting a side wall might be game over or just stop.
-        // If game over: room_restart();
-        // If just stop: current_h_speed would effectively be 0 for this frame's move
-        // move_and_collide already handles stopping, so we might not need to set current_h_speed to 0 here
-        // unless other logic depends on it AFTER collision.
+// --- Process High-Level Actions (Decide if interacting, then determine flap for physics) ---
+// Line 45 (approximately) is likely here or similar:
+var perform_flap_action_this_step = false;
+if (can_interact_with_npc && interact_check_key) { // 'can_interact_with_npc' is USED here
+    // Player is interacting, so no flap action
+    with (npc_at_player) {
+        event_perform(ev_other, ev_user0); // Perform the NPC's interaction event
     }
-} else if (current_h_speed != 0) { // No tilemap to check against, or tilemap variable is invalid
-    x += current_h_speed;
+} else if (key_flap_initiated_this_step) {
+    // Not interacting (or can't), and flap key was pressed
+    perform_flap_action_this_step = true;
 }
 
-// Vertical Collision
-if (variable_instance_exists(id, "tilemap") && tilemap != -1) {
-    var _v_collisions = move_and_collide(0, v_speed, tilemap);
-    if (array_length(_v_collisions) > 0) {
-        // Vertical collision occurred.
-        // show_debug_message("Vertical Collision with tile.");
-        // In Flappy Bird, this is typically game over.
-        // room_restart(); // Example
-        v_speed = 0; // Stop vertical movement.
-    }
-} else { // No tilemap to check against or tilemap variable is invalid
-    y += v_speed;
-}
+// --- Call Movement Script ---
+scr_player_movement_flappy(dir_x, perform_flap_action_this_step);
+
+// --- Define Flap Key States for Animation ---
+var flap_key_is_pressed_anim = key_flap_initiated_this_step;
+var flap_key_is_held_anim = keyboard_check(vk_space) || gamepad_button_check(0, gp_face1);
+var flap_key_is_released_anim = keyboard_check_released(vk_space) || gamepad_button_check_released(0, gp_face1);
+
 
 // --- Animation ---
-image_speed = 1; // Default animation speed if moving/flapping
+image_speed = 0; // We are manually setting the image_index
 
-if (dir_x != 0) { // Moving horizontally
-    if (dir_x > 0) {
-        // If you have specific flying right/flapping right sprites:
-        // sprite_index = (v_speed < -gravity_force*0.5) ? spr_player_flap_right : spr_player_fly_fall_right;
-        // Using existing walk sprites as placeholders:
-        sprite_index = spr_player_walk_right;
-    } else { // dir_x < 0
-        // sprite_index = (v_speed < -gravity_force*0.5) ? spr_player_flap_left : spr_player_fly_fall_left;
-        sprite_index = spr_player_walk_left;
-    }
-} else { // Not moving horizontally (or input is zero), base on vertical movement
-    if (v_speed < -gravity_force * 0.5) { // Moving upwards with some force
-        // Use a generic "up" or "flap" animation, or a direction-neutral one if available
-        // sprite_index = spr_player_flap_up; // Or a more generic flap if no horizontal movement
-        sprite_index = spr_player_walk_up; // Placeholder
-    } else { // Falling or neutral
-        // sprite_index = spr_player_fall_down; // Or a more generic fall if no horizontal movement
-        sprite_index = spr_player_walk_down; // Placeholder
-    }
+// 1. Update instance variable 'face_dir' (if dir_x from input is not 0)
+if (dir_x != 0) {
+    self.face_dir = dir_x;
 }
 
-// If you want idle animations when on ground AND not flapping/moving:
-// This requires a "grounded" check, which Flappy Bird usually doesn't have prominently.
-// For now, the player is always considered "in air" for animation purposes.
-// If v_speed is near 0 AND dir_x is 0, you might switch to an idle (e.g. spr_player_idle_down)
-// but this depends on whether the player can actually "rest" or is always subject to gravity.
-// For Flappy Bird style, usually, there's no true idle unless on a specific "safe" platform.
+// 2. Set the base sprite_index based on 'face_dir'
+if (self.face_dir == 1) { // Facing right
+    sprite_index = spr_player_walk_right; // USE YOUR ACTUAL SPRITE NAME
+} else { // Facing left
+    sprite_index = spr_player_walk_left;  // USE YOUR ACTUAL SPRITE NAME
+}
 
+// 3. Set the image_index (frame) based on flap key state and vertical movement
+if (flap_key_is_released_anim) {
+    // Priority 1: If the flap key was just released, always go to fall frame.
+    image_index = 0;
+} else if (flap_key_is_pressed_anim) {
+    // Priority 2: If the flap key was just pressed, show flap frame.
+    // This also covers the first frame of a hold.
+    image_index = 1;
+} else if (flap_key_is_held_anim) {
+    // Priority 3: If the flap key is being held (and not just pressed or released),
+    // keep showing the flap frame. You might also add "&& self.v_speed < 0"
+    // if you only want the flap frame while held AND moving up.
+    // For now, holding = flap visual.
+    image_index = 1;
+} else {
+    // Key is not pressed, not held, and not just released.
+    // This state occurs after a tap (pressed then released) or just free-falling.
+    // If player is rising from momentum after a tap, v_speed will be < 0.
+    // "returns to index 0 when the A button is let go" applies here.
+    image_index = 0; // Revert to fall frame if purely on momentum or actually falling.
+}
 
 // --- Room Transitions & Out of Bounds ---
+// This logic uses dir_x (input intent) and bbox properties (actual position after movement script)
+var current_h_speed_intent = dir_x * horizontal_move_speed; // Used for evaluating transition intent
+
 var exit_margin = 4;
 var player_bbox_top = bbox_top;
 var player_bbox_bottom = bbox_bottom;
@@ -138,28 +115,27 @@ var player_bbox_left = bbox_left;
 var player_bbox_right = bbox_right;
 var exit_dir = "none";
 
-// Out of Bounds (Vertical - typically game over)
+// Out of Bounds (Vertical)
 if (player_bbox_bottom > room_height + sprite_get_height(sprite_index) || player_bbox_top < 0 - sprite_get_height(sprite_index)) {
     // show_debug_message("GAME OVER - Out of Bounds (Vertical)");
-    // room_restart(); // Example game over action
-    y = clamp(y, 0, room_height); // Prevent continuous trigger if no restart
+    // room_restart();
+    y = clamp(y, 0, room_height);
     v_speed = 0;
 }
-// Out of Bounds (Horizontal - might be game over or block)
-if (player_bbox_right > room_width + sprite_get_width(sprite_index) && dir_x > 0) {
+// Out of Bounds (Horizontal) - Note: move_and_collide in script should prevent most OOB if tilemap extends to edges.
+// This is more of a fallback or for rooms without edge tiles.
+if (player_bbox_right > room_width && dir_x > 0) { // Check against room_width directly
     // show_debug_message("GAME OVER - Out of Bounds (Right)");
     // room_restart();
-    x = room_width - sprite_get_width(sprite_index)/2; // Clamp to edge
-    current_h_speed = 0;
-} else if (player_bbox_left < 0 - sprite_get_width(sprite_index) && dir_x < 0) {
+    x = room_width - (bbox_right - x); // Correctly position at edge
+} else if (player_bbox_left < 0 && dir_x < 0) {  // Check against 0 directly
     // show_debug_message("GAME OVER - Out of Bounds (Left)");
     // room_restart();
-    x = sprite_get_width(sprite_index)/2; // Clamp to edge
-    current_h_speed = 0;
+    x = 0 - (bbox_left - x); // Correctly position at edge
 }
 
-// Room Transitions (Horizontal)
-if (current_h_speed != 0) { // Only check if attempting to move horizontally
+// Room Transitions (Horizontal) - uses current_h_speed_intent
+if (current_h_speed_intent != 0) {
     if (player_bbox_left <= exit_margin && dir_x < 0) exit_dir = "left";
     else if (player_bbox_right >= room_width - exit_margin && dir_x > 0) exit_dir = "right";
 }
@@ -171,21 +147,16 @@ if (exit_dir != "none") {
             var dest = ds_map_find_value(conn_map, exit_dir);
             if (room_exists(dest)) {
                 global.entry_direction = exit_dir;
-                // Consider how player is positioned in new room for Flappy Bird style
-                // global.return_x = (exit_dir == "left") ? room_width - 32 : 32; // Example entry points
-                // global.return_y = room_height / 2;
                 room_goto(dest);
                 exit;
             }
         }
     }
-    // If no room connection, player will be stopped by out-of-bounds logic or wall collision.
 }
 
-
 // --- Random Encounter ---
-// Trigger based on any movement.
-if (current_h_speed != 0 || v_speed != 0) {
+// Uses dir_x (input intent) and v_speed (current state after movement script)
+if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving vertically
     if (!variable_global_exists("encounter_timer")) global.encounter_timer = 0;
     global.encounter_timer++;
 }
@@ -207,7 +178,6 @@ if (global.encounter_timer >= encounter_threshold) {
                     global.original_room = room;
                     global.return_x = x;
                     global.return_y = y;
-                    // Consider resetting v_speed or placing player safely on battle return
                     room_goto(rm_battle);
                     exit;
                 }
