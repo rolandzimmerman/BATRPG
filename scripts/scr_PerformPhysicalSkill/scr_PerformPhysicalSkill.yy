@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_PerformPhysicalSkill",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_PerformPhysicalSkill",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/Scripts/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

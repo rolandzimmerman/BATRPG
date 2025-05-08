@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_FetchCharacterInfo",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_FetchCharacterInfo",
+  "parent":{
+    "name":"Party",
+    "path":"folders/Scripts/Party.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

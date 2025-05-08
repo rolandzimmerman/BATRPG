@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_CalculateEquippedStats",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_CalculateEquippedStats",
+  "parent":{
+    "name":"Equipment",
+    "path":"folders/Scripts/Equipment.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

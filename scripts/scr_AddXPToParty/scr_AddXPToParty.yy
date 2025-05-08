@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_AddXPToParty",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_AddXPToParty",
+  "parent":{
+    "name":"Party",
+    "path":"folders/Scripts/Party.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

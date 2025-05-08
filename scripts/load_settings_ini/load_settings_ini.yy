@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"load_settings_ini",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"load_settings_ini",
+  "parent":{
+    "name":"Helpers",
+    "path":"folders/Scripts/Helpers.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

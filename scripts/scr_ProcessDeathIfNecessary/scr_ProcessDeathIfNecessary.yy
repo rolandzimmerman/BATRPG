@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_ProcessDeathIfNecessary",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_ProcessDeathIfNecessary",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/Scripts/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

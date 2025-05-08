@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_GetItemData",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_GetItemData",
+  "parent":{
+    "name":"Shopping&inventory",
+    "path":"folders/Scripts/Shopping&inventory.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

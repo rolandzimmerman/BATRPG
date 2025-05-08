@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_UpdateStatusEffects",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_UpdateStatusEffects",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/Scripts/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
