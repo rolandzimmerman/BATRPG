@@ -29,30 +29,41 @@ if (instance_exists(obj_dialog)) {
 }
 
 // --- Player Input ---
+// Horizontal Movement Input (dir_x calculation as before)
 var key_x_keyboard = keyboard_check(ord("D")) - keyboard_check(ord("A"));
 var joy_x_gamepad = gamepad_axis_value(0, gp_axislh);
 if (abs(joy_x_gamepad) < 0.25) joy_x_gamepad = 0;
-var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad); // Local var for input direction
+var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad);
 
+// Flap/Action Key (Pressed this step)
 var key_flap_initiated_this_step = keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1);
 
+// Up/Down Keys (Held state) for Phasing - CORRECTED GAMEPAD CONSTANTS
+var key_up_held = keyboard_check(vk_up) || keyboard_check(ord("W")) || (gamepad_axis_value(0, gp_axislv) < -0.5) || gamepad_button_check(0, gp_padu); // Use gp_padu for D-pad Up
+var key_down_held = keyboard_check(vk_down) || keyboard_check(ord("S")) || (gamepad_axis_value(0, gp_axislv) > 0.5) || gamepad_button_check(0, gp_padd); // Use gp_padd for D-pad Down (this was line 43)
+
+// NPC Interaction Input (as before)
 var interact_check_key = keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(0, gp_face3);
 var npc_at_player = instance_place(x, y, obj_npc_parent);
 var can_interact_with_npc = instance_exists(npc_at_player) && variable_instance_exists(npc_at_player, "can_talk") && npc_at_player.can_talk;
 
-// --- Process High-Level Actions ---
-var perform_flap_action_this_step = false;
+// --- Process High-Level Actions --- (as before)
+var perform_flap_action_for_physics = false;
+// ... (logic for interaction vs flap action) ...
 if (can_interact_with_npc && interact_check_key) {
     with (npc_at_player) event_perform(ev_other, ev_user0);
 } else if (key_flap_initiated_this_step) {
-    perform_flap_action_this_step = true;
+    perform_flap_action_for_physics = true;
 }
 
-// --- Call New Main Movement & State Script ---
-// This replaces the call to scr_player_movement_flappy
-scr_player_update_state_and_movement(dir_x, perform_flap_action_this_step);
+
+// --- Call New Main Movement & State Script --- (as before)
+// Pass dir_x, the action key press, and the up/down held states
+scr_player_update_state_and_movement(dir_x, key_flap_initiated_this_step, key_up_held, key_down_held);
+
 
 // --- Define Flap Key States for Animation (if needed for FLYING animation) ---
+// This 'key_flap_initiated_this_step' is the same as used above for action input
 var flap_key_is_pressed_anim = key_flap_initiated_this_step;
 var flap_key_is_held_anim = keyboard_check(vk_space) || gamepad_button_check(0, gp_face1);
 var flap_key_is_released_anim = keyboard_check_released(vk_space) || gamepad_button_check_released(0, gp_face1);

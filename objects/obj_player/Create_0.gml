@@ -7,7 +7,9 @@ enum PLAYER_STATE {
     WALKING_FLOOR,
     WALKING_CEILING
 }
-player_state = PLAYER_STATE.FLYING; // Bat starts in the flying state
+player_state = PLAYER_STATE.FLYING;
+
+TILE_SIZE = 32; // IMPORTANT: Set this to your game's actual tile size (e.g., 16, 32, etc.)
 
 
 // === Restore Position if returning from battle ===
@@ -35,11 +37,18 @@ face_dir = 1;
 walk_animation_speed = 1; // Adjust as needed for your walking animations
 
 // === World Interaction & Collision ===
-tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col"));
+tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col")); // Your main collision tilemap
 if (tilemap == -1) {
-    show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' or its tilemap not found! tilemap variable is -1.");
+    show_debug_message("Warning [obj_player Create]: Main collision layer 'Tiles_Col' or its tilemap not found!");
 } else {
-    show_debug_message("obj_player Create: Tilemap ID successfully found: " + string(tilemap));
+    show_debug_message("obj_player Create: Main collision tilemap ID successfully found: " + string(tilemap));
+}
+
+tilemap_phase_id = layer_tilemap_get_id(layer_get_id("Tiles_Phase")); // The new phasable tilemap
+if (tilemap_phase_id == -1) {
+    show_debug_message("Warning [obj_player Create]: Phasing layer 'Tiles_Phase' or its tilemap not found! Phasing will not work.");
+} else {
+    show_debug_message("obj_player Create: Phasing tilemap ID successfully found: " + string(tilemap_phase_id));
 }
 
 // === Persistent RPG Data Setup ===
