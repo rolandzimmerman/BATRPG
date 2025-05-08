@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_player_update_state_and_movement",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_player_update_state_and_movement",
+  "parent":{
+    "name":"Movement",
+    "path":"folders/Scripts/Movement.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

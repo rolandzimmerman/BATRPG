@@ -175,6 +175,7 @@
     {"id":{"name":"scr_PerformAttack","path":"scripts/scr_PerformAttack/scr_PerformAttack.yy",},},
     {"id":{"name":"scr_PerformPhysicalSkill","path":"scripts/scr_PerformPhysicalSkill/scr_PerformPhysicalSkill.yy",},},
     {"id":{"name":"scr_player_movement_flappy","path":"scripts/scr_player_movement_flappy/scr_player_movement_flappy.yy",},},
+    {"id":{"name":"scr_player_update_state_and_movement","path":"scripts/scr_player_update_state_and_movement/scr_player_update_state_and_movement.yy",},},
     {"id":{"name":"scr_ProcessDeathIfNecessary","path":"scripts/scr_ProcessDeathIfNecessary/scr_ProcessDeathIfNecessary.yy",},},
     {"id":{"name":"scr_RemoveInventoryItem","path":"scripts/scr_RemoveInventoryItem/scr_RemoveInventoryItem.yy",},},
     {"id":{"name":"scr_resume_music","path":"scripts/scr_resume_music/scr_resume_music.yy",},},

@@ -1,6 +1,15 @@
 /// obj_player :: Create Event
 persistent = true;
 
+// Define Player States
+enum PLAYER_STATE {
+    FLYING,
+    WALKING_FLOOR,
+    WALKING_CEILING
+}
+player_state = PLAYER_STATE.FLYING; // Bat starts in the flying state
+
+
 // === Restore Position if returning from battle ===
 // This should be checked early.
 if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
@@ -17,20 +26,20 @@ if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
 show_debug_message("--- obj_player Create Event RUNNING (Instance ID: " + string(id) + ") ---");
 
 // === Movement Physics & State Variables ===
-v_speed = 0;                // Current vertical speed
-gravity_force = 0.4;        // Downward acceleration per step (adjust for feel)
-flap_strength = -8;         // Upward velocity applied on flap (negative is up, adjust for feel)
-max_v_speed_fall = 8;       // Maximum speed the player can fall at (adjust for feel)
-horizontal_move_speed = 5;  // Player-controlled horizontal speed
-face_dir = 1;               // Player's horizontal facing: 1 for right, -1 for left (default to right)
+v_speed = 0;
+gravity_force = 0.4;
+flap_strength = -8;
+max_v_speed_fall = 8;
+horizontal_move_speed = 5;
+face_dir = 1;
+walk_animation_speed = 1; // Adjust as needed for your walking animations
 
 // === World Interaction & Collision ===
 tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col"));
 if (tilemap == -1) {
-    show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' not found!");
-}
-if (script_exists(scr_InitRoomMap)) { // Check if the room initialization script exists
-    scr_InitRoomMap();
+    show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' or its tilemap not found! tilemap variable is -1.");
+} else {
+    show_debug_message("obj_player Create: Tilemap ID successfully found: " + string(tilemap));
 }
 
 // === Persistent RPG Data Setup ===

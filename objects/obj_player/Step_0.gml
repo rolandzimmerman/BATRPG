@@ -28,80 +28,84 @@ if (instance_exists(obj_dialog)) {
     exit;
 }
 
-// Horizontal Movement Input
+// --- Player Input ---
 var key_x_keyboard = keyboard_check(ord("D")) - keyboard_check(ord("A"));
 var joy_x_gamepad = gamepad_axis_value(0, gp_axislh);
-if (abs(joy_x_gamepad) < 0.25) joy_x_gamepad = 0; // Deadzone
-var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad);
+if (abs(joy_x_gamepad) < 0.25) joy_x_gamepad = 0;
+var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad); // Local var for input direction
 
-// Flap Input (for physics)
-var key_flap_pressed_keyboard = keyboard_check_pressed(vk_space);
-var key_flap_pressed_gamepad = gamepad_button_check_pressed(0, gp_face1);
-var key_flap_initiated_this_step = key_flap_pressed_keyboard || key_flap_pressed_gamepad;
+var key_flap_initiated_this_step = keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1);
 
-// NPC Interaction Input & State Setup
-// These three lines MUST come before you use 'can_interact_with_npc' or 'interact_check_key' in decisions
-var interact_check_key = keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(0, gp_face3); // Defines the interaction key press
-var npc_at_player = instance_place(x, y, obj_npc_parent); // Finds if an NPC is at the player's position
-var can_interact_with_npc = instance_exists(npc_at_player) && variable_instance_exists(npc_at_player, "can_talk") && npc_at_player.can_talk; // Defines whether interaction is possible
+var interact_check_key = keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(0, gp_face3);
+var npc_at_player = instance_place(x, y, obj_npc_parent);
+var can_interact_with_npc = instance_exists(npc_at_player) && variable_instance_exists(npc_at_player, "can_talk") && npc_at_player.can_talk;
 
-// --- Process High-Level Actions (Decide if interacting, then determine flap for physics) ---
-// Line 45 (approximately) is likely here or similar:
+// --- Process High-Level Actions ---
 var perform_flap_action_this_step = false;
-if (can_interact_with_npc && interact_check_key) { // 'can_interact_with_npc' is USED here
-    // Player is interacting, so no flap action
-    with (npc_at_player) {
-        event_perform(ev_other, ev_user0); // Perform the NPC's interaction event
-    }
+if (can_interact_with_npc && interact_check_key) {
+    with (npc_at_player) event_perform(ev_other, ev_user0);
 } else if (key_flap_initiated_this_step) {
-    // Not interacting (or can't), and flap key was pressed
     perform_flap_action_this_step = true;
 }
 
-// --- Call Movement Script ---
-scr_player_movement_flappy(dir_x, perform_flap_action_this_step);
+// --- Call New Main Movement & State Script ---
+// This replaces the call to scr_player_movement_flappy
+scr_player_update_state_and_movement(dir_x, perform_flap_action_this_step);
 
-// --- Define Flap Key States for Animation ---
+// --- Define Flap Key States for Animation (if needed for FLYING animation) ---
 var flap_key_is_pressed_anim = key_flap_initiated_this_step;
 var flap_key_is_held_anim = keyboard_check(vk_space) || gamepad_button_check(0, gp_face1);
 var flap_key_is_released_anim = keyboard_check_released(vk_space) || gamepad_button_check_released(0, gp_face1);
 
-
 // --- Animation ---
-image_speed = 0; // We are manually setting the image_index
-
-// 1. Update instance variable 'face_dir' (if dir_x from input is not 0)
+// Instance variable self.face_dir is updated based on input dir_x
 if (dir_x != 0) {
     self.face_dir = dir_x;
 }
 
-// 2. Set the base sprite_index based on 'face_dir'
-if (self.face_dir == 1) { // Facing right
-    sprite_index = spr_player_walk_right; // USE YOUR ACTUAL SPRITE NAME
-} else { // Facing left
-    sprite_index = spr_player_walk_left;  // USE YOUR ACTUAL SPRITE NAME
-}
+switch (self.player_state) {
+    case PLAYER_STATE.FLYING:
+        image_speed = 0; // Manual frame control for flying
+        if (self.face_dir == 1) {
+            sprite_index = spr_player_walk_right; // Your actual flying_right sprite
+        } else {
+            sprite_index = spr_player_walk_left;  // Your actual flying_left sprite
+        }
 
-// 3. Set the image_index (frame) based on flap key state and vertical movement
-if (flap_key_is_released_anim) {
-    // Priority 1: If the flap key was just released, always go to fall frame.
-    image_index = 0;
-} else if (flap_key_is_pressed_anim) {
-    // Priority 2: If the flap key was just pressed, show flap frame.
-    // This also covers the first frame of a hold.
-    image_index = 1;
-} else if (flap_key_is_held_anim) {
-    // Priority 3: If the flap key is being held (and not just pressed or released),
-    // keep showing the flap frame. You might also add "&& self.v_speed < 0"
-    // if you only want the flap frame while held AND moving up.
-    // For now, holding = flap visual.
-    image_index = 1;
-} else {
-    // Key is not pressed, not held, and not just released.
-    // This state occurs after a tap (pressed then released) or just free-falling.
-    // If player is rising from momentum after a tap, v_speed will be < 0.
-    // "returns to index 0 when the A button is let go" applies here.
-    image_index = 0; // Revert to fall frame if purely on momentum or actually falling.
+        // Flap/Fall frame animation for flying state
+        if (flap_key_is_released_anim) { image_index = 0; }
+        else if (flap_key_is_pressed_anim) { image_index = 1; }
+        else if (flap_key_is_held_anim) { image_index = 1; }
+        else { image_index = 0; }
+        break;
+
+    case PLAYER_STATE.WALKING_FLOOR:
+        if (dir_x != 0) { // If moving horizontally
+            image_speed = self.walk_animation_speed;
+        } else {
+            image_speed = 0;
+            image_index = 0; // Show first frame of walk cycle when still
+        }
+        if (self.face_dir == 1) {
+            sprite_index = spr_player_walk_right_ground;
+        } else {
+            sprite_index = spr_player_walk_left_ground;
+        }
+        break;
+
+    case PLAYER_STATE.WALKING_CEILING:
+        if (dir_x != 0) {
+            image_speed = self.walk_animation_speed;
+        } else {
+            image_speed = 0;
+            image_index = 0;
+        }
+        if (self.face_dir == 1) {
+            sprite_index = spr_player_walk_right_ceiling;
+        } else {
+            sprite_index = spr_player_walk_left_ceiling;
+        }
+        break;
 }
 
 // --- Room Transitions & Out of Bounds ---
