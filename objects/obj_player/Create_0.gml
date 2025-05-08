@@ -14,22 +14,23 @@ if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
 
 show_debug_message("--- obj_player Create Event RUNNING (Instance ID: " + string(id) + ") ---");
 
+// === Flappy Bird Movement Variables ===
+v_speed = 0;          // Current vertical speed
+gravity_force = 0.4;  // How much gravity pulls the player down per step (adjust for feel)
+flap_strength = -8;   // How much upward force is applied on a flap (negative is up, adjust for feel)
+max_v_speed_fall = 8; // Maximum speed the player can fall at (adjust for feel)
+
+// === Horizontal Movement Variable ===
+horizontal_move_speed = 5; // Player-controlled horizontal speed
+
 // Movement & world setup
-move_speed = 2;
-tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col")); 
+tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col"));
 if (tilemap == -1) show_debug_message("Warning [obj_player Create]: Collision layer 'Tiles_Col' not found!");
 if (script_exists(scr_InitRoomMap)) scr_InitRoomMap();
 
-// === Return from battle positioning ===
-if (variable_global_exists("return_x") && variable_global_exists("return_y")) {
-    show_debug_message("Restoring player position from return_x/y...");
-    x = global.return_x;
-    y = global.return_y;
-
-    global.return_x = undefined;
-    global.return_y = undefined;
-    global.original_room = undefined;
-}
+// (Rest of your Create Event code remains the same)
+// ... Persistent data setup ...
+// ... Overworld/battle temp vars ...
 
 // Persistent data setup
 if (!variable_instance_exists(id, "persistent_data_initialized")) {
@@ -56,7 +57,7 @@ if (!variable_instance_exists(id, "persistent_data_initialized")) {
                 atk:10, def:5, matk:8, mdef:4, spd:7, luk:5,
                 level:1, xp:0, xp_require:100,
                 overdrive:0, overdrive_max:100,
-                skills:[], 
+                skills:[],
                 equipment:{ weapon:noone, offhand:noone, armor:noone, helm:noone, accessory:noone },
                 resistances:{ physical:0 },
                 character_key:_hero_key
@@ -66,7 +67,6 @@ if (!variable_instance_exists(id, "persistent_data_initialized")) {
         var _skills = variable_struct_exists(_base_data, "skills") && is_array(_base_data.skills) ? variable_clone(_base_data.skills, true) : [];
         var _equip = variable_struct_exists(_base_data, "equipment") && is_struct(_base_data.equipment) ? variable_clone(_base_data.equipment, true) : {};
         var _resist = variable_struct_exists(_base_data, "resistances") && is_struct(_base_data.resistances) ? variable_clone(_base_data.resistances, true) : {};
-
         var _xp_req = script_exists(scr_GetXPForLevel) ? scr_GetXPForLevel(2) : 100;
 
         var _hero_stats = {
@@ -86,7 +86,6 @@ if (!variable_instance_exists(id, "persistent_data_initialized")) {
             class:_base_data.class ?? "Adventurer",
             character_key:_hero_key
         };
-
         ds_map_add(global.party_current_stats, _hero_key, _hero_stats);
     }
 }

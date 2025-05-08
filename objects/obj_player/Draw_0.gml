@@ -4,6 +4,6 @@
 if (room == rm_battle) return;
 
 // default draw (your walking sprite, etc.)
-draw_shadow();
+draw_shadow(); // Consider if shadow behavior needs to change for an airborne player
 
 draw_self();
