@@ -9,7 +9,7 @@ enum PLAYER_STATE {
 }
 player_state = PLAYER_STATE.FLYING;
 
-TILE_SIZE = 32; // IMPORTANT: Set this to your game's actual tile size (e.g., 16, 32, etc.)
+TILE_SIZE = 12; // IMPORTANT: Set this to your game's actual tile size (e.g., 16, 32, etc.)
 
 
 // === Restore Position if returning from battle ===

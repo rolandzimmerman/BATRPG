@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"Mormon_Dad_Sprite",
-    "path":"sprites/Mormon_Dad_Sprite/Mormon_Dad_Sprite.yy",
+    "name":"goblin_club",
+    "path":"sprites/goblin_club/goblin_club.yy",
   },
   "spriteMaskId":null,
   "visible":true,

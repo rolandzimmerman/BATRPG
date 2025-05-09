@@ -1,5 +1,5 @@
 /// @function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed, _key_up_held, _key_down_held)
-/// @description Manages player state (flying, walking) and executes movement logic, including phasing.
+/// @description Manages player state (flying, walking) and executes movement logic, including phasing and step-up/down.
 /// @param {real} _input_dir_x Horizontal input direction (-1, 0, 1).
 /// @param {boolean} _action_key_pressed True if the primary action/flap key was pressed this step.
 /// @param {boolean} _key_up_held True if the up directional key is held.
@@ -13,11 +13,12 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
     }
     var _can_check_phase_layer = (self.tilemap_phase_id != -1); // Flag for easier checking later
 
-
+    // --- State Machine ---
     switch (self.player_state) {
 
         // ==================== FLYING STATE ====================
         case PLAYER_STATE.FLYING:
+            show_debug_message("State: FLYING");
             // --- Physics for Flying ---
             if (_action_key_pressed) {
                 self.v_speed = self.flap_strength;
@@ -28,60 +29,77 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
             // --- Horizontal Movement & Collision (Flying) ---
             var _current_h_speed_flying = _input_dir_x * self.horizontal_move_speed;
             if (_current_h_speed_flying != 0) {
-                // Use _collision_targets array
-                var _h_collisions_flying = move_and_collide(_current_h_speed_flying, 0, _collision_targets);
+                move_and_collide(_current_h_speed_flying, 0, _collision_targets);
             }
 
             // --- Vertical Movement & Collision (Flying) ---
             var _v_speed_before_collide = self.v_speed;
-            var _v_collision_reported = false;
+            var _v_collision_reported = false; // <<< CORRECT INITIALIZATION HERE
 
             if (_v_speed_before_collide != 0) {
-                if (self.tilemap == -1 && self.tilemap_phase_id == -1) { // Only skip if BOTH are invalid
+                if (self.tilemap == -1 && (!_can_check_phase_layer || self.tilemap_phase_id == -1) ) {
                     show_debug_message("WARNING in FLYING state: No valid collision tilemaps. Skipping vertical collision.");
                 } else {
-                    // Use _collision_targets array
                     var _v_collision_array = move_and_collide(0, _v_speed_before_collide, _collision_targets);
                     if (array_length(_v_collision_array) > 0) {
-                        _v_collision_reported = true;
+                        _v_collision_reported = true; // Set to true if move_and_collide returns collision data
                         show_debug_message("Vertical collision reported (FLYING). Data[0]: " + string(_v_collision_array[0]));
                     }
                 }
             }
 
             // --- State Transition Checks (from Flying) ---
-            if (_v_collision_reported) {
-                // Fallback logic based on direction (as detailed collision data was unreliable previously)
-                if (_v_speed_before_collide >= 0) { // Hit floor
-                    show_debug_message("Transition: FLYING -> WALKING_FLOOR (based on downward collision stop)");
-                    self.player_state = PLAYER_STATE.WALKING_FLOOR;
+            // Line 42 (approximately) would be this 'if' statement:
+            if (_v_collision_reported) { // Now _v_collision_reported is guaranteed to be defined
+                if (_v_speed_before_collide >= 0) { // Was moving down (or stationary) and hit something
+                    show_debug_message("Transition: FLYING -> WALKING_FLOOR (direct collision)");
+                    self.player_state = PLAYER_STATE.WALKING_FLOOR; // Ensure this uses your corrected enum member
                     self.v_speed = 0;
-                    // Snap Y position more accurately after state change if needed
-                } else { // Hit ceiling
-                    show_debug_message("Transition: FLYING -> WALKING_CEILING (based on upward collision stop)");
-                    self.player_state = PLAYER_STATE.WALKING_CEILING;
+                } else { // Was moving up (_v_speed_before_collide < 0) and hit something
+                    show_debug_message("Transition: FLYING -> WALKING_CEILING (direct collision)");
+                    self.player_state = PLAYER_STATE.WALKING_CEILING; // Ensure this uses your corrected enum member
                     self.v_speed = 0;
-                    // Snap Y position more accurately after state change if needed
+                }
+            } else if (_v_speed_before_collide < 0) { 
+                // NO direct collision stopped us, BUT we WERE moving upwards. Check for a "near miss" ceiling latch.
+                var _ceiling_grace_check_dist = 2; 
+                var _y_check_for_grace_latch = self.y - _ceiling_grace_check_dist;
+
+                var _near_ceiling_main = place_meeting(self.x, _y_check_for_grace_latch, self.tilemap);
+                var _near_ceiling_phase = false;
+                if (_can_check_phase_layer) {
+                    _near_ceiling_phase = place_meeting(self.x, _y_check_for_grace_latch, self.tilemap_phase_id);
+                }
+
+                if (_near_ceiling_main || _near_ceiling_phase) {
+                    show_debug_message("Grace Latch: FLYING -> WALKING_CEILING (near miss detected)");
+                    self.player_state = PLAYER_STATE.WALKING_CEILING; // Corrected enum member
+                    self.v_speed = 0; 
+                    // Optional: Add an immediate forceful snap to the ceiling here if needed
+                    // move_and_collide(0, -(_ceiling_grace_check_dist + 2), _collision_targets);
+                    // self.v_speed = 0; // Re-zero after snap
                 }
             }
-            break;
+            break; // End of FLYING case
 
 
-// ==================== WALKING ON FLOOR STATE ====================
+        // ==================== WALKING ON FLOOR STATE ====================
         case PLAYER_STATE.WALKING_FLOOR:
-            // --- Phasing Check (Priority 1) ---
-            // NOTE: This still relies on a TILE_SIZE assumption for the y-adjustment.
-            // If tile height truly varies, phasing needs a more complex way to determine platform thickness.
+// --- Phasing Check (Priority 1) ---
             if (_action_key_pressed && _key_down_held && _can_check_phase_layer && variable_instance_exists(id,"TILE_SIZE") && self.TILE_SIZE > 0) {
-                if (tilemap_get_at_pixel(self.tilemap_phase_id, self.x, self.bbox_bottom) != 0) { // Check phase layer using coordinates
+                if (tilemap_get_at_pixel(self.tilemap_phase_id, self.x, self.bbox_bottom) != 0) { 
                     show_debug_message("Attempting Phase: Floor -> Ceiling");
-                    // Precise Y adjust assumes TILE_SIZE is the platform thickness
-                    var _current_tile_top_y = floor(self.bbox_bottom / self.TILE_SIZE) * self.TILE_SIZE;
-                    var _new_target_y_for_bbox_top = _current_tile_top_y + self.TILE_SIZE;
-                    self.y = _new_target_y_for_bbox_top + (self.y - self.bbox_top);
-                    self.player_state = PLAYER_STATE.WALKING_CEILING;
+                    
+                    var _player_height = self.bbox_bottom - self.bbox_top;
+                    // Move player's origin DOWN so its TOP edge is TILE_SIZE below its original BOTTOM edge.
+                    // This ensures the entire hitbox clears the tile it was standing on.
+                    self.y += (_player_height + self.TILE_SIZE); 
+                    
+                    self.player_state = PLAYER_STATE.WALKING_CEILING; 
                     self.v_speed = 0;
-                    break; // Exit switch
+                    
+                    // NO immediate snap here. Let the WALKING_CEILING state's logic handle sticking in the next frame.
+                    break; 
                 }
             }
 
@@ -97,52 +115,79 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
             show_debug_message("State: WALKING_FLOOR");
             self.v_speed = 0; // Keep v_speed zero while walking
 
-            // Horizontal Movement
+            // Horizontal Movement with Step-Up
             var _current_h_speed_floor = _input_dir_x * self.horizontal_move_speed;
             if (_current_h_speed_floor != 0) {
-                move_and_collide(_current_h_speed_floor, 0, _collision_targets);
-            }
+                var _x_before_h_move_floor = self.x;
+                var _y_before_h_move_floor = self.y;
 
-            // Stick to floor & Edge detection (Check BOTH layers for ground presence)
-            var _check_dist_ground = 2; // How far below bbox to check
-            // Check main collision layer
+                var _h_collisions_initial_floor = move_and_collide(_current_h_speed_floor, 0, _collision_targets);
+
+                if (self.x == _x_before_h_move_floor && array_length(_h_collisions_initial_floor) > 0) {
+                    show_debug_message("Floor Horizontal collision. Attempting step-up...");
+                    var _max_step_up = 16; 
+                    var _stepped_up_successfully = false;
+                    
+                    var _original_y_for_step = self.y;
+                    // Try to move up, checking for ceiling collisions during the step-up itself
+                    var _y_before_nudge = self.y;
+                    var _upward_nudge_collisions = move_and_collide(0, -_max_step_up, _collision_targets);
+                    var _actual_y_nudge_amount = _y_before_nudge - self.y; // Positive if moved up
+
+                    if (_actual_y_nudge_amount > 0) { // If we actually moved up some amount
+                        // Attempt horizontal move from new y
+                        var _h_collisions_after_step = move_and_collide(_current_h_speed_floor, 0, _collision_targets);
+                        if (self.x != _x_before_h_move_floor) { // Moved horizontally
+                            _stepped_up_successfully = true;
+                            show_debug_message("Step-up (floor) successful. Snapping down.");
+                            move_and_collide(0, _actual_y_nudge_amount + 1, _collision_targets); // Snap down slightly more than nudged
+                            self.v_speed = 0;
+                        }
+                    }
+                    
+                    if (!_stepped_up_successfully) {
+                        self.y = _original_y_for_step; // Revert y to before any step attempt
+                        self.x = _x_before_h_move_floor;  // x should already be here from first collision
+                        show_debug_message("Step-up (floor) failed.");
+                    }
+                }
+            }
+            
+            // Stick to floor + Edge detection
+            var _check_dist_ground = 2;
             var _is_ground_below_main = place_meeting(self.x, self.y + _check_dist_ground, self.tilemap);
-            // Check phase layer (if it exists)
             var _is_ground_below_phase = false;
-            if (_can_check_phase_layer) { // _can_check_phase_layer was set at script start
+            if (_can_check_phase_layer) {
                 _is_ground_below_phase = place_meeting(self.x, self.y + _check_dist_ground, self.tilemap_phase_id);
             }
-            // Consider ground present if found on EITHER layer
             var _is_ground_below = _is_ground_below_main || _is_ground_below_phase;
 
-            show_debug_message("Ground Check: MainLayer? "+string(_is_ground_below_main)+" PhaseLayer? "+string(_is_ground_below_phase)+" | GroundBelow?: "+string(_is_ground_below));
-
             if (_is_ground_below) {
-                // Ground IS below on at least one layer. Ensure snapped using all targets.
-                move_and_collide(0, 1, _collision_targets); // Snap down using all targets
-                self.v_speed = 0; // Re-affirm speed is zero after snap attempt
+                move_and_collide(0, 1, _collision_targets); // Final snap down
+                self.v_speed = 0;
             } else {
-                // No ground detected below on EITHER layer.
-                show_debug_message("Transition: WALKING_FLOOR -> FLYING (Walked off edge - checked both layers)");
+                show_debug_message("Transition: WALKING_FLOOR -> FLYING (Walked off edge)");
                 self.player_state = PLAYER_STATE.FLYING;
-                // v_speed is already 0, gravity will take over.
             }
-            break; // End of WALKING_FLOOR case
+            break;
 
 
-// ==================== WALKING ON CEILING STATE ====================
+        // ==================== WALKING ON CEILING STATE ====================
         case PLAYER_STATE.WALKING_CEILING:
-             // --- Phasing Check (Priority 1 - Requires TILE_SIZE assumption) ---
-             if (_action_key_pressed && _key_up_held && _can_check_phase_layer && variable_instance_exists(id,"TILE_SIZE") && self.TILE_SIZE > 0) {
-                 if (tilemap_get_at_pixel(self.tilemap_phase_id, self.x, self.bbox_top - 1) != 0) { // Check phase layer using coordinates
+// --- Phasing Check (Priority 1) ---
+            if (_action_key_pressed && _key_up_held && _can_check_phase_layer && variable_instance_exists(id,"TILE_SIZE") && self.TILE_SIZE > 0) {
+                if (tilemap_get_at_pixel(self.tilemap_phase_id, self.x, self.bbox_top - 1) != 0) {
                      show_debug_message("Attempting Phase: Ceiling -> Floor");
-                     // Precise Y adjust assumes TILE_SIZE is platform thickness
-                     var _current_tile_bottom_y = ceil(self.bbox_top / self.TILE_SIZE) * self.TILE_SIZE;
-                     var _new_target_y_for_bbox_bottom = _current_tile_bottom_y - self.TILE_SIZE;
-                     self.y = _new_target_y_for_bbox_bottom - (self.bbox_bottom - self.y);
+                     
+                     var _player_height = self.bbox_bottom - self.bbox_top;
+                     // Move player's origin UP so its BOTTOM edge is TILE_SIZE above its original TOP edge.
+                     self.y -= (_player_height + self.TILE_SIZE); 
+                     
                      self.player_state = PLAYER_STATE.WALKING_FLOOR;
                      self.v_speed = 0;
-                     break; // Exit switch.
+                     
+                     // NO immediate snap here. Let the WALKING_ON_FLOOR state's logic handle sticking in the next frame.
+                     break;
                  }
              }
 
@@ -150,45 +195,69 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
              if (_action_key_pressed) {
                  show_debug_message("Transition: WALKING_CEILING -> FLYING (Flap initiated - detaching)");
                  self.player_state = PLAYER_STATE.FLYING;
-                 self.v_speed = 1.5; // Push OFF the ceiling
+                 self.v_speed = 1.5; 
                  break;
              }
 
             // --- Normal Ceiling Walking Logic (Priority 3) ---
             show_debug_message("State: WALKING_CEILING");
-            self.v_speed = 0; // Keep v_speed zero
+            self.v_speed = 0; 
 
-            // Horizontal Movement
+            // Horizontal Movement with Step-Down
             var _current_h_speed_ceiling = _input_dir_x * self.horizontal_move_speed;
             if (_current_h_speed_ceiling != 0) {
-                move_and_collide(_current_h_speed_ceiling, 0, _collision_targets);
-            }
+                var _x_before_h_move_ceil = self.x;
+                var _y_before_h_move_ceil = self.y;
 
-            // Stick to ceiling & Edge detection (Check BOTH layers for ceiling presence)
-            var _check_dist_ceil = 2; // How far above bbox to check
-            // Check main collision layer
+                var _h_collisions_initial_ceil = move_and_collide(_current_h_speed_ceiling, 0, _collision_targets);
+
+                if (self.x == _x_before_h_move_ceil && array_length(_h_collisions_initial_ceil) > 0) {
+                    show_debug_message("Ceiling Horizontal collision. Attempting step-down...");
+                    var _max_step_down = 16; 
+                    var _stepped_down_successfully = false;
+                    
+                    var _original_y_for_step_ceil = self.y;
+                    // Try to move "down" (increase y) checking for floor collisions
+                    var _y_before_nudge_ceil = self.y;
+                    var _downward_nudge_collisions = move_and_collide(0, _max_step_down, _collision_targets);
+                    var _actual_y_nudge_amount_ceil = self.y - _y_before_nudge_ceil; // Positive if moved down
+
+                    if (_actual_y_nudge_amount_ceil > 0) { // If we actually moved "down"
+                        var _h_collisions_after_step_ceil = move_and_collide(_current_h_speed_ceiling, 0, _collision_targets);
+                        if (self.x != _x_before_h_move_ceil) { // Moved horizontally
+                            _stepped_down_successfully = true;
+                            show_debug_message("Step-down (ceiling) successful. Snapping up.");
+                            move_and_collide(0, -(_actual_y_nudge_amount_ceil + 1), _collision_targets); // Snap "up"
+                            self.v_speed = 0;
+                        }
+                    }
+
+                    if (!_stepped_down_successfully) {
+                        self.y = _original_y_for_step_ceil;
+                        self.x = _x_before_h_move_ceil;
+                        show_debug_message("Step-down (ceiling) failed.");
+                    }
+                }
+            }
+            
+            // Stick to ceiling + Edge detection
+            var _check_dist_ceil = 2;
             var _is_ceiling_above_main = place_meeting(self.x, self.y - _check_dist_ceil, self.tilemap);
-            // Check phase layer (if it exists)
             var _is_ceiling_above_phase = false;
             if (_can_check_phase_layer) {
                 _is_ceiling_above_phase = place_meeting(self.x, self.y - _check_dist_ceil, self.tilemap_phase_id);
             }
-            // Consider ceiling present if found on EITHER layer
             var _is_ceiling_above = _is_ceiling_above_main || _is_ceiling_above_phase;
 
-            show_debug_message("Ceiling Check: MainLayer? "+string(_is_ceiling_above_main)+" PhaseLayer? "+string(_is_ceiling_above_phase)+" | CeilingAbove?: "+string(_is_ceiling_above));
-
             if (_is_ceiling_above) {
-                // Ceiling IS above on at least one layer. Ensure snapped using all targets.
-                move_and_collide(0, -1, _collision_targets); // Snap up using all targets
-                self.v_speed = 0; // Re-affirm speed is zero after snap attempt
+                move_and_collide(0, -1, _collision_targets); // Final snap up
+                self.v_speed = 0;
             } else {
-                // No ceiling detected above on EITHER layer.
-                show_debug_message("Transition: WALKING_CEILING -> FLYING (Walked off edge - checked both layers)");
+                show_debug_message("Transition: WALKING_CEILING -> FLYING (Walked off edge)");
                 self.player_state = PLAYER_STATE.FLYING;
-                self.y += 2; // Nudge down
-                self.v_speed = self.gravity_force; // Initial downward speed
+                self.y += 2; 
+                self.v_speed = self.gravity_force; 
             }
-            break; // End of WALKING_ON_CEILING case
-    }
-}
+            break;
+    } // End Switch
+} // End Function

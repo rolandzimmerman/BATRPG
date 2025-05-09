@@ -19,7 +19,7 @@ function scr_BuildCharacterDB() {
 
     // --- Hero ---
     ds_map_add(_char_map, "hero", {
-        name               : "Hero",
+        name               : "Bat",
         class              : "Hero",
         hp                 : 40,   maxhp: 40,
         mp                 : 20,   maxmp: 20,
@@ -69,7 +69,7 @@ function scr_BuildCharacterDB() {
 
     // --- Claude ---
     ds_map_add(_char_map, "claude", {
-        name               : "Claude",
+        name               : "Boy",
         class              : "Cleric",
         hp                 : 35,   maxhp: 35,
         mp                 : 25,   maxmp: 25,
@@ -117,7 +117,7 @@ function scr_BuildCharacterDB() {
 
     // --- Gabby ---
     ds_map_add(_char_map, "gabby", {
-        name               : "Gabby",
+        name               : "Gub",
         class              : "Mage",
         hp                 : 30,   maxhp: 30,
         mp                 : 35,   maxmp: 35,
@@ -159,7 +159,7 @@ function scr_BuildCharacterDB() {
 
     // --- Izzy ---
     ds_map_add(_char_map, "izzy", {
-        name               : "Izzy",
+        name               : "Moth",
         class              : "Thief",
         hp                 : 38,   maxhp: 38,
         mp                 : 15,   maxmp: 15,

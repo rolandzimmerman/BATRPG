@@ -36,10 +36,7 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":{
-    "name":"spr_lexy_battle",
-    "path":"sprites/spr_lexy_battle/spr_lexy_battle.yy",
-  },
+  "spriteId":null,
   "spriteMaskId":{
     "name":"spr_lexy_battle",
     "path":"sprites/spr_lexy_battle/spr_lexy_battle.yy",

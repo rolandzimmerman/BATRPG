@@ -35,8 +35,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"Mormon_Dad_Sprite",
-    "path":"sprites/Mormon_Dad_Sprite/Mormon_Dad_Sprite.yy",
+    "name":"goblin",
+    "path":"sprites/goblin/goblin.yy",
   },
   "spriteMaskId":null,
   "visible":true,

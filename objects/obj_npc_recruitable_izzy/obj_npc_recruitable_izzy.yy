@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_izzy_battle",
-    "path":"sprites/spr_izzy_battle/spr_izzy_battle.yy",
+    "name":"moth",
+    "path":"sprites/moth/moth.yy",
   },
   "spriteMaskId":null,
   "visible":true,

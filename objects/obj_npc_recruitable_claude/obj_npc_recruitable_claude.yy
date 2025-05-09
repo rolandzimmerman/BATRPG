@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_npc_claude",
-    "path":"sprites/spr_npc_claude/spr_npc_claude.yy",
+    "name":"ghost",
+    "path":"sprites/ghost/ghost.yy",
   },
   "spriteMaskId":null,
   "visible":true,

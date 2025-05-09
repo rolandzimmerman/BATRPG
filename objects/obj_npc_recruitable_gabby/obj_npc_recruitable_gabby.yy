@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_gabby_battle",
-    "path":"sprites/spr_gabby_battle/spr_gabby_battle.yy",
+    "name":"gob",
+    "path":"sprites/gob/gob.yy",
   },
   "spriteMaskId":null,
   "visible":true,
