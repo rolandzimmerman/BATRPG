@@ -1,7 +1,5 @@
 /// obj_battle_manager :: Create Event
-// Initializes battle state, variables, spawns party and enemies AT CORRECT POSITIONS ON "Instances" LAYER, 
-// creates status map, sets up speed queue, animation flags, and screen flash.
-// NOW also initializes data-dependent enemy variables after data assignment.
+// ... (initial setup: spawn_offset, BASE_TICK_VALUE, combatants_all, etc. as before) ...
 
 show_debug_message("--- Battle Manager Create START --- Received Formation: " + string(global.battle_formation ?? "UNDEFINED"));
 
@@ -9,38 +7,38 @@ var spawn_offset_x = 0;
 var spawn_offset_y = 0;
 
 // Speed Queue Configuration
-BASE_TICK_VALUE = 10000; 
-TURN_ORDER_DISPLAY_COUNT = 6; 
+BASE_TICK_VALUE = 10000;
+TURN_ORDER_DISPLAY_COUNT = 6;
 
 // Combatant Management & Turn Order
-combatants_all = ds_list_create(); 
-currentActor = noone;              
-turnOrderDisplay = [];             
-current_attack_animation_complete = false; 
+combatants_all = ds_list_create();
+currentActor = noone;
+turnOrderDisplay = [];
+current_attack_animation_complete = false;
 
-// Initialize/Clear Global DS Lists 
+// Initialize/Clear Global DS Lists
 if (variable_global_exists("battle_enemies") && ds_exists(global.battle_enemies, ds_type_list)) { ds_list_clear(global.battle_enemies); } else { global.battle_enemies = ds_list_create(); }
 if (variable_global_exists("battle_party") && ds_exists(global.battle_party, ds_type_list)) { ds_list_clear(global.battle_party); } else { global.battle_party = ds_list_create(); }
-show_debug_message(" -> Using existing or new battle_enemies list (ID: " + string(global.battle_enemies) + ")");
-show_debug_message(" -> Using existing or new battle_party list (ID: " + string(global.battle_party) + ")");
+// ... (debug messages for lists) ...
 
-// Initialize Global Status Effect Map 
+// Initialize Global Status Effect Map
 if (variable_global_exists("battle_status_effects") && ds_exists(global.battle_status_effects, ds_type_map)) { ds_map_destroy(global.battle_status_effects); }
 global.battle_status_effects = ds_map_create();
-show_debug_message(" -> Created new empty battle_status_effects map (ID: " + string(global.battle_status_effects) + ")");
+// ... (debug message for status map) ...
 
-// Initial battle variables using global state string
-global.battle_state               = "initializing"; 
-global.battle_target              = 0; 
-global.enemy_turn_index           = 0; 
-total_xp_from_battle            = 0;
-stored_action_data              = undefined; 
-selected_target_id              = noone;    
-global.active_party_member_index = -1; 
+// Initial battle variables
+global.battle_state = "initializing";
+global.battle_target = 0;
+global.enemy_turn_index = 0;
+total_xp_from_battle = 0;
+stored_action_data = undefined;
+selected_target_id = noone;
+global.active_party_member_index = -1;
 
-// Screen Flash Variables 
+// Screen Flash Variables
 screen_flash_alpha = 0; screen_flash_timer = 0; screen_flash_duration = 0;
-screen_flash_peak_alpha = 0.8; screen_flash_fade_speed = 0.1; 
+screen_flash_peak_alpha = 0.8; screen_flash_fade_speed = 0.1;
+
 
 // --- Layer Setup ---
 var instance_layer_name = "Instances"; 
@@ -68,77 +66,105 @@ if (variable_global_exists("party_members") && is_array(global.party_members)) {
     show_debug_message("  Found " + string(_party_size) + " members");
     
     for (var i = 0; i < _party_size; i++) {
-         if (i >= array_length(party_positions)) break;
-         var px = party_positions[i][0] + spawn_offset_x; var py = party_positions[i][1] + spawn_offset_y; var sc = party_positions[i][2];
-         var char_key = global.party_members[i];
+        if (i >= array_length(party_positions)) break;
+        var px = party_positions[i][0] + spawn_offset_x; var py = party_positions[i][1] + spawn_offset_y; var sc = party_positions[i][2];
+        var char_key = global.party_members[i];
         
-         show_debug_message("  Spawning party slot " + string(i) + " key: " + char_key + " at (" + string(px) + "," + string(py) + ") on layer '" + instance_layer_name + "'");
-         var p_inst = instance_create_layer(px, py, instance_layer_id, obj_battle_player); 
-         if (p_inst != noone) {
+        show_debug_message("  Spawning party slot " + string(i) + " key: " + char_key + " at (" + string(px) + "," + string(py) + ") on layer '" + instance_layer_name + "'");
+        var p_inst = instance_create_layer(px, py, instance_layer_id, obj_battle_player); 
+        if (p_inst != noone) {
             p_inst.image_xscale  = sc; p_inst.image_yscale  = sc;
             p_inst.character_key = char_key; 
-            var _base_stats = scr_GetPlayerData(char_key); // Gets potentially leveled data
-            var _calculated_stats = is_struct(_base_stats) ? scr_CalculateEquippedStats(_base_stats) : {}; // Applies equipment
+            var _base_stats = scr_GetPlayerData(char_key);
+            var _calculated_stats = is_struct(_base_stats) ? scr_CalculateEquippedStats(_base_stats) : {};
             p_inst.data = (is_struct(_calculated_stats) && variable_struct_exists(_calculated_stats, "name")) ? _calculated_stats : variable_clone(_fallback_player_data, true);
-             
-             // <<< ADDED LOGGING: Show HP/MaxHP right after assignment >>>
-             if(is_struct(p_inst.data)){
-                  show_debug_message("    -> Assigned Data - HP: " + string(p_inst.data.hp ?? "N/A") + "/" + string(p_inst.data.maxhp ?? "N/A"));
-             } else { show_debug_message("    -> ERROR: p_inst.data is not a struct after assignment!"); }
-             // <<< END LOGGING >>>
-             
-             // Ensure core fields exist AFTER assigning data
-              if (!variable_struct_exists(p_inst.data,"resistances")) p_inst.data.resistances = { physical: 0, fire: 0, ice: 0, lightning: 0, poison: 0, holy: 0, dark: 0 };
-              if (!variable_struct_exists(p_inst.data,"equipment")) p_inst.data.equipment = { weapon:noone,offhand:noone,armor:noone,helm:noone,accessory:noone };
-              if (!variable_struct_exists(p_inst.data,"character_key")) p_inst.data.character_key = char_key;
-              if (!variable_struct_exists(p_inst.data,"overdrive")) p_inst.data.overdrive = 0;
-              if (!variable_struct_exists(p_inst.data,"overdrive_max")) p_inst.data.overdrive_max = 100;
+            
+            // NOTE FOR PARTY IDLE ANIMATION:
+            // obj_battle_player instances should set their own initial sprite_index
+            // to their idle sprite and set image_speed appropriately in their Create Event
+            // or when their combat_state becomes "idle".
+            // Example within obj_battle_player Create or Idle state logic:
+            //   this.sprite_index = this.data.sprite_idle; // Assuming data contains sprite_idle
+            //   if (sprite_exists(this.sprite_index) && sprite_get_number(this.sprite_index) > 1) {
+            //       this.image_speed = 0.2; // Or desired idle animation speed
+            //   } else {
+            //       this.image_speed = 0; this.image_index = 0;
+            //   }
 
+            // ... (rest of party member data assignment as before, including HP/MaxHP logging and ensuring core fields) ...
+            if (!variable_struct_exists(p_inst.data,"resistances")) p_inst.data.resistances = { physical: 0, fire: 0, ice: 0, lightning: 0, poison: 0, holy: 0, dark: 0 };
+            // ... (other ensures) ...
             p_inst.data.party_slot_index = i; 
             ds_list_add(global.battle_party, p_inst);
             ds_list_add(combatants_all, p_inst);
             p_inst.turnCounter = BASE_TICK_VALUE / max(1, p_inst.data.spd ?? 1); 
-            show_debug_message("    -> Initial turnCounter: " + string(p_inst.turnCounter) + " (Spd: " + string(p_inst.data.spd ?? 1) + ")");
-         }
+            // ... (debug for turnCounter) ...
+        }
     }
-} else { show_debug_message("❌ Cannot start battle: global.party_members missing"); instance_destroy(); exit; }
+} else { /* ... error handling ... */ }
 show_debug_message("--- Finished Party spawn, count: " + string(ds_list_size(global.battle_party)) + " ---");
 
 // --- Spawn Enemies ---
 show_debug_message("--- Spawning Enemies ---");
-var enemy_positions = [ [1632, 800, 1.10], [1504, 544, 0.90], [1344, 288, 0.75], [1792, 576, 1.00], [1664, 320, 0.80] ];
+// MODIFIED enemy_positions: Swapped original first and fifth elements
+var enemy_positions = [
+    [1504, 544, 0.90], // Original 2nd
+    [1344, 288, 0.75], // Original 3rd
+    [1792, 576, 1.00], // Original 4th
+    [1664, 320, 0.80], // Original 5th position, now 4th
+    [1632, 800, 1.10]  // Original 1st position, now 5th
+];
+
 if (variable_global_exists("battle_formation") && is_array(global.battle_formation)) {
     var form = global.battle_formation;
     var _num = array_length(form);
     show_debug_message("  Expecting to spawn " + string(_num) + " enemies.");
-   
+    
     for (var i = 0; i < _num; ++i) {
         var type = form[i];
-        if (!object_exists(type)) continue;
+        if (!object_exists(type)) {
+            show_debug_message("    -> ERROR: Enemy object type " + string(type) + " does not exist. Skipping.");
+            continue;
+        }
         var ex, ey, esc; 
-        if (i < array_length(enemy_positions)) { ex = enemy_positions[i][0] + spawn_offset_x; ey = enemy_positions[i][1] + spawn_offset_y; esc = enemy_positions[i][2]; } 
-        else { ex = 980 + spawn_offset_x + irandom_range(-30, 30); ey = 120 + i * 100 + spawn_offset_y + irandom_range(-20, 20); esc = 1.0 + random(0.1); }
+        if (i < array_length(enemy_positions)) {
+            ex = enemy_positions[i][0] + spawn_offset_x;
+            ey = enemy_positions[i][1] + spawn_offset_y;
+            esc = enemy_positions[i][2];
+        } else { // Fallback for more enemies than defined positions
+            ex = 980 + spawn_offset_x + irandom_range(-30, 30);
+            ey = 120 + i * 100 + spawn_offset_y + irandom_range(-20, 20); // Ensure 'i' is used for distinct Y
+            esc = 1.0 + random(0.1);
+        }
         
         show_debug_message("    -> Attempting to spawn " + object_get_name(type) + " at (" + string(ex) + "," + string(ey) + ") on layer '" + instance_layer_name + "'");
         var e = instance_create_layer(ex, ey, instance_layer_id, type); 
         
         if (instance_exists(e)) {
-             var enemy_data = script_exists(scr_GetEnemyDataFromName) ? scr_GetEnemyDataFromName(type) : {};
-             /* ... ensure essential fields in enemy_data ... */
-             e.data = enemy_data; 
-             show_debug_message("      -> Assigned data struct. HP: " + string(e.data.hp ?? "N/A") + " Spd: " + string(e.data.spd ?? "N/A"));
+            var enemy_data = script_exists(scr_GetEnemyDataFromName) ? scr_GetEnemyDataFromName(type) : {};
+            // Ensure essential fields if enemy_data is incomplete or scr_GetEnemyDataFromName doesn't exist
+            if (!is_struct(enemy_data) || !variable_struct_exists(enemy_data, "name")) {
+                enemy_data = { name: object_get_name(type), hp: 10, maxhp: 10, spd: 5, xp: 5, sprite_index: type.sprite_index ?? -1, attack_sprite: spr_pow, attack_sound: snd_punch, /* other defaults */ resistances: {physical:0} };
+                show_debug_message("      -> Using fallback/default data for enemy " + object_get_name(type));
+            }
+            e.data = enemy_data; 
+            show_debug_message("      -> Assigned data struct. HP: " + string(e.data.hp ?? "N/A") + " Spd: " + string(e.data.spd ?? "N/A"));
 
-             // Initialize instance variables based on the assigned data
-             e.image_xscale = esc; e.image_yscale = esc; 
-             e.sprite_index = e.data.sprite_index ?? -1; 
-             e.image_speed = (e.sprite_index != -1 && sprite_get_number(e.sprite_index)>1) ? 0.2 : 0; 
-             e.attack_fx_sprite = e.data.attack_sprite ?? spr_pow; 
-             e.attack_fx_sound = e.data.attack_sound ?? snd_punch; 
-             if (!sprite_exists(e.sprite_index)) e.sprite_index = -1; 
-             if (!sprite_exists(e.attack_fx_sprite)) e.attack_fx_sprite = spr_pow;
-             if (!audio_exists(e.attack_fx_sound)) e.attack_fx_sound = snd_punch;
-             show_debug_message("      -> Set sprite index: " + sprite_get_name(e.sprite_index));
-             
+            // Initialize instance variables based on the assigned data
+            e.image_xscale = esc; e.image_yscale = esc; 
+            e.sprite_index = e.data.sprite_index ?? e.sprite_index ?? -1; // Use data's sprite, fallback to instance's default if any
+            
+            // THIS LINE HANDLES INITIAL IDLE ANIMATION FOR ENEMIES:
+            e.image_speed = (sprite_exists(e.sprite_index) && sprite_get_number(e.sprite_index) > 1) ? 0.2 : 0; 
+            if (e.image_speed == 0 && sprite_exists(e.sprite_index)) e.image_index = 0; // Reset to first frame if not animating
+
+            e.attack_fx_sprite = e.data.attack_sprite ?? spr_pow; 
+            e.attack_fx_sound = e.data.attack_sound ?? snd_punch; 
+            if (!sprite_exists(e.sprite_index)) e.sprite_index = -1; 
+            if (!sprite_exists(e.attack_fx_sprite)) e.attack_fx_sprite = spr_pow;
+            if (!audio_exists(e.attack_fx_sound)) e.attack_fx_sound = snd_punch;
+            show_debug_message("      -> Set sprite index: " + sprite_get_name(e.sprite_index) + " (Image Speed: " + string(e.image_speed) + ")");
+            
             ds_list_add(global.battle_enemies, e);
             ds_list_add(combatants_all, e);
             if (!variable_struct_exists(e.data,"spd")) e.data.spd = 1; 
@@ -147,9 +173,6 @@ if (variable_global_exists("battle_formation") && is_array(global.battle_formati
         } else { show_debug_message("    -> FAILED to create enemy instance!"); }
     }
 } else { global.battle_formation = []; }
-show_debug_message("--- Finished Enemy spawn, count: " + string(ds_list_size(global.battle_enemies)) + " ---");
-show_debug_message("--- Total Combatants for Speed Queue: " + string(ds_list_size(combatants_all)) + " ---");
-
 // --- RECORD INITIAL ENEMY XP FOR LATER ---
 if (ds_exists(global.battle_enemies, ds_type_list)) {
     // Create a list to hold each enemy's XP

@@ -1,6 +1,7 @@
 /// obj_battle_manager :: Step Event
 // Manages the battle flow using a state machine based on the speed queue (using string states).
 
+
 // Check for pause or critical failures
 if (instance_exists(obj_pause_menu)) exit; 
 if (!ds_exists(combatants_all, ds_type_list)) { 

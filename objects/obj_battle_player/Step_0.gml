@@ -6,6 +6,7 @@ if (variable_instance_exists(id, "data")
  && is_struct(data)
  && data.hp <= 0
  && combat_state != "dying"
+ && combat_state != "idle"
  && combat_state != "corpse"
  && combat_state != "dead") {
     death_started = false;       // reset the flag
@@ -57,7 +58,7 @@ if (!variable_instance_exists(id, "sprite_assigned") || !sprite_assigned) {
                  show_debug_message(" -> WARNING: Failed to get base_char_info, using default sprites.");
             }
             
-            image_index = 0; image_speed = 0; 
+            image_index = 0; image_speed = 1; 
             sprite_assigned = true; 
             show_debug_message("Player " + string(id) + " Sprites Initialized & Assigned."); 
         } else { /* Missing character_key */ }
@@ -285,7 +286,7 @@ switch (combat_state) {
     case "idle":
         if (sprite_index != idle_sprite) { sprite_index = idle_sprite; image_index = 0; }
         if (image_xscale != original_scale) { image_xscale = original_scale; image_yscale = original_scale; }
-        if (image_speed != 0) image_speed = 0; 
+        if (image_speed != 0) image_speed = 1; 
         break;
 
     // --- Physical Attack / Physical Skill Animation ---

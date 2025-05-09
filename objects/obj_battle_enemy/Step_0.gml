@@ -1,11 +1,12 @@
 /// obj_battle_enemy :: Step Event (Example Parent)
-// Handles combat animation state machine.
+
 
 // — AUTO-TRIGGER ENEMY DEATH —
 if (variable_instance_exists(id, "data")
  && is_struct(data)
  && data.hp <= 0
  && combat_state != "dying"
+ && combat_state != "idle"
  && combat_state != "corpse"
  && combat_state != "dead") {
     death_started = false;
@@ -40,7 +41,7 @@ if (combat_state == "idle") {
 switch (combat_state) {
     case "idle":
         // Wait for attack_start; stop any anim speed
-        if (image_speed != 0) image_speed = 0;
+        if (image_speed != 0) image_speed = 1;
         break;
 
     case "attack_start":
