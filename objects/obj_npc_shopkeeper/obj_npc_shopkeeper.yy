@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"goblin_club",
-    "path":"sprites/goblin_club/goblin_club.yy",
+    "name":"goblin_shop",
+    "path":"sprites/goblin_shop/goblin_shop.yy",
   },
   "spriteMaskId":null,
   "visible":true,

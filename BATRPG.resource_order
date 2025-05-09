@@ -480,6 +480,7 @@
     {"name":"ghost","order":5,"path":"sprites/ghost/ghost.yy",},
     {"name":"gob","order":1,"path":"sprites/gob/gob.yy",},
     {"name":"goblin_club","order":2,"path":"sprites/goblin_club/goblin_club.yy",},
+    {"name":"goblin_shop","order":15,"path":"sprites/goblin_shop/goblin_shop.yy",},
     {"name":"goblin","order":3,"path":"sprites/goblin/goblin.yy",},
     {"name":"Mormon_Dad_Sprite","order":1,"path":"sprites/Mormon_Dad_Sprite/Mormon_Dad_Sprite.yy",},
     {"name":"moth","order":11,"path":"sprites/moth/moth.yy",},

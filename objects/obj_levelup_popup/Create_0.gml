@@ -7,7 +7,7 @@ info = global.battle_level_up_infos[ global.battle_levelup_index ];
 // the list of stat-keys we'll display
 keys = ["maxhp","maxmp","atk","def","matk","mdef","spd","luk"];
 // box position/size (tweak as needed)
-boxX =  (display_get_gui_width()  - 400) / 2;
+boxX =  (display_get_gui_width()  - 600) / 2;
 boxY =  (display_get_gui_height() - 300) / 2;
 boxW =  400;
 boxH =  300;

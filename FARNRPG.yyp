@@ -534,6 +534,7 @@
     {"id":{"name":"ghost","path":"sprites/ghost/ghost.yy",},},
     {"id":{"name":"gob","path":"sprites/gob/gob.yy",},},
     {"id":{"name":"goblin_club","path":"sprites/goblin_club/goblin_club.yy",},},
+    {"id":{"name":"goblin_shop","path":"sprites/goblin_shop/goblin_shop.yy",},},
     {"id":{"name":"goblin","path":"sprites/goblin/goblin.yy",},},
     {"id":{"name":"Mormon_Dad_Sprite","path":"sprites/Mormon_Dad_Sprite/Mormon_Dad_Sprite.yy",},},
     {"id":{"name":"moth","path":"sprites/moth/moth.yy",},},
