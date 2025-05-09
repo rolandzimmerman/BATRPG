@@ -468,6 +468,7 @@
     {"name":"Wind8","order":4,"path":"sounds/Wind8/Wind8.yy",},
     {"name":"Wind9","order":5,"path":"sounds/Wind9/Wind9.yy",},
     {"name":"Abutton","order":3,"path":"sprites/Abutton/Abutton.yy",},
+    {"name":"bat_statue","order":14,"path":"sprites/bat_statue/bat_statue.yy",},
     {"name":"Bbutton","order":2,"path":"sprites/Bbutton/Bbutton.yy",},
     {"name":"castle_foreground2","order":8,"path":"sprites/castle_foreground2/castle_foreground2.yy",},
     {"name":"castle4x4","order":9,"path":"sprites/castle4x4/castle4x4.yy",},

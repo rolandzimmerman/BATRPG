@@ -521,6 +521,7 @@
     {"id":{"name":"Wind9","path":"sounds/Wind9/Wind9.yy",},},
     {"id":{"name":"Abutton","path":"sprites/Abutton/Abutton.yy",},},
     {"id":{"name":"babybat","path":"sprites/babybat/babybat.yy",},},
+    {"id":{"name":"bat_statue","path":"sprites/bat_statue/bat_statue.yy",},},
     {"id":{"name":"Bbutton","path":"sprites/Bbutton/Bbutton.yy",},},
     {"id":{"name":"castle_foreground2","path":"sprites/castle_foreground2/castle_foreground2.yy",},},
     {"id":{"name":"castle4x4","path":"sprites/castle4x4/castle4x4.yy",},},

@@ -32,8 +32,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_npc1",
-    "path":"sprites/spr_npc1/spr_npc1.yy",
+    "name":"bat_statue",
+    "path":"sprites/bat_statue/bat_statue.yy",
   },
   "spriteMaskId":null,
   "visible":true,
