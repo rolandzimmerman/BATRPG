@@ -575,7 +575,7 @@ case "item_start":
         x = origin_x; y = origin_y; // Teleport Back
         if (sprite_exists(sprite_before_attack)) { sprite_index = sprite_before_attack; } else { sprite_index = idle_sprite; } 
         image_xscale = original_scale; image_yscale = original_scale; // Restore scale
-        image_index = 0; image_speed = 0; 
+        image_index = 0; image_speed = 1; 
         show_debug_message(" -> Restored sprite and scale"); 
         if (instance_exists(obj_battle_manager)) { obj_battle_manager.current_attack_animation_complete = true; }
         target_for_attack = noone; stored_action_for_anim = undefined; 
@@ -587,7 +587,7 @@ case "item_start":
     case "cast_return":
          show_debug_message(object_get_name(object_index) + " " + string(id) + ": State -> cast_return");
          if (sprite_exists(sprite_before_attack)) { sprite_index = sprite_before_attack; } else { sprite_index = idle_sprite; } 
-         image_index = 0; image_speed = 0; 
+         image_index = 0; image_speed = 1; 
          // No scale change to restore for casting
          show_debug_message(" -> Restored idle sprite after casting.");
          if (instance_exists(obj_battle_manager)) { obj_battle_manager.current_attack_animation_complete = true; }
@@ -602,7 +602,7 @@ case "item_start":
          // Restore Sprite (No teleport or scale change happened)
          if (sprite_exists(sprite_before_attack)) { sprite_index = sprite_before_attack; } 
          else { sprite_index = idle_sprite; } 
-         image_index = 0; image_speed = 0; 
+         image_index = 0; image_speed = 1; 
          show_debug_message(" -> Restored idle sprite after item use.");
          // Signal Manager & Reset
          if (instance_exists(obj_battle_manager)) { obj_battle_manager.current_attack_animation_complete = true; }
@@ -631,7 +631,7 @@ case "dying":
         }
         sprite_index = corpse;
         image_index  = 0;
-        image_speed  = 0;
+        image_speed  = 1;
         combat_state = "corpse";
     }
     break;
