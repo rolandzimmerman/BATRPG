@@ -1,10 +1,10 @@
 {
   "$GMSprite":"",
-  "%Name":"Xbutton",
+  "%Name":"Xbutton_1",
   "bboxMode":0,
   "bbox_bottom":143,
   "bbox_left":0,
-  "bbox_right":143,
+  "bbox_right":142,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -21,7 +21,7 @@
   "layers":[
     {"$GMImageLayer":"","%Name":"da26d7bd-cdbe-445f-88a6-bdc09ae41019","blendMode":0,"displayName":"default","isLocked":false,"name":"da26d7bd-cdbe-445f-88a6-bdc09ae41019","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
-  "name":"Xbutton",
+  "name":"Xbutton_1",
   "nineSlice":null,
   "origin":0,
   "parent":{
@@ -71,7 +71,7 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a1596964-15c3-4b82-a611-ed82a99a36bd","path":"sprites/Xbutton/Xbutton.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a1596964-15c3-4b82-a611-ed82a99a36bd","path":"sprites/Xbutton_1/Xbutton_1.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"f436bcc7-a5bd-42a4-bf26-35ddab5ba66b","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],

@@ -2,7 +2,7 @@
   "$GMSprite":"",
   "%Name":"Ybutton",
   "bboxMode":0,
-  "bbox_bottom":142,
+  "bbox_bottom":143,
   "bbox_left":0,
   "bbox_right":143,
   "bbox_top":0,
