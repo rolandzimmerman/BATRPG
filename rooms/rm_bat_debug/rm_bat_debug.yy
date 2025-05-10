@@ -19,6 +19,7 @@
     {"name":"inst_7CF584A6","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
     {"name":"inst_7CB31DBB","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
     {"name":"inst_3F6FB55E","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
+    {"name":"inst_443A7CAA","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -38,6 +39,7 @@
         {"$GMRInstance":"v2","%Name":"inst_644F0D01","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_644F0D01","objectId":{"name":"obj_npc_recruitable_claude","path":"objects/obj_npc_recruitable_claude/obj_npc_recruitable_claude.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":736.0,"y":832.0,},
         {"$GMRInstance":"v2","%Name":"inst_7CF584A6","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7CF584A6","objectId":{"name":"obj_npc_recruitable_izzy","path":"objects/obj_npc_recruitable_izzy/obj_npc_recruitable_izzy.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":928.0,"y":832.0,},
         {"$GMRInstance":"v2","%Name":"inst_7CB31DBB","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7CB31DBB","objectId":{"name":"obj_npc_recruitable_gabby","path":"objects/obj_npc_recruitable_gabby/obj_npc_recruitable_gabby.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1120.0,"y":832.0,},
+        {"$GMRInstance":"v2","%Name":"inst_443A7CAA","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_443A7CAA","objectId":{"name":"obj_destructible_torch","path":"objects/obj_destructible_torch/obj_destructible_torch.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":992.0,"y":448.0,},
       ],"layers":[],"name":"Instances_NPCs","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Tiles_Phase","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Tiles_Phase","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":240,"SerialiseWidth":480,"TileCompressedData":[
           -25380,-2147483648,-33,79222,-447,-2147483648,-33,79222,-447,-2147483648,-33,79222,-441,-2147483648,

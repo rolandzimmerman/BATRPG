@@ -127,6 +127,32 @@ switch (self.player_state) { // self.player_state is an instance variable set by
         }
         break;
 }
+// — Fire echo missile on X (keyboard “X” or controller Face3) —
+if (keyboard_check_pressed(ord("X"))
+ || gamepad_button_check_pressed(0, gp_face3))
+{
+    // 1) Create the missile
+    var m = instance_create_depth(x, y, 0, obj_echo_missile);
+
+    // 2) Set its horizontal speed using hspeed
+    m.hspeed    = missile_speed * face_dir;  
+    m.origin_x  = x;                         
+    m.max_dist  = missile_max_distance;      
+
+    // 3) Choose the correct animated sprite
+    if (face_dir > 0) {
+        m.sprite_index = spr_echo_right;
+    } else {
+        m.sprite_index = spr_echo_left;
+    }
+    // 4) Kick off its built-in animation
+    m.image_speed = 0.4;
+    m.image_index = 0;
+
+    // (no need to set move_dir or manual x-movement any more)
+}
+
+
 
 // --- Room Transitions & Out of Bounds ---
 // horizontal_move_speed is an instance variable defined in Create Event
@@ -189,7 +215,7 @@ if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving ver
 }
 
 var encounter_threshold = 300;
-var encounter_chance = 100;
+var encounter_chance = 25;
 
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;
@@ -213,3 +239,9 @@ if (global.encounter_timer >= encounter_threshold) {
         }
     }
 }
+
+
+
+
+
+

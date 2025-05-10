@@ -152,5 +152,10 @@ original_scale = image_xscale; // Stores original image scale for temporary chan
 
 // IMPORTANT: No call to scr_player_movement_flappy() here.
 // Movement logic is handled in the Step Event.
+    
+    // — Echo Missile Settings —  
+missile_speed        = 8;    // pixels per frame  
+missile_max_distance = 200;  // in pixels
+
 
 show_debug_message("--- obj_player Create Event FINISHED ---");
