@@ -1,182 +1,334 @@
-// obj_equipment_menu :: Draw GUI Event
+/// obj_equipment_menu :: Draw GUI Event
+/// Draws the equipment menu, character stats, and item selection sub-menu.
 
-if (!variable_instance_exists(id, "menu_active") || !menu_active) return;
-if (!variable_instance_exists(id, "equipment_data") || !is_struct(equipment_data)) { return; }
-if (!variable_instance_exists(id, "menu_state")) return;
-if (!variable_instance_exists(id, "equipment_slots")) { equipment_slots = [ "weapon", "offhand", "armor", "helm", "accessory" ]; }
+// 1) Bail if inactive or missing data
+if (!variable_instance_exists(id, "active") || !active) {
+    return;
+}
+if (!variable_instance_exists(id, "equipment_data") || !is_struct(equipment_data)
+ || !variable_instance_exists(id, "menu_state")
+ || !variable_instance_exists(id, "equipment_slots")
+ || !variable_instance_exists(id, "selected_slot")
+ || !variable_instance_exists(id, "item_submenu_choices")
+ || !variable_instance_exists(id, "item_submenu_scroll_top")
+ || !variable_instance_exists(id, "item_submenu_selected_index")
+ || !variable_instance_exists(id, "item_submenu_display_count")
+ || !variable_instance_exists(id, "margin"))
+{
+    if (font_exists(Font1)) draw_set_font(Font1);
+    draw_text(10, 10, "Equipment Menu Error: Missing variables.");
+    if (font_exists(Font1)) draw_set_font(-1);
+    return;
+}
 
+// 2) GUI dims
+var guiWidth     = display_get_gui_width();
+var guiHeight    = display_get_gui_height();
 
-var gui_w = display_get_gui_width();
-var gui_h = display_get_gui_height();
+// 3) Font & line metrics
+if (font_exists(Font1)) draw_set_font(Font1);
+else                       draw_set_font(-1);
 
+var txtHeight    = string_height("HgAg");
+var lineHeight   = ceil(txtHeight + 10);
+var titleHeight  = ceil(txtHeight + 12);
+var padOuter     = 20;
+var padInner     = 8;
+var menuMargin   = self.margin;
 
-if (font_exists(Font1)) draw_set_font(Font1); else draw_set_font(-1);
-draw_set_color(c_white);
-draw_set_valign(fa_top);
-draw_set_halign(fa_left);
+// 4) Colors
+var colInc       = make_color_rgb(100,255,100);
+var colDec       = make_color_rgb(255,100,100);
+var colText      = c_white;
+var colDim       = c_black;
+var colPanel     = make_color_rgb(30,30,30);
+var colHighlight = c_yellow;
 
+// 5) Panel bounds
+var panelX      = self.boxX;
+var panelY      = self.boxY;
+var panelW      = self.boxW;
+var panelH      = self.boxH;
 
-col_stat_increase = c_lime;
-col_stat_decrease = c_red;
+// 6) Compute final stats once
+var statsFinal  = scr_CalculateEquippedStats(equipment_data);
+if (!is_struct(statsFinal)) {
+    draw_text(panelX + padOuter, panelY + padOuter, "Error: Stats unavailable.");
+    draw_set_font(-1);
+    return;
+}
 
-
-var margin = 16;
-var top_y_start = margin;
-var line_h = 28;
-var col1_x_def = margin;
-var col2_x_def = col1_x_def + 110;
-var col3_x_def = (gui_w / 2) + margin;
-var col4_x_def = col3_x_def + 90;
-
-
-var slot_count = array_length(equipment_slots);
-var slot_section_h = (slot_count * line_h);
-var stats_section_h = (8 * line_h);
-var needed_h = max(slot_section_h, stats_section_h) + line_h * 4;
-var box_h = min(needed_h, gui_h - margin * 2);
-var box_w = gui_w - margin * 2;
-var box_x = margin;
-var box_y = (gui_h - box_h) / 2;
-
-
-var display_stats = scr_CalculateEquippedStats(equipment_data);
-if (!is_struct(display_stats)) { return; }
-
-
-draw_set_alpha(0.7); draw_set_color(c_black);
-draw_rectangle(0, 0, gui_w, gui_h, false);
+// 7) Dim BG
+draw_set_alpha(0.7);
+draw_set_color(colDim);
+draw_rectangle(0,0,guiWidth,guiHeight,false);
 draw_set_alpha(1.0);
+draw_set_color(colText);
 
-
+// 8) Draw panel box
 if (sprite_exists(spr_box1)) {
-    var _spr_w = sprite_get_width(spr_box1);
-    var _spr_h = sprite_get_height(spr_box1);
-    if (_spr_w > 0 && _spr_h > 0) {
-        var _xscale = box_w / _spr_w;
-        var _yscale = box_h / _spr_h;
-        draw_sprite_ext(spr_box1, 0, box_x, box_y, _xscale, _yscale, 0, c_white, 1);
+    var sW = sprite_get_width(spr_box1);
+    var sH = sprite_get_height(spr_box1);
+    if (sW>0 && sH>0) {
+        draw_sprite_ext(spr_box1,0,panelX,panelY,panelW/sW,panelH/sH,0,c_white,1);
     } else {
-         draw_set_color(c_navy); draw_rectangle(box_x, box_y, box_x + box_w, box_y + box_h, false);
-         draw_set_color(c_white); draw_rectangle(box_x, box_y, box_x + box_w, box_y + box_h, true);
+        draw_set_color(colPanel);
+        draw_rectangle(panelX,panelY,panelX+panelW,panelY+panelH,false);
     }
 } else {
-    draw_set_color(c_navy); draw_rectangle(box_x, box_y, box_x + box_w, box_y + box_h, false);
-    draw_set_color(c_white); draw_rectangle(box_x, box_y, box_x + box_w, box_y + box_h, true);
+    draw_set_color(colPanel);
+    draw_rectangle(panelX,panelY,panelX+panelW,panelY+panelH,false);
+}
+draw_set_color(colText);
+
+// 9) Title
+var titleX  = panelX + panelW/2;
+var titleY  = panelY + padOuter + titleHeight/2;
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+var charName = variable_struct_get(statsFinal, "name") ?? "?";
+draw_text(titleX, titleY, "Equipment - " + charName);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+
+// 10) Columns
+var startY      = panelY + padOuter + titleHeight + padOuter;
+var slotColumnX = panelX + padOuter;
+
+// compute widest slot label
+var widestSlotW = 0;
+for (var iSlot=0; iSlot<array_length(equipment_slots); iSlot++) {
+    var w = string_width("> " + string_upper(equipment_slots[iSlot]) + ":");
+    if (w > widestSlotW) widestSlotW = w;
+}
+var itemColumnX = slotColumnX + widestSlotW + padOuter;
+
+// stats column
+var statsColumnX = panelX + panelW * 0.55;
+var widestStatW  = 0;
+var statKeys     = ["hp","mp","atk","def","matk","mdef","spd","luk"];
+for (var iKey=0; iKey<array_length(statKeys); iKey++) {
+    var w = string_width(string_upper(statKeys[iKey]));
+    if (w > widestStatW) widestStatW = w;
+}
+var statsValueX  = statsColumnX + widestStatW + padOuter;
+var statsValueW  = string_width("999/9999");
+
+// 11) Draw slots + equipped items
+for (var iSlot=0; iSlot<array_length(equipment_slots); iSlot++) {
+    var rowPos = startY + iSlot * lineHeight;
+    var slotName = equipment_slots[iSlot];
+    var isSelectedSlot = (iSlot == selected_slot && menu_state == EEquipMenuState.BrowseSlots);
+
+    // slot label
+    draw_set_color(isSelectedSlot ? colHighlight : colText);
+    draw_text(slotColumnX, rowPos, (isSelectedSlot ? "> " : "  ") + string_upper(slotName) + ":");
+
+    // equipped item
+    var eqKey = variable_struct_get(statsFinal.equipment, slotName);
+    var itemLabel = "(none)";
+    if (is_string(eqKey) && eqKey!="" && eqKey!="noone") {
+        var info = scr_GetItemData(eqKey);
+        if (is_struct(info) && variable_struct_exists(info,"name")) {
+            itemLabel = info.name;
+        } else {
+            itemLabel = eqKey + " (Inv!)";
+        }
+    }
+    draw_set_color(isSelectedSlot ? colHighlight : colText);
+    draw_text(itemColumnX, rowPos, itemLabel);
 }
 
+// 12) Draw stats
+for (var iStat=0; iStat<array_length(statKeys); iStat++) {
+    var statPos = startY + iStat * lineHeight;
+    var keyName = statKeys[iStat];
+    var valNum  = variable_struct_get(statsFinal, keyName) ?? 0;
+    var txt     = string(valNum);
 
-var top_y = box_y + margin;
-var col1_x = box_x + margin;
-var col2_x = col1_x + 110;
-var col3_x = box_x + (box_w / 2) + margin;
-var col4_x = col3_x + 90;
+    if (keyName == "hp" && variable_struct_exists(statsFinal,"maxhp")) {
+        var mh = variable_struct_get(statsFinal,"maxhp");
+        txt = string(variable_struct_get(statsFinal,"hp")) + "/" + string(mh);
+    }
+    if (keyName == "mp" && variable_struct_exists(statsFinal,"maxmp")) {
+        var mm = variable_struct_get(statsFinal,"maxmp");
+        txt = string(variable_struct_get(statsFinal,"mp")) + "/" + string(mm);
+    }
 
-
-var char_name = variable_struct_exists(display_stats, "name") ? display_stats.name : "?";
-draw_set_halign(fa_center);
-draw_set_color(c_white);
-draw_text(box_x + box_w / 2, top_y, "Equipment - " + char_name);
-top_y += line_h * 1.5;
+    draw_set_color(colText);
+    draw_set_halign(fa_left);
+    draw_text(statsColumnX, statPos, string_upper(keyName));
+    draw_set_halign(fa_right);
+    draw_text(statsValueX + statsValueW, statPos, txt);
+}
 draw_set_halign(fa_left);
 
-
-var slot_start_y = top_y;
-for (var i = 0; i < slot_count; i++) {
-    var row_y = slot_start_y + i * line_h;
-    var slot_name = equipment_slots[i];
-    var is_selected_slot = (i == selected_slot && menu_state == EEquipMenuState.BrowseSlots);
-    var slot_label_text = string_upper(slot_name) + ":";
-    if (is_selected_slot) { slot_label_text = "> " + slot_label_text; }
-    draw_set_color(c_white);
-    draw_text(col1_x, row_y, slot_label_text);
-
-    var current_item_key = noone;
-    if (variable_struct_exists(display_stats, "equipment") && is_struct(display_stats.equipment)) {
-        if (variable_struct_exists(display_stats.equipment, slot_name)) { current_item_key = variable_struct_get(display_stats.equipment, slot_name); }
-    }
-    var item_label = "(none)";
-    if (is_string(current_item_key)) {
-        var item_info = scr_GetItemData(current_item_key);
-        if (is_struct(item_info) && variable_struct_exists(item_info, "name")) { item_label = item_info.name; } else { item_label = "(inv!)"; }
-    }
-    draw_set_color(c_white);
-    draw_text(col2_x, row_y, item_label);
-}
-
-
-var stats_y = top_y;
-draw_set_color(c_white);
-draw_text(col3_x, stats_y + line_h * 0, "HP"); draw_text(col3_x, stats_y + line_h * 1, "MP");
-draw_text(col3_x, stats_y + line_h * 2, "ATK"); draw_text(col3_x, stats_y + line_h * 3, "DEF");
-draw_text(col3_x, stats_y + line_h * 4, "MATK"); draw_text(col3_x, stats_y + line_h * 5, "MDEF");
-draw_text(col3_x, stats_y + line_h * 6, "SPD"); draw_text(col3_x, stats_y + line_h * 7, "LUK");
-
-draw_text(col4_x, stats_y + line_h * 0, string(display_stats.hp) + "/" + string(display_stats.maxhp));
-draw_text(col4_x, stats_y + line_h * 1, string(display_stats.mp) + "/" + string(display_stats.maxmp));
-draw_text(col4_x, stats_y + line_h * 2, string(display_stats.atk)); draw_text(col4_x, stats_y + line_h * 3, string(display_stats.def));
-draw_text(col4_x, stats_y + line_h * 4, string(display_stats.matk)); draw_text(col4_x, stats_y + line_h * 5, string(display_stats.mdef));
-draw_text(col4_x, stats_y + line_h * 6, string(display_stats.spd)); draw_text(col4_x, stats_y + line_h * 7, string(display_stats.luk));
-
-
+// 13) Item sub-menu
 if (menu_state == EEquipMenuState.SelectingItem) {
-    var sub_x = col1_x + 10; var sub_y = slot_start_y + selected_slot * line_h;
-    var sub_item_list_x = sub_x + 10; var sub_stat_diff_x = sub_item_list_x + 160;
-    var sub_width = sub_stat_diff_x + 80 - sub_x; sub_width = min(sub_width, gui_w - sub_x - margin);
-    var item_count = array_length(item_submenu_choices); var sub_visible_items = min(item_submenu_display_count, item_count);
-    var sub_height = (sub_visible_items * line_h) + line_h; sub_height = min(sub_height, gui_h - sub_y - margin);
-    if (sub_y + sub_height > gui_h - margin) { sub_y = gui_h - margin - sub_height; } sub_y = max(margin, sub_y);
+    var baseX        = slotColumnX + padInner;
+    var baseY        = startY + selected_slot * lineHeight;
+    var totalChoices = array_length(item_submenu_choices);
+    var visibleCount = min(item_submenu_display_count, totalChoices);
 
+    // measure widest item label
+    var widestItemW  = 0;
+    var diffLabelW   = string_width("MDEF +999");
+    for (var iChoice=0; iChoice<totalChoices; iChoice++) {
+        var cKey = item_submenu_choices[iChoice];
+        var cName = "(Unequip)";
+        if (is_string(cKey)) {
+            var cInfo = scr_GetItemData(cKey);
+            if (is_struct(cInfo) && variable_struct_exists(cInfo,"name")) {
+                cName = cInfo.name;
+            }
+        }
+        var w = string_width("> " + cName);
+        if (w > widestItemW) widestItemW = w;
+    }
+    var maxDiffLines = array_length(statKeys); 
+    var subBoxW = min(widestItemW*1.25 + padOuter + diffLabelW + padOuter*2,
+                      guiWidth - baseX - menuMargin);
+    var subBoxH = visibleCount * lineHeight 
+            + padOuter*2 
+            + maxDiffLines * lineHeight;
+
+    if (baseY + subBoxH > guiHeight - menuMargin) {
+        baseY = guiHeight - menuMargin - subBoxH;
+    }
+    if (baseY < menuMargin) {
+        baseY = menuMargin;
+    }
+
+    // draw sub-box
     if (sprite_exists(spr_box1)) {
-        var _spr_w_sub=sprite_get_width(spr_box1); var _spr_h_sub=sprite_get_height(spr_box1);
-        if (_spr_w_sub > 0 && _spr_h_sub > 0) {
-            var _xscale_sub = sub_width / _spr_w_sub; var _yscale_sub = sub_height / _spr_h_sub;
-            draw_sprite_ext(spr_box1, 0, sub_x, sub_y, _xscale_sub, _yscale_sub, 0, c_white, 1);
-        } else { /* Fallback Rect */ }
-    } else { /* Fallback Rect */ }
+        var sW2 = sprite_get_width(spr_box1), sH2 = sprite_get_height(spr_box1);
+        if (sW2>0 && sH2>0) {
+            draw_sprite_ext(spr_box1,0,baseX,baseY,subBoxW/sW2,subBoxH/sH2,0,c_white,1);
+        } else {
+            draw_set_color(colPanel);
+            draw_rectangle(baseX,baseY,baseX+subBoxW,baseY+subBoxH,false);
+        }
+    } else {
+        draw_set_color(colPanel);
+        draw_rectangle(baseX,baseY,baseX+subBoxW,baseY+subBoxH,false);
+    }
 
-    var item_list_draw_y = sub_y + (line_h / 2);
-    for (var i = 0; i < sub_visible_items; i++) {
-        var list_index = item_submenu_scroll_top + i; if (list_index >= item_count) break;
-        var current_draw_y = item_list_draw_y + i * line_h; var item_key = item_submenu_choices[list_index];
-        var item_list_label = "(Unequip)"; if (is_string(item_key)) { var info=scr_GetItemData(item_key); item_list_label=(is_struct(info)&&variable_struct_exists(info,"name"))?info.name:"(inv!)"; }
-        var is_selected_item = (list_index == item_submenu_selected_index);
-        if (is_selected_item) { item_list_label = "> " + item_list_label; }
-        draw_set_color(c_white);
-        draw_text(sub_item_list_x, current_draw_y, item_list_label);
+    var textX = baseX + padOuter;
+    var textY = baseY + padOuter;
+    var diffX  = textX + widestItemW + padOuter;
 
-        if (is_selected_item && variable_struct_exists(id, "item_submenu_stat_diffs") && is_struct(item_submenu_stat_diffs)) {
-            var diff_line = 0; var diff_draw_x = sub_stat_diff_x; var diff_base_y = current_draw_y; var diff_line_h = line_h * 0.75;
-            draw_set_color(c_white);
-            var val_hp = item_submenu_stat_diffs.hp_total ?? 0; if (val_hp != 0) { var s=val_hp > 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"HP "+s+string(val_hp)); diff_line++; }
-            var val_mp = item_submenu_stat_diffs.mp_total ?? 0; if (val_mp != 0) { var s=val_mp > 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"MP "+s+string(val_mp)); diff_line++; }
-            var val_atk= item_submenu_stat_diffs.atk ?? 0; if (val_atk!= 0) { var s=val_atk> 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"ATK "+s+string(val_atk)); diff_line++; }
-            var val_def= item_submenu_stat_diffs.def ?? 0; if (val_def!= 0) { var s=val_def> 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"DEF "+s+string(val_def)); diff_line++; }
-            var val_matk=item_submenu_stat_diffs.matk ?? 0; if (val_matk!=0) { var s=val_matk>0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"MATK "+s+string(val_matk)); diff_line++; }
-            var val_mdef=item_submenu_stat_diffs.mdef ?? 0; if (val_mdef!=0) { var s=val_mdef>0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"MDEF "+s+string(val_mdef)); diff_line++; }
-            var val_spd= item_submenu_stat_diffs.spd ?? 0; if (val_spd!= 0) { var s=val_spd> 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"SPD "+s+string(val_spd)); diff_line++; }
-            var val_luk= item_submenu_stat_diffs.luk ?? 0; if (val_luk!= 0) { var s=val_luk> 0?"+":""; draw_text(diff_draw_x,diff_base_y+diff_line*diff_line_h,"LUK "+s+string(val_luk)); diff_line++; }
+    // draw each choice + stat diffs
+    for (var iVis=0; iVis<visibleCount; iVis++) {
+        var idxChoice = item_submenu_scroll_top + iVis;
+        if (idxChoice >= totalChoices) break;
+
+        var choicePos = textY + iVis * lineHeight;
+        var cKey      = item_submenu_choices[idxChoice];
+        var cName     = "(Unequip)";
+        if (is_string(cKey)) {
+            var cInfo = scr_GetItemData(cKey);
+            if (is_struct(cInfo) && variable_struct_exists(cInfo,"name")) {
+                cName = cInfo.name;
+            }
+        }
+        var isSelChoice = (idxChoice == item_submenu_selected_index);
+
+        draw_set_color(isSelChoice ? colHighlight : colText);
+        draw_set_halign(fa_left);
+        draw_text(textX, choicePos, (isSelChoice ? "> " : "") + cName);
+
+        if (isSelChoice && is_struct(item_submenu_stat_diffs)) {
+            var diffs  = item_submenu_stat_diffs;
+            var offset = 0;
+            var dLine  = lineHeight * 0.75;
+
+            // hp_total
+            var vHP = diffs.hp_total ?? 0;
+            if (vHP != 0) {
+                draw_set_color(vHP > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "HP " + (vHP>0?"+":"") + string(vHP));
+                offset += dLine;
+            }
+            // mp_total
+            var vMP = diffs.mp_total ?? 0;
+            if (vMP != 0) {
+                draw_set_color(vMP > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "MP " + (vMP>0?"+":"") + string(vMP));
+                offset += dLine;
+            }
+            // atk
+            var vAT = diffs.atk ?? 0;
+            if (vAT != 0) {
+                draw_set_color(vAT > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "ATK " + (vAT>0?"+":"") + string(vAT));
+                offset += dLine;
+            }
+            // def
+            var vDF = diffs.def ?? 0;
+            if (vDF != 0) {
+                draw_set_color(vDF > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "DEF " + (vDF>0?"+":"") + string(vDF));
+                offset += dLine;
+            }
+            // matk
+            var vMT = diffs.matk ?? 0;
+            if (vMT != 0) {
+                draw_set_color(vMT > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "MATK " + (vMT>0?"+":"") + string(vMT));
+                offset += dLine;
+            }
+            // mdef
+            var vMD = diffs.mdef ?? 0;
+            if (vMD != 0) {
+                draw_set_color(vMD > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "MDEF " + (vMD>0?"+":"") + string(vMD));
+                offset += dLine;
+            }
+            // spd
+            var vSP = diffs.spd ?? 0;
+            if (vSP != 0) {
+                draw_set_color(vSP > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "SPD " + (vSP>0?"+":"") + string(vSP));
+                offset += dLine;
+            }
+            // luk
+            var vLU = diffs.luk ?? 0;
+            if (vLU != 0) {
+                draw_set_color(vLU > 0 ? colInc : colDec);
+                draw_text(diffX, choicePos + offset, "LUK " + (vLU>0?"+":"") + string(vLU));
+                offset += dLine;
+            }
         }
     }
 
-    var indicator_x = sub_x + sub_width / 2;
+    // scroll arrows
+    var arrowX   = baseX + subBoxW/2;
+    var arrowPad = lineHeight * 0.25;
     draw_set_color(c_white);
-    if (item_submenu_scroll_top > 0) { draw_set_halign(fa_center); draw_text(indicator_x, sub_y - line_h * 0.1, "▲"); draw_set_halign(fa_left); }
-    if (item_submenu_scroll_top + sub_visible_items < item_count) { draw_set_halign(fa_center); draw_text(indicator_x, sub_y + sub_height - line_h * 0.6, "▼"); draw_set_halign(fa_left); }
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    if (item_submenu_scroll_top > 0) {
+        draw_text(arrowX, baseY + arrowPad, "▲");
+    }
+    if (item_submenu_scroll_top + visibleCount < totalChoices) {
+        draw_text(arrowX, baseY + subBoxH - arrowPad, "▼");
+    }
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
 }
 
-
-var footer_y = box_y + box_h + margin / 2;
-footer_y = min(footer_y, gui_h - margin - line_h);
-draw_set_halign(fa_left);
-var help_text = "";
-if (menu_state == EEquipMenuState.BrowseSlots) { help_text = "[↑/↓] Slot   [←/→] Char   [Confirm] Select Item   [Cancel] Back"; }
-else if (menu_state == EEquipMenuState.SelectingItem) { help_text = "[↑/↓] Item   [Confirm] Equip Item   [Cancel] Back to Slots"; }
-else { help_text = "Unknown State"; }
+// 14) Footer
 draw_set_color(c_white);
-draw_text(margin, footer_y, help_text);
+draw_set_halign(fa_left);
+draw_set_valign(fa_bottom);
+var footerTxt = (menu_state == EEquipMenuState.BrowseSlots)
+              ? "[U/D] Slot  [L/R] Char  [Confirm] Select Item  [Cancel] Back"
+              : "[U/D] Item  [Confirm] Equip Item  [Cancel] Back to Slots";
+draw_text(menuMargin, guiHeight - menuMargin, footerTxt);
 
-
+// 15) Reset
 draw_set_font(-1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
-draw_set_alpha(1);
+draw_set_alpha(1.0);
+draw_set_color(c_white);
