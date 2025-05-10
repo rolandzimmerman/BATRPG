@@ -110,7 +110,7 @@ if (sprite_exists(spr_box1)) {
     var _spr_h = sprite_get_height(spr_box1);
     if (_spr_w > 0 && _spr_h > 0) {
         // Ensure 9-slice is enabled for spr_box1 in the Sprite Editor
-        draw_sprite_ext(spr_box1, 0, box_x_main, box_y_main, 
+        draw_sprite_ext(spr_box1, -1, box_x_main, box_y_main, 
                         box_width_main / _spr_w, box_height_main / _spr_h, 
                         0, c_white, 1.0);
     } else { /* Fallback rect */ draw_set_alpha(0.8); draw_set_color(c_black); draw_rectangle(box_x_main, box_y_main, box_x_main + box_width_main, box_y_main + box_height_main, false); draw_set_alpha(1.0); }
@@ -193,7 +193,7 @@ if (sprite_exists(spr_box1)) {
     var _spr_w_pv = sprite_get_width(spr_box1);
     var _spr_h_pv = sprite_get_height(spr_box1);
     if (_spr_w_pv > 0 && _spr_h_pv > 0) {
-        draw_sprite_ext(spr_box1, 0, PREVIEW_X, PREVIEW_Y,
+        draw_sprite_ext(spr_box1, -1, PREVIEW_X, PREVIEW_Y,
                         PREVIEW_SIZE / _spr_w_pv, PREVIEW_SIZE / _spr_h_pv,
                         0, c_white, 1.0);
     } else { /* Fallback rect */ draw_set_alpha(0.8); draw_set_color(c_black); draw_rectangle(PREVIEW_X, PREVIEW_Y, PREVIEW_X + PREVIEW_SIZE, PREVIEW_Y + PREVIEW_SIZE, false); draw_set_alpha(1.0); }
@@ -232,7 +232,7 @@ if (sprite_exists(spr_box1)) {
     var _spr_w_gold = sprite_get_width(spr_box1);
     var _spr_h_gold = sprite_get_height(spr_box1);
     if (_spr_w_gold > 0 && _spr_h_gold > 0) {
-        draw_sprite_ext(spr_box1, 0, cur_box_x, cur_box_y,
+        draw_sprite_ext(spr_box1, -1, cur_box_x, cur_box_y,
                         cur_box_final_w / _spr_w_gold, cur_box_final_h / _spr_h_gold,
                         0, c_white, 1.0);
     } else { /* Fallback rect */ draw_set_alpha(0.8); draw_set_color(c_black); draw_rectangle(cur_box_x, cur_box_y, cur_box_x + cur_box_final_w, cur_box_y + cur_box_final_h, false); draw_set_alpha(1.0); }

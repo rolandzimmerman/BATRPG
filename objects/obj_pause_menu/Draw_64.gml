@@ -70,7 +70,7 @@ if (sprite_exists(spr_box1)) {
         // For 9-slice like stretching, draw_sprite_stretched is fine.
         // If spr_box1 is a true 9-slice sprite, you'd use draw_sprite_pos or draw_sprite_nine_slice.
         // Assuming draw_sprite_stretched is the intended method:
-        draw_sprite_stretched(spr_box1, 0, box_x, box_y, box_width, box_height);
+        draw_sprite_stretched(spr_box1, -1, box_x, box_y, box_width, box_height);
     } else { // Fallback if sprite has no dimensions
         draw_set_alpha(0.8); draw_set_color(c_dkgray); // Fallback box color
         draw_rectangle(box_x, box_y, box_x + box_width, box_y + box_height, false);

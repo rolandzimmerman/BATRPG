@@ -61,3 +61,4 @@ if (array_length(usable_items) == 0) {
 } else {
     item_index = 0;
 }
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame

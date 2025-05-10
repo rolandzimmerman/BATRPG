@@ -91,7 +91,7 @@ if (sprite_exists(spr_box1)) {
     var _spr_h = sprite_get_height(spr_box1);
     if (_spr_w > 0 && _spr_h > 0) {
          // Use draw_sprite_ext if 9-slice is enabled in sprite properties
-        draw_sprite_ext(spr_box1, 0, panel_x, panel_y, 
+        draw_sprite_ext(spr_box1, -1, panel_x, panel_y, 
                         final_box_w / _spr_w, final_box_h / _spr_h, 
                         0, c_white, 1.0);
     } else { /* Fallback rect */ draw_set_color(make_color_rgb(30,30,30)); draw_rectangle(panel_x, panel_y, panel_x + final_box_w, panel_y + final_box_h, false); }

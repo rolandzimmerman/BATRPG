@@ -74,7 +74,7 @@ var col_selection_bar = c_yellow;
 // Draw main background box
 if (sprite_exists(spr_box1)) {
     var sw = sprite_get_width(spr_box1); var sh = sprite_get_height(spr_box1);
-    if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1, 0, box_outer_x, box_outer_y, box_outer_w / sw, box_outer_h / sh, 0, c_white, 1);
+    if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1, -1, box_outer_x, box_outer_y, box_outer_w / sw, box_outer_h / sh, 0, c_white, 1);
     else { draw_set_color(col_bg_interactive); draw_set_alpha(0.9); draw_rectangle(box_outer_x, box_outer_y, box_outer_x + box_outer_w, box_outer_y + box_outer_h, false); draw_set_alpha(1.0); }
 } else { draw_set_color(col_bg_interactive); draw_set_alpha(0.9); draw_rectangle(box_outer_x, box_outer_y, box_outer_x + box_outer_w, box_outer_y + box_outer_h, false); draw_set_alpha(1.0); }
 

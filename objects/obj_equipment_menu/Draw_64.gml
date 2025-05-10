@@ -70,7 +70,7 @@ if (sprite_exists(spr_box1)) {
     var sW = sprite_get_width(spr_box1);
     var sH = sprite_get_height(spr_box1);
     if (sW>0 && sH>0) {
-        draw_sprite_ext(spr_box1,0,panelX,panelY,panelW/sW,panelH/sH,0,c_white,1);
+        draw_sprite_ext(spr_box1,-1,panelX,panelY,panelW/sW,panelH/sH,0,c_white,1);
     } else {
         draw_set_color(colPanel);
         draw_rectangle(panelX,panelY,panelX+panelW,panelY+panelH,false);
@@ -203,7 +203,7 @@ if (menu_state == EEquipMenuState.SelectingItem) {
     if (sprite_exists(spr_box1)) {
         var sW2 = sprite_get_width(spr_box1), sH2 = sprite_get_height(spr_box1);
         if (sW2>0 && sH2>0) {
-            draw_sprite_ext(spr_box1,0,baseX,baseY,subBoxW/sW2,subBoxH/sH2,0,c_white,1);
+            draw_sprite_ext(spr_box1,-1,baseX,baseY,subBoxW/sW2,subBoxH/sH2,0,c_white,1);
         } else {
             draw_set_color(colPanel);
             draw_rectangle(baseX,baseY,baseX+subBoxW,baseY+subBoxH,false);

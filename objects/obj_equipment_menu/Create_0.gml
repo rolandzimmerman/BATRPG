@@ -77,6 +77,6 @@ if (!is_struct(equipment_data)) {
 }
 
 calling_menu = noone; // Instance ID of the menu that opened this one, if any
-
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame
 show_debug_message(">> Equipment Menu Created & Initialized. Active: " + string(active) + " for char: " + string(equipment_character_key));
 show_debug_message("   Panel geometry: X=" + string(boxX) + " Y=" + string(boxY) + " W=" + string(boxW) + " H=" + string(boxH) + " Margin: " + string(margin));

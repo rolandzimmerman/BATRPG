@@ -25,5 +25,5 @@ active = true;
 // snd_cursor = snd_menu_cursor;
 // snd_select = snd_menu_select;
 // snd_cancel = snd_menu_cancel;
-
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame
 show_debug_message("obj_pause_menu Create: Initialized with options: " + string(menu_options));

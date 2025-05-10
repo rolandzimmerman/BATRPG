@@ -54,7 +54,7 @@ var char_box_y = box_margin;
 
 if (party_count > 0) {
     if (sprite_exists(spr_box1)) {
-        draw_sprite_stretched(spr_box1, 0, char_box_x, char_box_y, char_box_w, char_box_h);
+        draw_sprite_stretched(spr_box1, -1, char_box_x, char_box_y, char_box_w, char_box_h);
     } else { // Fallback drawing if spr_box1 is missing
         draw_set_alpha(0.8);
         draw_set_color(c_black);
@@ -122,7 +122,7 @@ if (menu_state == "spell_select") {
     var list_box_h = title_h + visible_items_h + pad * 2; // Total height of the spell list box
 
     if (sprite_exists(spr_box1)) {
-        draw_sprite_stretched(spr_box1, 0, list_box_x, list_box_y, list_box_w, list_box_h);
+        draw_sprite_stretched(spr_box1, -1, list_box_x, list_box_y, list_box_w, list_box_h);
     } // Fallback drawing for box can be added here if needed
 
     draw_set_halign(fa_center);
@@ -169,7 +169,7 @@ else if (menu_state == "target_select_ally") {
     var list_box_h = title_h + visible_targets_h + pad * 2;
 
     if (sprite_exists(spr_box1)) {
-        draw_sprite_stretched(spr_box1, 0, list_box_x, list_box_y, list_box_w, list_box_h);
+        draw_sprite_stretched(spr_box1, -1, list_box_x, list_box_y, list_box_w, list_box_h);
     } // Fallback box drawing
 
     draw_set_halign(fa_center);

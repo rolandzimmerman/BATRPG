@@ -39,7 +39,7 @@ if (sprite_exists(spr_box1)) { // Check for the correct sprite name
         var _xscale = _boxw / _spr_w;
         var _yscale = _boxh / _spr_h;
         // Draw using ext (engine handles 9-slice if enabled on sprite)
-        draw_sprite_ext(spr_box1, 0, _dx, _dy, _xscale, _yscale, 0, c_white, 1.0); // Use white tint, full alpha
+        draw_sprite_ext(spr_box1, -1, _dx, _dy, _xscale, _yscale, 0, c_white, 1.0); // Use white tint, full alpha
     } else {
         // Fallback rectangle if sprite has no dimensions
         show_debug_message("ERROR: spr_box1 has zero width/height in obj_dialog Draw GUI!");

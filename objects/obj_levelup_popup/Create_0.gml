@@ -7,8 +7,8 @@ info = global.battle_level_up_infos[ global.battle_levelup_index ];
 // the list of stat-keys we'll display
 keys = ["maxhp","maxmp","atk","def","matk","mdef","spd","luk"];
 // box position/size (tweak as needed)
-boxX =  (display_get_gui_width()  - 600) / 2;
-boxY =  (display_get_gui_height() - 300) / 2;
+boxX =  48; //(display_get_gui_width()  - 600) / 2;
+boxY =  256; //display_get_gui_height() - 300) / 2;
 boxW =  400;
 boxH =  300;
 padding = 16;
@@ -22,3 +22,4 @@ oldColor   = c_gray;
 sepColor   = c_white;
 newColorUp = c_lime;
 newColor   = c_white;
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame

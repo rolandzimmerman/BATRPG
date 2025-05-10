@@ -10,5 +10,5 @@ menu_state = "character_select"; // <<< Start by selecting the caster
 
 usable_spells = [];     // Array to hold the selected character's usable field spells
 selected_caster_key = ""; // Store the key of the character chosen
-
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame
 show_debug_message("obj_spell_menu_field Created. Initial State: " + menu_state);

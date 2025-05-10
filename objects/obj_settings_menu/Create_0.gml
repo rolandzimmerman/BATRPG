@@ -50,5 +50,5 @@ if (!variable_global_exists("music_volume")) {
 }
 
 input_cooldown = 0; // For gamepad D-pad navigation delay
-
+self.image_speed = .05;         // THIS makes it animate at 1 sprite frame per game frame
 show_debug_message("obj_settings_menu Created and Initialized. Active: " + string(active));

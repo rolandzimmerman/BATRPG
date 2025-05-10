@@ -64,12 +64,12 @@ for (var i = 1; i < array_length(party_hud_positions_x); i++) {
     party_hud_positions_x[i] = party_hud_positions_x[i-1] + new_hud_spacing_step;
 }
 
-var menu_x_offset         = 96;    // User's value
-var menu_y_offset         = 600;   // User's value
+var menu_x_offset         = 48;    // User's value
+var menu_y_offset         = 632;   // User's value
 var menu_cx               = 160;
 var menu_cy               = 600;   // User's value
 var menu_r                = 80;
-var button_scale          = 1;     // User's value
+var button_scale          = .8;     // User's value
 
 var list_x_base           = (menu_cx + menu_x_offset) + menu_r + 80; // User's formula
 var list_y                = menu_y_offset; // Adjusted for visibility
@@ -234,7 +234,7 @@ if (active_player_data_valid && active_p_inst != noone) {
 
         if (sprite_exists(spr_box1)) { 
             var sw = sprite_get_width(spr_box1); var sh = sprite_get_height(spr_box1); 
-            if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1,0,box_x,box_y,actual_skill_box_w/sw,box_h/sh,0,c_white,0.9); 
+            if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1,-1,box_x,box_y,actual_skill_box_w/sw,box_h/sh,0,c_white,0.9); 
         }
         
         if (cnt>0) {
@@ -293,7 +293,7 @@ if (active_player_data_valid && active_p_inst != noone) {
 
         if (sprite_exists(spr_box1)) { 
             var sw = sprite_get_width(spr_box1); var sh = sprite_get_height(spr_box1); 
-            if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1,0,box_x,box_y,actual_item_box_w/sw,box_h/sh,0,c_white,0.9); 
+            if (sw > 0 && sh > 0) draw_sprite_ext(spr_box1,-1,box_x,box_y,actual_item_box_w/sw,box_h/sh,0,c_white,0.9); 
         }
         
         if (cnt>0) {
@@ -390,7 +390,7 @@ if (instance_exists(obj_battle_manager)
     var box_display_y = turn_order_y - turn_order_box_padding;
     if (sprite_exists(spr_box1)) {
        var sw_box = sprite_get_width(spr_box1); var sh_box = sprite_get_height(spr_box1);
-       if (sw_box > 0 && sh_box > 0) draw_sprite_ext(spr_box1, 0, box_display_x, box_display_y, box_display_w / sw_box, box_display_h / sh_box, 0, c_white, 0.8);
+       if (sw_box > 0 && sh_box > 0) draw_sprite_ext(spr_box1, -1, box_display_x, box_display_y, box_display_w / sw_box, box_display_h / sh_box, 0, c_white, 0.8);
     }
     draw_set_halign(fa_left); draw_set_valign(fa_middle);
     for (var i = 0; i < _order_count; i++) {
