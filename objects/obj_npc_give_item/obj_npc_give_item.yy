@@ -35,8 +35,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"goblin",
-    "path":"sprites/goblin/goblin.yy",
+    "name":"goblin_club",
+    "path":"sprites/goblin_club/goblin_club.yy",
   },
   "spriteMaskId":null,
   "visible":true,

@@ -20,8 +20,8 @@
   ],
   "name":"rm_bat_castle",
   "parent":{
-    "name":"Bat",
-    "path":"folders/Rooms/Bat.yy",
+    "name":"Rooms",
+    "path":"folders/Rooms.yy",
   },
   "parentRoom":null,
   "physicsSettings":{

@@ -5,7 +5,11 @@
 /// @param {boolean} _key_up_held True if the up directional key is held.
 /// @param {boolean} _key_down_held True if the down directional key is held.
 function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed, _key_up_held, _key_down_held) {
-
+    if (object_index != obj_player) {
+        // Optionally, a debug message here if you want to know what else is trying to call it.
+        show_debug_message("Warning: scr_player_update_state_and_movement called by non-player: " + object_get_name(object_index));
+        exit; // Stop execution for non-player objects
+    }
     // --- Define Collision Targets ---
     var _collision_targets = [self.tilemap]; // Start with main collision map
     if (self.tilemap_phase_id != -1) {
@@ -18,7 +22,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
 
         // ==================== FLYING STATE ====================
         case PLAYER_STATE.FLYING:
-            show_debug_message("State: FLYING");
+            //show_debug_message("State: FLYING");
             // --- Physics for Flying ---
             if (_action_key_pressed) {
                 self.v_speed = self.flap_strength;
@@ -112,7 +116,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
             }
 
             // --- Normal Floor Walking Logic (Priority 3) ---
-            show_debug_message("State: WALKING_FLOOR");
+            //show_debug_message("State: WALKING_FLOOR");
             self.v_speed = 0; // Keep v_speed zero while walking
 
             // Horizontal Movement with Step-Up
@@ -200,7 +204,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
              }
 
             // --- Normal Ceiling Walking Logic (Priority 3) ---
-            show_debug_message("State: WALKING_CEILING");
+            //show_debug_message("State: WALKING_CEILING");
             self.v_speed = 0; 
 
             // Horizontal Movement with Step-Down
