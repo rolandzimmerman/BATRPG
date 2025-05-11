@@ -13,7 +13,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
     // --- Define Collision Targets ---
     var _collision_targets = [self.tilemap]; // Start with main collision map
     if (self.tilemap_phase_id != -1) {
-        array_push(_collision_targets, self.tilemap_phase_id); // Add phase map if it exists
+        array_push(_collision_targets, self.tilemap_phase_id, obj_destructible_block); // Add phase map if it exists
     }
     var _can_check_phase_layer = (self.tilemap_phase_id != -1); // Flag for easier checking later
 

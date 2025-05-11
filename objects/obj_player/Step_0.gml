@@ -215,7 +215,7 @@ if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving ver
 }
 
 var encounter_threshold = 300;
-var encounter_chance = 25;
+var encounter_chance = 15;
 
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;
