@@ -144,7 +144,7 @@ if (variable_global_exists("battle_party") && ds_exists(global.battle_party, ds_
 
 // === Main Command / Skill / Item Menues ===
 if (active_player_data_valid && active_p_inst != noone) {
-    var menu_box_side_padding = 20; // Increased side padding for skill/item boxes (e.g., 20px)
+    var menu_box_side_padding = 32; // Increased side padding for skill/item boxes (e.g., 20px)
 
     if (_current_battle_state == "player_input") {
         // ... (Player Input command drawing - confirmed working) ...

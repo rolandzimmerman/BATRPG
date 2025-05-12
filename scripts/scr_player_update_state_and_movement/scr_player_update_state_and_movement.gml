@@ -5,6 +5,30 @@
 /// @param {boolean} _key_up_held True if the up directional key is held.
 /// @param {boolean} _key_down_held True if the down directional key is held.
 function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed, _key_up_held, _key_down_held) {
+        // --- DIVING MODE HANDLER ---
+    if (self.isDiving) {
+        // 1) continue downward physics
+        self.v_speed += self.gravity_force;
+        self.v_speed = clamp(self.v_speed, self.flap_strength*1.5, self.max_v_speed_fall);
+
+        // 2) move + collide
+        var cols = move_and_collide(0, self.v_speed, [self.tilemap, self.tilemap_phase_id]);
+        
+        // 3) keep dive sprite playing
+        self.sprite_index = spr_dive;
+        // image_speed is already set in scr_player_dive()
+
+        // 4) on landing, clear dive
+        if (array_length(cols) > 0 || place_meeting(self.x, self.y+1, self.tilemap)) {
+            self.isDiving    = false;
+            self.player_state = PLAYER_STATE.FLYING;
+            // reset to your normal flying sprite/frame:
+            image_speed   = 0;
+            image_index   = 0;
+        }
+        return; // skip the rest of the state‐machine this frame
+    }
+
     if (object_index != obj_player) {
         // Optionally, a debug message here if you want to know what else is trying to call it.
         show_debug_message("Warning: scr_player_update_state_and_movement called by non-player: " + object_get_name(object_index));

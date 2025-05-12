@@ -35,7 +35,11 @@ max_v_speed_fall = 8;
 horizontal_move_speed = 5;
 face_dir = 1;
 walk_animation_speed = 1; // Adjust as needed for your walking animations
-
+// dive settings
+dive_strength    = 96;
+dive_max_speed   = 96;  // new: how fast you can fall when diving
+isDiving         = false;  // true while in the dive
+isSlamming       = false;  // true while playing slam animation
 // === World Interaction & Collision ===
 tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col")); // Your main collision tilemap
 if (tilemap == -1) {

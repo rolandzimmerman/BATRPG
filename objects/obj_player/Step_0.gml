@@ -1,5 +1,34 @@
 /// obj_player :: Step Event
+/// ——— Dive Mode Handler ———
+if (isDiving) {
+    // 1) Instant max‐speed fall
+    v_speed = dive_max_speed;
 
+    // 2) Move & collide
+    var cols = move_and_collide(0, v_speed, [tilemap, tilemap_phase_id]);
+
+    // 3) Force dive sprite
+    sprite_index = spr_dive;
+    image_speed  = 0.5;
+
+    // 4) On landing → spawn a slam‐fx instance
+    if (array_length(cols) > 0 || place_meeting(x, y + 1, tilemap)) {
+        // end dive
+        isDiving    = false;
+        player_state = PLAYER_STATE.FLYING;
+        // snap back to your normal flying sprite/frame
+        image_speed  = 0;
+        image_index  = 0;
+
+        // spawn the dirt‐slam effect at your feet
+        var fx_layer = layer_get_id("Effects");
+        if (fx_layer == -1) fx_layer = layer_get_id("Instances");
+        instance_create_layer((bbox_left + bbox_right)/2, (bbox_top + bbox_bottom)/2, fx_layer, obj_dive_slam_fx);
+    }
+
+    // 5) stop here so nothing else overrides
+    exit;
+}
 // Get reference to the game manager
 var _gm = instance_exists(obj_game_manager) ? obj_game_manager : noone;
 
@@ -66,6 +95,12 @@ if (can_interact_with_npc && interact_key_pressed) {
 // The 'else if (key_action_initiated_this_step)' block that was here and set
 // 'perform_flap_action_for_physics' is no longer needed because
 // 'key_action_initiated_this_step' is passed directly to the movement script.
+    // --- Dive Input (Y key or gamepad Y) ---
+var key_dive = keyboard_check_pressed(ord("Y"))
+             || gamepad_button_check_pressed(0, gp_face4);
+if (key_dive && !isDiving) {
+    scr_player_dive();
+}
 
 // --- Call Main Movement & State Script ---
 // Pass current horizontal input, the action key press, and up/down held states
@@ -217,7 +252,7 @@ if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving ver
 }
 
 var encounter_threshold = 300;
-var encounter_chance = 100;
+var encounter_chance = 0;
 
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;

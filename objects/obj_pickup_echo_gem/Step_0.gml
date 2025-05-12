@@ -49,7 +49,7 @@ if (added) {
 create_dialog([
     { name: "", 
       msg: added
-        ? "You picked up the Echo Gem! Echo Wave is now unlocked."
+        ? "You got the Echo Gem! Press X to fire the Echo Wave."
         : "You already have an Echo Gem."
     }
 ]);
