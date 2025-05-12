@@ -31,6 +31,7 @@
     {"name":"inst_588384B8","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
     {"name":"inst_3D3D6FC7","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
     {"name":"inst_4A7E344","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
+    {"name":"inst_658AA5EF","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -63,6 +64,7 @@
         {"$GMRInstance":"v2","%Name":"inst_6F11F946","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6F11F946","objectId":{"name":"obj_destructible_torch","path":"objects/obj_destructible_torch/obj_destructible_torch.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1248.0,"y":448.0,},
         {"$GMRInstance":"v2","%Name":"inst_6CB0C4C4","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6CB0C4C4","objectId":{"name":"obj_destructible_torch","path":"objects/obj_destructible_torch/obj_destructible_torch.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":864.0,"y":448.0,},
         {"$GMRInstance":"v2","%Name":"inst_4A7E344","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4A7E344","objectId":{"name":"obj_dive_switch","path":"objects/obj_dive_switch/obj_dive_switch.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":576.0,"y":480.0,},
+        {"$GMRInstance":"v2","%Name":"inst_658AA5EF","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_658AA5EF","objectId":{"name":"obj_gate","path":"objects/obj_gate/obj_gate.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":544.0,},
       ],"layers":[],"name":"Instances_NPCs","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Tiles_Phase","depth":300,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Tiles_Phase","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":240,"SerialiseWidth":480,"TileCompressedData":[
           -25380,-2147483648,-33,79222,-447,-2147483648,-33,79222,-447,-2147483648,-33,79222,-441,-2147483648,
