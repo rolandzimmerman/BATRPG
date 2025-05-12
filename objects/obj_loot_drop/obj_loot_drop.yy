@@ -10,8 +10,8 @@
   "name":"obj_loot_drop",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Movement",
+    "path":"folders/Objects/Movement.yy",
   },
   "parentObjectId":null,
   "persistent":false,

@@ -1,12 +1,12 @@
 {
   "$GMObject":"",
-  "%Name":"obj_dive_slam_fx",
+  "%Name":"obj_dive_switch",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"obj_dive_slam_fx",
+  "name":"obj_dive_switch",
   "overriddenProperties":[],
   "parent":{
     "name":"Movement",
@@ -29,8 +29,14 @@
   "properties":[],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
-  "solid":false,
-  "spriteId":null,
-  "spriteMaskId":null,
+  "solid":true,
+  "spriteId":{
+    "name":"spr_switch_off",
+    "path":"sprites/spr_switch_off/spr_switch_off.yy",
+  },
+  "spriteMaskId":{
+    "name":"spr_switch_off",
+    "path":"sprites/spr_switch_off/spr_switch_off.yy",
+  },
   "visible":true,
 }

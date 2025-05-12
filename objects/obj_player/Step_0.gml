@@ -1,34 +1,40 @@
 /// obj_player :: Step Event
 /// ——— Dive Mode Handler ———
 if (isDiving) {
-    // 1) Instant max‐speed fall
+    // 1) Instant max-speed fall
     v_speed = dive_max_speed;
 
-    // 2) Move & collide
-    var cols = move_and_collide(0, v_speed, [tilemap, tilemap_phase_id]);
+    // 2) Move & collide against tilemaps + destructibles only
+    var collision_targets = [ tilemap ];
+    if (tilemap_phase_id != -1) array_push(collision_targets, tilemap_phase_id);
+    array_push(collision_targets, obj_destructible_block);
+    var cols = move_and_collide(0, v_speed, collision_targets);
 
     // 3) Force dive sprite
     sprite_index = spr_dive;
     image_speed  = 0.5;
 
-    // 4) On landing → spawn a slam‐fx instance
+    // 4) On landing → spawn slam-fx
     if (array_length(cols) > 0 || place_meeting(x, y + 1, tilemap)) {
-        // end dive
-        isDiving    = false;
+        isDiving     = false;
         player_state = PLAYER_STATE.FLYING;
-        // snap back to your normal flying sprite/frame
         image_speed  = 0;
         image_index  = 0;
 
-        // spawn the dirt‐slam effect at your feet
         var fx_layer = layer_get_id("Effects");
         if (fx_layer == -1) fx_layer = layer_get_id("Instances");
-        instance_create_layer((bbox_left + bbox_right)/2, (bbox_top + bbox_bottom)/2, fx_layer, obj_dive_slam_fx);
+        instance_create_layer(
+            (bbox_left + bbox_right) / 2,
+            (bbox_top  + bbox_bottom)/ 2,
+            fx_layer,
+            obj_dive_slam_fx
+        );
     }
 
     // 5) stop here so nothing else overrides
     exit;
 }
+
 // Get reference to the game manager
 var _gm = instance_exists(obj_game_manager) ? obj_game_manager : noone;
 
