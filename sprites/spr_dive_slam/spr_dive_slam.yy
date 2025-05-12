@@ -25,7 +25,7 @@
   ],
   "name":"spr_dive_slam",
   "nineSlice":null,
-  "origin":4,
+  "origin":7,
   "parent":{
     "name":"Player and Movement",
     "path":"folders/Sprites/Player and Movement.yy",
@@ -86,7 +86,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":96,
-    "yorigin":96,
+    "yorigin":192,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

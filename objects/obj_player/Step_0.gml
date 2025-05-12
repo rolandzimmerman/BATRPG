@@ -1,20 +1,57 @@
 /// obj_player :: Step Event
 /// ——— Dive Mode Handler ———
-if (isDiving) {
-    // 1) Instant max-speed fall
-    v_speed = dive_max_speed;
+// 1) ——— Dash Mode Handler ———
+if (isDashing) {
+    // Move
+    var move_x = dash_speed * dash_dir;
+    var targets = [ tilemap ];
+    if (tilemap_phase_id != -1) array_push(targets, tilemap_phase_id);
+    array_push(targets, obj_destructible_block, obj_gate);
+    move_and_collide(move_x, 0, targets);
 
-    // 2) Move & collide against tilemaps + destructibles only
+    // Force sprite (but don't reset image_index!)
+    sprite_index = (dash_dir < 0) 
+                 ? spr_player_dash_left 
+                 : spr_player_dash_right;
+    image_speed = 1;
+
+    // Countdown
+    dash_timer -= 1;
+    if (dash_timer <= 0) {
+        isDashing    = false;
+        player_state = PLAYER_STATE.FLYING;
+        // back to your normal sprite
+        sprite_index = spr_player_walk_right; 
+        image_speed  = 0;
+        image_index  = 0;
+    }
+
+    // IMPORTANT: stop here so we never hit input or other logic
+    exit;
+}
+
+// 2) ——— Dash Input ———
+// Make sure this runs *before* any other exit
+var dash_left  = keyboard_check_pressed(ord("Q")) 
+              || gamepad_button_check_pressed(0, gp_shoulderl);
+var dash_right = keyboard_check_pressed(ord("E")) 
+              || gamepad_button_check_pressed(0, gp_shoulderr);
+if (!isDiving && !isDashing) {
+    if (dash_left)  scr_player_dash(-1);
+    else if (dash_right) scr_player_dash(+1);
+}
+
+// 3) ——— Dive Mode Handler ———
+if (isDiving) {
+    v_speed = dive_max_speed;
     var collision_targets = [ tilemap ];
     if (tilemap_phase_id != -1) array_push(collision_targets, tilemap_phase_id);
     array_push(collision_targets, obj_destructible_block);
     var cols = move_and_collide(0, v_speed, collision_targets);
 
-    // 3) Force dive sprite
     sprite_index = spr_dive;
-    image_speed  = 0.5;
+    image_speed  = 1;
 
-    // 4) On landing → spawn slam-fx
     if (array_length(cols) > 0 || place_meeting(x, y + 1, tilemap)) {
         isDiving     = false;
         player_state = PLAYER_STATE.FLYING;
@@ -31,10 +68,8 @@ if (isDiving) {
         );
     }
 
-    // 5) stop here so nothing else overrides
     exit;
 }
-
 // Get reference to the game manager
 var _gm = instance_exists(obj_game_manager) ? obj_game_manager : noone;
 
@@ -258,7 +293,7 @@ if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving ver
 }
 
 var encounter_threshold = 300;
-var encounter_chance = 0;
+var encounter_chance = 100;
 
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;

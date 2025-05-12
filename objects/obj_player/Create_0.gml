@@ -41,6 +41,13 @@ dive_max_speed   = 96;  // new: how fast you can fall when diving
 isDiving         = false;  // true while in the dive
 isSlamming       = false;  // true while playing slam animation
 // === World Interaction & Collision ===
+// — Dash settings —
+dash_speed     = 48;    // pixels per frame during dash
+dash_duration  = 12 ;    // how many frames the dash lasts
+isDashing      = false; // true while in a dash
+dash_timer     = 0;     // frames remaining in current dash
+dash_dir       = 0;     // -1 for left, +1 for right
+
 tilemap = layer_tilemap_get_id(layer_get_id("Tiles_Col")); // Your main collision tilemap
 if (tilemap == -1) {
     show_debug_message("Warning [obj_player Create]: Main collision layer 'Tiles_Col' or its tilemap not found!");

@@ -187,14 +187,14 @@ function scr_ItemDatabase() {
         usable_in_field : false, 
         sprite_index    : spr_meteor_shard,
     });
-    ds_map_add(_item_map, "speed_flower", {
-        item_key        : "speed_flower", 
-        name            : "Speed Flower", 
-        description     : "Unlocks Flower Dash",
+    ds_map_add(_item_map, "flurry_flower", {
+        item_key        : "flurry_flower", 
+        name            : "Flurry Flower", 
+        description     : "Unlocks Flower Flurry",
         effect          : noone, 
         usable_in_battle: false, 
         usable_in_field : false, 
-        sprite_index    : spr_meteor_shard,
+        sprite_index    : spr_flurry_flower,
     });
     // …add any other items here with a `value` field…
 

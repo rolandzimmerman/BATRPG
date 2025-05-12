@@ -121,6 +121,7 @@ function scr_BuildSpellDB() {
             cost:            3,
             effect:          "echo_wave",
             target_type:     "enemy",
+            damage:          25,
             element:         "physical",
             power_stat:      "matk",
             fx_sprite:       spr_echo,
@@ -133,12 +134,23 @@ function scr_BuildSpellDB() {
             cost:            5,
             effect:          "meteor_dive",
             target_type:     "enemy",
+            damage:          40,
             element:         "physical",
             power_stat:      "atk",
             fx_sprite:       spr_echo,
             fx_sound:        snd_sfx_magic,
             usable_in_field: false,
             unlock_item:     "meteor_shard"   // <— tag it here
+        },
+        flower_flurry: {
+            name:            "Flower Flurry",
+            cost:            5,
+            effect:          "haste",
+            target_type:     "ally",
+            fx_sprite:       spr_echo,
+            fx_sound:        snd_sfx_magic,
+            usable_in_field: false,
+            unlock_item:     "flurry_flower"   // <— tag it here
         }
 
 
