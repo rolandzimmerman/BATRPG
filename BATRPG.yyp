@@ -132,6 +132,7 @@
     {"id":{"name":"obj_player","path":"objects/obj_player/obj_player.yy",},},
     {"id":{"name":"obj_popup_damage","path":"objects/obj_popup_damage/obj_popup_damage.yy",},},
     {"id":{"name":"obj_save_point","path":"objects/obj_save_point/obj_save_point.yy",},},
+    {"id":{"name":"obj_set_drop","path":"objects/obj_set_drop/obj_set_drop.yy",},},
     {"id":{"name":"obj_settings_controller","path":"objects/obj_settings_controller/obj_settings_controller.yy",},},
     {"id":{"name":"obj_settings_menu","path":"objects/obj_settings_menu/obj_settings_menu.yy",},},
     {"id":{"name":"obj_shop","path":"objects/obj_shop/obj_shop.yy",},},
