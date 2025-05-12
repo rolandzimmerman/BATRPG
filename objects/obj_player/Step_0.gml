@@ -131,26 +131,28 @@ switch (self.player_state) { // self.player_state is an instance variable set by
 if (keyboard_check_pressed(ord("X"))
  || gamepad_button_check_pressed(0, gp_face3))
 {
-    // 1) Create the missile
-    var m = instance_create_depth(x, y, 0, obj_echo_missile);
+    // Only allow if player has at least 1 Echo Gem
+    if (scr_HaveItem("echo_gem", 1)) {
+        // 1) Create the missile
+        var m = instance_create_depth(x, y, 0, obj_echo_missile);
 
-    // 2) Set its horizontal speed using hspeed
-    m.hspeed    = missile_speed * face_dir;  
-    m.origin_x  = x;                         
-    m.max_dist  = missile_max_distance;      
+        // 2) Set its horizontal speed using hspeed
+        m.hspeed    = missile_speed * face_dir;  
+        m.origin_x  = x;                         
+        m.max_dist  = missile_max_distance;      
 
-    // 3) Choose the correct animated sprite
-    if (face_dir > 0) {
-        m.sprite_index = spr_echo_right;
-    } else {
-        m.sprite_index = spr_echo_left;
-    }
-    // 4) Kick off its built-in animation
-    m.image_speed = 0.4;
-    m.image_index = 0;
-
-    // (no need to set move_dir or manual x-movement any more)
+        // 3) Choose the correct animated sprite
+        if (face_dir > 0) {
+            m.sprite_index = spr_echo_right;
+        } else {
+            m.sprite_index = spr_echo_left;
+        }
+        // 4) Kick off its built-in animation
+        m.image_speed = 0.4;
+        m.image_index = 0;
+    } else { }
 }
+
 
 
 
@@ -215,7 +217,7 @@ if (dir_x != 0 || v_speed != 0) { // If player intended to move or is moving ver
 }
 
 var encounter_threshold = 300;
-var encounter_chance = 15;
+var encounter_chance = 100;
 
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;

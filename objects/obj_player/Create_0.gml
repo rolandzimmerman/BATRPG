@@ -154,8 +154,8 @@ original_scale = image_xscale; // Stores original image scale for temporary chan
 // Movement logic is handled in the Step Event.
     
     // — Echo Missile Settings —  
-missile_speed        = 8;    // pixels per frame  
-missile_max_distance = 200;  // in pixels
+missile_speed        = 10;    // pixels per frame  
+missile_max_distance = 500;  // in pixels
 
 
 show_debug_message("--- obj_player Create Event FINISHED ---");

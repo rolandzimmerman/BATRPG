@@ -167,7 +167,35 @@ function scr_ItemDatabase() {
         value           : 80,
         sprite_index    : spr_equipment_generic
     });
+// KEY ITEMS
     
+    ds_map_add(_item_map, "echo_gem", {
+        item_key        : "echo_gem", 
+        name            : "Echo Gem", 
+        description     : "Unlocks Echo Wave",
+        effect          : noone, 
+        usable_in_battle: false, 
+        usable_in_field : false, 
+        sprite_index    : spr_echo_gem,
+    });
+    ds_map_add(_item_map, "meteor_shard", {
+        item_key        : "meteor_shard", 
+        name            : "Meteor Shard", 
+        description     : "Unlocks Meteor Dive",
+        effect          : noone, 
+        usable_in_battle: false, 
+        usable_in_field : false, 
+        sprite_index    : spr_meteor_shard,
+    });
+    ds_map_add(_item_map, "speed_flower", {
+        item_key        : "speed_flower", 
+        name            : "Speed Flower", 
+        description     : "Unlocks Flower Dash",
+        effect          : noone, 
+        usable_in_battle: false, 
+        usable_in_field : false, 
+        sprite_index    : spr_meteor_shard,
+    });
     // …add any other items here with a `value` field…
 
     show_debug_message("Item Database Initialized with " 

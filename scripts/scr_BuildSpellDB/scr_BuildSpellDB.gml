@@ -115,18 +115,78 @@ function scr_BuildSpellDB() {
             power_stat:  "matk",
             fx_sprite:   spr_fx_magic,
             fx_sound:    snd_sfx_magic
+        },
+        echo_wave: {
+            name:            "Echo Wave",
+            cost:            3,
+            effect:          "echo_wave",
+            target_type:     "enemy",
+            element:         "physical",
+            power_stat:      "matk",
+            fx_sprite:       spr_echo,
+            fx_sound:        snd_sfx_magic,
+            usable_in_field: false,
+            unlock_item:     "echo_gem"   // <— tag it here
+        },
+        meteor_dive: {
+            name:            "Meteor Dive",
+            cost:            5,
+            effect:          "meteor_dive",
+            target_type:     "enemy",
+            element:         "physical",
+            power_stat:      "atk",
+            fx_sprite:       spr_echo,
+            fx_sound:        snd_sfx_magic,
+            usable_in_field: false,
+            unlock_item:     "meteor_shard"   // <— tag it here
         }
-    };
 
+
+
+    };
+// Only inject Echo Wave if the player currently has an Echo Gem
+/*        if (scr_HaveItem("echo_gem", 1)) {
+            _spell_db.echo_wave = {
+            name:            "Echo Wave",
+            cost:            3,
+            effect:          "echo_wave",
+            target_type:     "enemy",
+            element:         "physical",
+            power_stat:      "matk",
+            fx_sprite:       spr_echo,
+            fx_sound:        snd_sfx_magic,
+            usable_in_field: false,
+            unlock_item:     "echo_gem"   // <— tag it here
+            };
+        }
+    
+// Only inject Echo Wave if the player currently has an Echo Gem
+        if (scr_HaveItem("meteor_shard", 1)) {
+            _spell_db.echo_wave = {
+            name:            "Meteor Dive",
+            cost:            5,
+            effect:          "meteor_dive",
+            target_type:     "enemy",
+            element:         "physical",
+            power_stat:      "atk",
+            fx_sprite:       spr_echo,
+            fx_sound:        snd_sfx_magic,
+            usable_in_field: false,
+            unlock_item:     "meteor_shard"   // <— tag it here
+            };
+        }
+*/
     // 2) Build a ds_map for learning_schedule
     var sched = ds_map_create();
 
     // Hero schedule
     var hero_map = ds_map_create();
+    ds_map_add(hero_map, "1", "echo_wave");   // ← now the hero “learns” Echo Wave
     ds_map_add(hero_map, "2", "overdrive_strike");
     ds_map_add(hero_map, "3", "greater_heal");
     ds_map_add(hero_map, "5", "frostbolt");
     ds_map_add(sched, "hero", hero_map);
+
 
     // Claude schedule
     var claude_map = ds_map_create();
