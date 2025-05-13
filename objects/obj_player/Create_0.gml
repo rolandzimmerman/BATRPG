@@ -11,6 +11,12 @@ player_state = PLAYER_STATE.FLYING;
 
 TILE_SIZE = 12; // IMPORTANT: Set this to your game's actual tile size (e.g., 16, 32, etc.)
 
+/// obj_player :: Create Event (add near the top)
+
+prev_x         = x;
+prev_y         = y;
+stuck_counter  = 0;  // for Guard #4
+
 
 // === Restore Position if returning from battle ===
 // This should be checked early.
@@ -43,7 +49,7 @@ isSlamming       = false;  // true while playing slam animation
 // === World Interaction & Collision ===
 // — Dash settings —
 dash_speed     = 48;    // pixels per frame during dash
-dash_duration  = 12 ;    // how many frames the dash lasts
+dash_duration  = 10 ;    // how many frames the dash lasts
 isDashing      = false; // true while in a dash
 dash_timer     = 0;     // frames remaining in current dash
 dash_dir       = 0;     // -1 for left, +1 for right
@@ -167,6 +173,9 @@ original_scale = image_xscale; // Stores original image scale for temporary chan
     // — Echo Missile Settings —  
 missile_speed        = 10;    // pixels per frame  
 missile_max_distance = 500;  // in pixels
+    
+
+
 
 
 show_debug_message("--- obj_player Create Event FINISHED ---");

@@ -151,6 +151,26 @@ function scr_BuildSpellDB() {
             fx_sound:        snd_sfx_magic,
             usable_in_field: false,
             unlock_item:     "flurry_flower"   // <— tag it here
+        },
+        steal: { 
+            name:"Steal",        
+            cost:0, 
+            effect:"steal_item", 
+            target_type:"enemy",
+            animation_type:"physical",
+            fx_sprite: spr_slash, 
+            fx_sound: snd_sfx_status
+        },
+        quick_attack: { 
+            name:"Quick Attack", cost:3, 
+            effect:"damage_enemy", 
+            target_type:"enemy",
+            damage:10, 
+            element:"physical", 
+            power_stat:"atk",
+            animation_type:"physical", 
+            fx_sprite:spr_slash, 
+            fx_sound:snd_punch
         }
 
 

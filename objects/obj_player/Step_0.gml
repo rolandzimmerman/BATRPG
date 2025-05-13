@@ -137,8 +137,8 @@ if (can_interact_with_npc && interact_key_pressed) {
 // 'perform_flap_action_for_physics' is no longer needed because
 // 'key_action_initiated_this_step' is passed directly to the movement script.
     // --- Dive Input (Y key or gamepad Y) ---
-var key_dive = keyboard_check_pressed(ord("Y"))
-             || gamepad_button_check_pressed(0, gp_face4);
+var key_dive = keyboard_check_pressed(ord("B"))
+             || gamepad_button_check_pressed(0, gp_face2);
 if (key_dive && !isDiving) {
     scr_player_dive();
 }
@@ -317,7 +317,14 @@ if (global.encounter_timer >= encounter_threshold) {
         }
     }
 }
-
+// ——— Soft “push out of solid” fallback ———
+// If you somehow still end up inside a tile, nudge you 1px up
+if ((tilemap != -1 && place_meeting(x, y, tilemap))
+ || (tilemap_phase_id != -1 && place_meeting(x, y, tilemap_phase_id)))
+{
+    // only nudge upward by 1 pixel
+    y -= 1;
+}
 
 
 

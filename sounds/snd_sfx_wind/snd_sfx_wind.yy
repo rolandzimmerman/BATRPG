@@ -1,6 +1,6 @@
 {
   "$GMSound":"",
-  "%Name":"Bluezone_BC0240_background_exterior_ambience_002",
+  "%Name":"snd_sfx_wind",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,16 +10,16 @@
   "compression":0,
   "conversionMode":0,
   "duration":36.0,
-  "name":"Bluezone_BC0240_background_exterior_ambience_002",
+  "name":"snd_sfx_wind",
   "parent":{
-    "name":"BluezoneFreeSounds",
-    "path":"folders/Sounds/BluezoneFreeSounds.yy",
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"Bluezone_BC0240_background_exterior_ambience_002.wav",
+  "soundFile":"snd_sfx_wind.wav",
   "type":0,
-  "volume":1.0,
+  "volume":0.0,
 }

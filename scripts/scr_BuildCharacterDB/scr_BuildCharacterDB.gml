@@ -29,26 +29,7 @@ function scr_BuildCharacterDB() {
         level              :  1,   xp: 0, xp_require: 100,
         overdrive          :  0,   overdrive_max: 100,
 
-        skills             : [
-            { name:"Heal",     cost:5, effect:"heal_hp",     target_type:"ally",
-              heal_amount:25, power_stat:"matk", animation_type:"magic",
-              fx_sprite:default_heal_fx,   fx_sound:default_heal_snd,
-              usable_in_field:true
-            },
-            { name:"Fireball", cost:6, effect:"damage_enemy", target_type:"enemy",
-              damage:18, element:"fire", power_stat:"matk", animation_type:"magic",
-              fx_sprite:spr_fx_fireball ?? default_damage_fx,
-              fx_sound:snd_sfx_fire  ?? default_damage_snd
-            },
-            { name:"Blind",    cost:5, effect:"blind",        target_type:"enemy",
-              duration:3, animation_type:"magic",
-              fx_sprite:default_status_fx, fx_sound:default_status_snd
-            },
-            { name:"Shame",    cost:8, effect:"shame",        target_type:"enemy",
-              duration:3, animation_type:"magic",
-              fx_sprite:default_status_fx, fx_sound:default_status_snd
-            }
-        ],
+        skills             : [ ],
 
         equipment          : { weapon:"bronze_sword",
                                offhand:noone,
@@ -89,10 +70,6 @@ function scr_BuildCharacterDB() {
               damage:15, element:"lightning", power_stat:"matk",
               animation_type:"magic",
               fx_sprite:default_damage_fx, fx_sound:default_damage_snd
-            },
-            { name:"Bind", cost:6,  effect:"bind",         target_type:"enemy",
-              duration:3, animation_type:"magic",
-              fx_sprite:default_status_fx, fx_sound:default_status_snd
             }
         ],
 
@@ -132,11 +109,6 @@ function scr_BuildCharacterDB() {
               damage:18, element:"fire", power_stat:"matk", animation_type:"magic",
               fx_sprite:spr_fx_fireball ?? default_damage_fx,
               fx_sound:snd_sfx_fire  ?? default_damage_snd
-            },
-            { name:"Heal",     cost:5, effect:"heal_hp",     target_type:"ally",
-              heal_amount:25, power_stat:"matk", animation_type:"magic",
-              fx_sprite:default_heal_fx,   fx_sound:default_heal_snd,
-              usable_in_field:true
             }
         ],
 
@@ -169,16 +141,7 @@ function scr_BuildCharacterDB() {
         level              :  1,   xp: 0, xp_require:100,
         overdrive          :  0,   overdrive_max:100,
 
-        skills             : [
-            { name:"Steal",        cost:0, effect:"steal_item", target_type:"enemy",
-              animation_type:"physical",
-              fx_sprite:default_status_fx, fx_sound:default_status_snd
-            },
-            { name:"Quick Attack", cost:3, effect:"damage_enemy", target_type:"enemy",
-              damage:10, element:"physical", power_stat:"atk",
-              animation_type:"physical", fx_sprite:default_slash_fx, fx_sound:snd_punch
-            }
-        ],
+        skills             : [ ],
 
         equipment          : { weapon:"iron_dagger",
                                offhand:noone,
