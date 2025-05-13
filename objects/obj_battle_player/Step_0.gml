@@ -99,252 +99,216 @@ if (variable_global_exists("active_party_member_index")
                 var hasEnemies = ds_exists(global.battle_enemies, ds_type_list) && ds_list_size(global.battle_enemies) > 0;
                 if (A && hasEnemies) { // Attack selected
                     if (!instance_exists(obj_battle_manager)) break; 
-                    obj_battle_manager.stored_action_data = "Attack"; // Store action type
-                    global.battle_target = 0; // Reset target cursor
-                    global.battle_state  = "TargetSelect"; // Move to target selection
+                    obj_battle_manager.stored_action_data = "Attack";
+                    global.battle_target = 0; 
+                    global.battle_state  = "TargetSelect"; 
                     show_debug_message(" -> Action Selected: Attack -> TargetSelect");
                 }
                 else if (B) { // Defend selected
-                     if (!instance_exists(obj_battle_manager)) break; 
+                    if (!instance_exists(obj_battle_manager)) break; 
                     obj_battle_manager.stored_action_data  = "Defend";
-                    obj_battle_manager.selected_target_id  = noone; // Defend doesn't need a target
-                    global.battle_state = "ExecutingAction"; // Go directly to execution
+                    obj_battle_manager.selected_target_id  = noone; 
+                    global.battle_state = "ExecutingAction"; 
                     show_debug_message(" -> Action Selected: Defend -> ExecutingAction");
                 }
+                // ----- MODIFICATION START for Skills (X button) -----
                 else if (X) { // Skills menu selected
-                    var skills = (variable_struct_exists(d, "skills") && is_array(d.skills)) ? d.skills : [];
-                    if (array_length(skills) > 0) {
-                        if (!variable_struct_exists(d, "skill_index")) d.skill_index = 0; // Initialize index if needed
-                        d.skill_index = clamp(d.skill_index, 0, max(0, array_length(skills) - 1)); // Ensure valid index
-                        global.battle_state = "skill_select"; // Move to skill selection state
-                         show_debug_message(" -> Action Selected: Skills -> skill_select");
-                    } else { /* Play 'no skills' sound? */ show_debug_message(" -> Action Selected: Skills (No skills available)"); }
+                    show_debug_message("Player " + string(d.name) + " selected Skills command (X pressed).");
+
+                    // The obj_battle_player itself will be responsible for preparing its 'display_skills'
+                    // in its 'skill_select' state block later in this Step Event.
+                    // For now, just transition the global state.
+
+                    if (!variable_struct_exists(d, "skill_index")) {
+                        d.skill_index = 0; // Initialize skill_index if it doesn't exist
+                    } else {
+                         d.skill_index = 0; // Always reset to top of list when opening skill menu
+                    }
+                    
+                    global.battle_state = "skill_select"; // ALWAYS go to skill_select state
+
+                    // The debug message about "No skills available" will now effectively be handled by
+                    // the Draw GUI based on the (potentially empty) display_skills list.
+                    show_debug_message(" -> Action Selected: Skills. Transitioning to global state: skill_select");
                 }
+                // ----- MODIFICATION END for Skills (X button) -----
                 else if (Y) { // Items menu selected
-                    global.battle_usable_items = []; // Reset usable item list
+                    global.battle_usable_items = []; 
                     var inv = (variable_global_exists("party_inventory") && is_array(global.party_inventory)) ? global.party_inventory : [];
-                    for (var i = 0; i < array_length(inv); i++) { 
-                        var inv_entry = inv[i];
+                    for (var i_item = 0; i_item < array_length(inv); i_item++) { // Changed loop var to i_item 
+                        var inv_entry = inv[i_item];
                         if (!is_struct(inv_entry) || !variable_struct_exists(inv_entry,"item_key") || !variable_struct_exists(inv_entry,"quantity") || inv_entry.quantity <= 0) continue;
                         var it_key = inv_entry.item_key;
-                        var it_data = scr_GetItemData(it_key); // Assumes this script exists and returns item data
+                        var it_data = scr_GetItemData(it_key); 
                         if (is_struct(it_data) && (it_data.usable_in_battle ?? false) ) { 
-                             array_push(global.battle_usable_items, { item_key: it_key, quantity: inv_entry.quantity, name: it_data.name ?? "???" }); 
+                            array_push(global.battle_usable_items, { item_key: it_key, quantity: inv_entry.quantity, name: it_data.name ?? "???" }); 
                         }
                     }
                     if (array_length(global.battle_usable_items) > 0) {
-                         if (!variable_struct_exists(d, "item_index")) d.item_index = 0; // Initialize index if needed
-                         d.item_index = clamp(d.item_index, 0, max(0, array_length(global.battle_usable_items) - 1)); // Ensure valid index
-                         global.battle_state = "item_select"; // Move to item selection state
-                         show_debug_message(" -> Action Selected: Items -> item_select");
-                    } else { /* Play 'no items' sound? */ show_debug_message(" -> Action Selected: Items (No usable items available)"); }
+                        if (!variable_struct_exists(d, "item_index")) d.item_index = 0; 
+                        d.item_index = clamp(d.item_index, 0, max(0, array_length(global.battle_usable_items) - 1)); 
+                        global.battle_state = "item_select"; 
+                        show_debug_message(" -> Action Selected: Items -> item_select");
+                    } else { 
+                        show_debug_message(" -> Action Selected: Items (No usable items available)"); 
+                        // Consider also changing state to "item_select" here to show "No items" message in menu
+                        // global.battle_state = "item_select"; // If you want item menu to open and show "No items"
+                    }
                 }
                 break; // End "player_input" case
             // ==================================================================
-case "skill_select":
-{
-    // This whole block only runs if it's this player's turn and they are in the "skill_select" input phase.
-    // (Assuming the input processing logic for U, D, A, B buttons is also within this "skill_select" state
-    //  or just before/after the display_skills preparation, and that it uses the final display_skills for its logic)
+            case "skill_select":
+            {
+                // This is where you prepare `self.display_skills` for the current player
+                // This code was already provided in your obj_battle_player Step Event
+                show_debug_message("DEBUG skill_select (Player Step): Active battler " + string(data.character_key) + " preparing display_skills.");
 
-    show_debug_message("DEBUG skill_select: Active battler " + string(data.character_key) + " (ID: " + string(id) + ") is in skill_select state.");
+                var key_list_from_data = (variable_struct_exists(data,"skills") && is_array(data.skills)) ? data.skills : [];
+                // show_debug_message("DEBUG skill_select (Player Step): Battler's known skill structs (data.skills): " + string(key_list_from_data));
 
-    // 1. Get the list of KNOWN skill KEYS for this character
-    // 'data.skills' should be an array of strings like ["heal", "fireball", "echo_wave"]
-    var key_list = (variable_struct_exists(data,"skills") && is_array(data.skills))
-                   ? data.skills
-                   : [];
-    show_debug_message("DEBUG skill_select: Battler's known skill keys (data.skills): " + string(key_list));
+                // `display_skills` MUST be an instance variable, not a local 'var'
+                display_skills = []; // Initialize/clear for this frame for this active player
 
-    // 2. Build a temporary local array of the full spell structs for these known skills
-    var raw_skills = []; // This is local to this block, used to temporarily hold full spell data
-    for (var i = 0; i < array_length(key_list); i++) {
-        var k = key_list[i]; // 'k' is a string like "heal"
-        show_debug_message("DEBUG skill_select: Processing known skill key: '" + string(k) + "'");
-
-        if (variable_global_exists("spell_db") && is_struct(global.spell_db) && variable_struct_exists(global.spell_db, k)) {
-            var spell_struct_from_db = variable_struct_get(global.spell_db, k);
-            array_push(raw_skills, spell_struct_from_db);
-            show_debug_message("DEBUG skill_select: Found '" + string(k) + "' in global.spell_db. Data: " + string(spell_struct_from_db));
-        } else {
-            show_debug_message("DEBUG skill_select: WARNING! Skill key '" + string(k) + "' not found in global.spell_db or spell_db is invalid!");
-        }
-    }
-    show_debug_message("DEBUG skill_select: Raw skills from DB (before filtering for UI): " + string(raw_skills));
-
-    // 3. Filter raw_skills into an INSTANCE variable 'display_skills'
-    //    This 'display_skills' will be accessed by obj_battle_menu (the GUI)
-    //    Initialize/clear 'display_skills' as an INSTANCE variable.
-    display_skills = []; // CRITICAL: No 'var' here, so it becomes/updates an instance variable.
-
-    for (var i = 0; i < array_length(raw_skills); i++) {
-        var s = raw_skills[i]; // 's' is a full spell struct
-        show_debug_message("DEBUG skill_select: Filtering skill for UI: " + string(s.name ?? "Unnamed Skill"));
-
-        // 3a) Check for unlock_item requirement
-        if (variable_struct_exists(s, "unlock_item")) {
-            show_debug_message("DEBUG skill_select: Skill '" + string(s.name) + "' has unlock_item: '" + string(s.unlock_item) + "'");
-            var _has_unlock_item = scr_HaveItem(s.unlock_item, 1); // scr_HaveItem should have its own debugs
-            show_debug_message("DEBUG skill_select: scr_HaveItem(" + string(s.unlock_item) + ", 1) returned: " + string(_has_unlock_item));
-
-            if (!_has_unlock_item) {
-                show_debug_message("DEBUG skill_select: SKIPPING '" + string(s.name) + "' from display_skills (missing unlock_item).");
-                continue; // Skip this skill, don't add to display_skills
-            }
-        } else {
-            show_debug_message("DEBUG skill_select: Skill '" + string(s.name) + "' does NOT have an unlock_item field.");
-        }
-
-        // 3b) Check for Overdrive requirement (if applicable)
-        if (variable_struct_exists(s, "overdrive") && s.overdrive) {
-            show_debug_message("DEBUG skill_select: Skill '" + string(s.name) + "' is an Overdrive skill.");
-            if (!variable_struct_exists(data, "overdrive") || !variable_struct_exists(data, "overdrive_max") || data.overdrive < data.overdrive_max) {
-                show_debug_message("DEBUG skill_select: SKIPPING '" + string(s.name) + "' from display_skills (insufficient Overdrive or missing overdrive stats in 'data').");
-                continue; // Skip this skill
-            }
-            show_debug_message("DEBUG skill_select: Skill '" + string(s.name) + "' passes Overdrive check.");
-        }
-
-        // If all checks pass, add the spell struct to the instance's display_skills array
-        show_debug_message("DEBUG skill_select: ADDING skill '" + string(s.name) + "' to instance's display_skills array.");
-        array_push(display_skills, s);
-    }
-    show_debug_message("DEBUG skill_select: Final instance 'display_skills' for " + string(data.character_key) + ": " + string(display_skills) + " (Count: " + string(array_length(display_skills)) + ")");
-
-    // 4. Handle Player Input for Navigating and Selecting from 'display_skills'
-    //    This part assumes 'data.skill_index' is the cursor for the 'display_skills' array.
-    //    The inputs (U, D, A, B) would be checked here, and 'data.skill_index' would be updated,
-    //    or 'global.battle_state' would be changed if A (confirm) or B (cancel) is pressed.
-
-    //    Example input handling snippet (you'll have your own more complete version):
-    var _P = 0; // Gamepad index
-    var _up_pressed = keyboard_check_pressed(vk_up) || gamepad_button_check_pressed(_P, gp_padu);
-    var _down_pressed = keyboard_check_pressed(vk_down) || gamepad_button_check_pressed(_P, gp_padd);
-    var _confirm_pressed = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(_P, gp_face1);
-    var _cancel_pressed = keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(_P, gp_face2);
-
-    // <<< NEW: if we just cancelled a TargetSelect, ignore this B press and clear the flag >>>
-    // This was in your original code and seems important to keep if still relevant
-    if (variable_global_exists("battle_ignore_b") && global.battle_ignore_b) {
-        if (_cancel_pressed) _cancel_pressed = false; // Ignore this specific cancel press
-        global.battle_ignore_b = false;
-    }
-
-    var _display_count = array_length(display_skills); // Use the length of the instance variable
-
-    if (_display_count > 0) {
-        // Ensure 'data.skill_index' is valid for the current 'display_skills' list
-        if (!variable_struct_exists(data, "skill_index")) data.skill_index = 0; // Initialize if it doesn't exist
-        data.skill_index = clamp(data.skill_index, 0, max(0, _display_count - 1));
-
-        if (_up_pressed) {
-            data.skill_index = (data.skill_index - 1 + _display_count) % _display_count;
-            show_debug_message("DEBUG skill_select: Input UP. New skill_index: " + string(data.skill_index));
-        }
-        if (_down_pressed) {
-            data.skill_index = (data.skill_index + 1) % _display_count;
-            show_debug_message("DEBUG skill_select: Input DOWN. New skill_index: " + string(data.skill_index));
-        }
-
-        if (_confirm_pressed) {
-            var selected_skill_struct = display_skills[data.skill_index];
-            show_debug_message("DEBUG skill_select: Input CONFIRM. Selected skill: " + string(selected_skill_struct.name));
-
-            // Check affordability for the selected skill
-            var can_afford_selected = true;
-            var skill_cost = selected_skill_struct.cost ?? 0;
-            if (variable_struct_exists(selected_skill_struct, "overdrive") && selected_skill_struct.overdrive) {
-                can_afford_selected = (data.overdrive >= data.overdrive_max);
-            } else {
-                can_afford_selected = (data.mp >= skill_cost);
-            }
-
-            if (can_afford_selected) {
-                if (instance_exists(obj_battle_manager)) {
-                    obj_battle_manager.stored_action_data = selected_skill_struct; // Store the full skill struct
-
-                    // Determine target type and transition state
-                    var target_type = selected_skill_struct.target_type ?? "enemy";
-                    show_debug_message("DEBUG skill_select: Skill target_type: " + target_type);
-                    if (target_type == "enemy" || target_type == "all_enemies") {
-                        global.battle_target = 0; // Reset enemy target cursor
-                        global.battle_state = "TargetSelect";
-                    } else if (target_type == "ally" || target_type == "all_allies" || target_type == "self") {
-                        global.battle_ally_target = global.active_party_member_index ?? 0; // Default to self for ally targeting
-                        global.battle_state = "TargetSelectAlly";
-                    } else { // Default or unknown
-                        global.battle_target = 0;
-                        global.battle_state = "TargetSelect";
-                        show_debug_message("DEBUG skill_select: Unknown or unhandled target_type '" + target_type + "'. Defaulting to TargetSelect (Enemy).");
+                for (var i_skill = 0; i_skill < array_length(key_list_from_data); i_skill++) { // Changed loop var to i_skill
+                    var s_struct = key_list_from_data[i_skill]; // 's_struct' is a skill struct from data.skills
+                    
+                    if(!is_struct(s_struct) || !variable_struct_exists(s_struct, "name")){
+                        // show_debug_message("DEBUG skill_select (Player Step): Invalid skill struct found in data.skills at index " + string(i_skill));
+                        continue;
                     }
-                    show_debug_message("DEBUG skill_select: Transitioning to state: " + global.battle_state);
+                    // show_debug_message("DEBUG skill_select (Player Step): Processing skill for display: " + string(s_struct.name));
+                    
+                    // Optional: Add filtering logic here (e.g., based on status, conditions, etc.)
+                    // For now, we assume all skills in data.skills are candidates for display_skills initially.
+                    // The affordability check is done in the menu / when confirming.
+                    // Unlock item checks (if any) should ideally influence what's in data.skills already,
+                    // or be checked here if they are dynamic.
+
+                    // Example check for unlock_item (if you use this pattern)
+                    var can_display_skill = true;
+                    if (variable_struct_exists(s_struct, "unlock_item")) {
+                        if (!scr_HaveItem(s_struct.unlock_item, 1)) {
+                            can_display_skill = false;
+                            // show_debug_message("DEBUG skill_select (Player Step): Skill '" + s_struct.name + "' skipped (missing unlock_item: " + s_struct.unlock_item + ")");
+                        }
+                    }
+                    // Example check for Overdrive only if character is not at full OD (if it's a requirement to *see* it, not just use it)
+                    // Typically, Overdrives are always shown if known, and usability is checked later.
+
+                    if (can_display_skill) {
+                        array_push(display_skills, s_struct);
+                    }
                 }
-            } else {
-                show_debug_message("DEBUG skill_select: Cannot afford skill '" + string(selected_skill_struct.name) + "'. No action taken.");
-                // Optionally, play a "cannot afford" sound effect
+                // show_debug_message("DEBUG skill_select (Player Step): Final instance 'display_skills' for " + string(data.character_key) + ": Count: " + string(array_length(display_skills)));
+
+                // Input handling for navigating the display_skills list and confirming/cancelling
+                var _P_skill = 0; 
+                var _up_pressed_skill = keyboard_check_pressed(vk_up) || gamepad_button_check_pressed(_P_skill, gp_padu);
+                var _down_pressed_skill = keyboard_check_pressed(vk_down) || gamepad_button_check_pressed(_P_skill, gp_padd);
+                var _confirm_pressed_skill = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(_P_skill, gp_face1);
+                var _cancel_pressed_skill = keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(_P_skill, gp_face2);
+
+                if (variable_global_exists("battle_ignore_b") && global.battle_ignore_b) {
+                    if (_cancel_pressed_skill) _cancel_pressed_skill = false; 
+                    global.battle_ignore_b = false;
+                }
+
+                var _display_count_skill = array_length(display_skills);
+
+                if (_display_count_skill > 0) {
+                    // data.skill_index is already reset to 0 when entering skill_select, or clamp if returning
+                    data.skill_index = clamp(data.skill_index, 0, max(0, _display_count_skill - 1));
+
+                    if (_up_pressed_skill) {
+                        data.skill_index = (data.skill_index - 1 + _display_count_skill) % _display_count_skill;
+                    }
+                    if (_down_pressed_skill) {
+                        data.skill_index = (data.skill_index + 1) % _display_count_skill;
+                    }
+                    if (_confirm_pressed_skill) {
+                        var selected_skill_struct_confirm = display_skills[data.skill_index];
+                        var can_afford_selected_confirm = true;
+                        var skill_cost_confirm = selected_skill_struct_confirm.cost ?? 0;
+
+                        if (variable_struct_exists(selected_skill_struct_confirm, "overdrive") && selected_skill_struct_confirm.overdrive) {
+                            can_afford_selected_confirm = (data.overdrive >= (data.overdrive_max ?? 100));
+                        } else {
+                            can_afford_selected_confirm = (data.mp >= skill_cost_confirm);
+                        }
+
+                        if (can_afford_selected_confirm) {
+                            if (instance_exists(obj_battle_manager)) {
+                                obj_battle_manager.stored_action_data = selected_skill_struct_confirm;
+                                var target_type_confirm = selected_skill_struct_confirm.target_type ?? "enemy";
+                                if (target_type_confirm == "enemy" || target_type_confirm == "all_enemies") {
+                                    global.battle_target = 0; 
+                                    global.battle_state = "TargetSelect";
+                                } else if (target_type_confirm == "ally" || target_type_confirm == "all_allies" || target_type_confirm == "self") {
+                                    global.battle_ally_target = global.active_party_member_index ?? 0; 
+                                    global.battle_state = "TargetSelectAlly";
+                                } else { 
+                                    global.battle_target = 0;
+                                    global.battle_state = "TargetSelect";
+                                }
+                            }
+                        } else { /* Play "cannot afford" sound */ }
+                    }
+                } else { // No skills in display_skills
+                    if (_confirm_pressed_skill) { /* Optional: Play "buzz" or do nothing */ }
+                }
+
+                if (_cancel_pressed_skill) {
+                    global.battle_state = "player_input";
+                }
             }
-        }
-    } else { // _display_count is 0 (no skills available to select)
-        if (_confirm_pressed) {
-            show_debug_message("DEBUG skill_select: Confirm pressed but no skills to select.");
-            // Optionally, play a "cannot select" sound
-        }
-    }
-
-    if (_cancel_pressed) {
-        global.battle_state = "player_input";
-        show_debug_message("DEBUG skill_select: Input CANCEL. Transitioning to player_input state.");
-    }
-}
-break; // End of case "skill_select"
-
+            break; // End of case "skill_select"
             // ==================================================================
             case "item_select":
-                 var items = global.battle_usable_items ?? []; var c = array_length(items);
-                  if (c > 0) {
-                      // Navigation
-                      if (U) d.item_index = (d.item_index - 1 + c) mod c;
-                      if (D) d.item_index = (d.item_index + 1) mod c;
-                      
-                      // Confirm Selection
-                      if (A && instance_exists(obj_battle_manager)) { 
-                          var item_info = items[d.item_index]; 
-                          var item_data = scr_GetItemData(item_info.item_key); 
-                          
-                          if (is_struct(item_data)) {
+                // ... (Your existing item_select input handling logic) ...
+                // This should also prepare global.battle_usable_items if not already done when entering state.
+                // And handle U, D, A, B inputs for the item list.
+                // The structure here mirrors the skill_select input handling.
+                var items_nav = global.battle_usable_items ?? []; 
+                var count_items_nav = array_length(items_nav);
 
-                              obj_battle_manager.stored_action_data = item_data; 
-                              
-                              // --- Determine Next State based on Item Target ---
-                              var itemTargetType = item_data.target ?? "enemy"; 
-                               show_debug_message(" -> Item '" + (item_data.name ?? "???") + "' selected. Target Type: " + itemTargetType);
-
-                               if (itemTargetType == "enemy") {
-                                   global.battle_target = 0; 
-                                   global.battle_state  = "TargetSelect"; 
-                                   show_debug_message("    -> Transitioning to TargetSelect (Enemy)");
-                               } 
-                               else if (itemTargetType == "ally") { // <<< THIS IS THE FIX >>>
-                                   global.battle_ally_target = global.active_party_member_index ?? 0; 
-                                   global.battle_state = "TargetSelectAlly"; // <<< USE ALLY TARGETING STATE
-                                   show_debug_message("    -> Transitioning to TargetSelectAlly");
-                               } 
-                               else if (itemTargetType == "self" || itemTargetType == "all_allies" || itemTargetType == "all_enemies") {
-                                   obj_battle_manager.selected_target_id = (itemTargetType == "self") ? id : noone; 
-                                   global.battle_state  = "ExecutingAction"; 
-                                   show_debug_message("    -> " + itemTargetType + " target item. Transitioning to ExecutingAction");
-                               } 
-                               else { // Default
-                                    global.battle_target = 0; global.battle_state  = "TargetSelect"; 
-                               }
-                              // --- End Item Target Type Check ---
-
-                          } else { /* Invalid item data */ }
-                      } // End Confirm (A)
-                  } // End if c > 0
-                  // Cancel/Back
-                  if (B) { global.battle_usable_items = []; global.battle_state = "player_input";} 
-                 break; // End "item_select" case
+                if (count_items_nav > 0) {
+                    // data.item_index should be clamped to [0, count_items_nav - 1]
+                    data.item_index = clamp(data.item_index, 0, max(0, count_items_nav - 1));
+                    if (U) data.item_index = (data.item_index - 1 + count_items_nav) % count_items_nav;
+                    if (D) data.item_index = (data.item_index + 1) % count_items_nav;
+                    
+                    if (A && instance_exists(obj_battle_manager)) { 
+                        var item_info_nav = items_nav[data.item_index]; 
+                        var item_data_nav = scr_GetItemData(item_info_nav.item_key); 
+                        
+                        if (is_struct(item_data_nav)) {
+                            obj_battle_manager.stored_action_data = item_data_nav; 
+                            var itemTargetType_nav = item_data_nav.target ?? "enemy"; 
+                            if (itemTargetType_nav == "enemy") {
+                                global.battle_target = 0; 
+                                global.battle_state  = "TargetSelect"; 
+                            } 
+                            else if (itemTargetType_nav == "ally") {
+                                global.battle_ally_target = global.active_party_member_index ?? 0; 
+                                global.battle_state = "TargetSelectAlly"; 
+                            } 
+                            else if (itemTargetType_nav == "self" || itemTargetType_nav == "all_allies" || itemTargetType_nav == "all_enemies") {
+                                obj_battle_manager.selected_target_id = (itemTargetType_nav == "self") ? id : noone; 
+                                global.battle_state  = "ExecutingAction"; 
+                            } 
+                            else { 
+                                global.battle_target = 0; global.battle_state  = "TargetSelect"; 
+                            }
+                        }
+                    }
+                } else { // No items
+                     if (A) { /* Optional: Play "buzz" sound */ }
+                }
+                if (B) { 
+                    global.battle_usable_items = []; // Clear it if cancelling
+                    global.battle_state = "player_input";
+                } 
+                break; // End "item_select" case
             // ==================================================================
         } // End input state switch
     } // End if correct state for input
