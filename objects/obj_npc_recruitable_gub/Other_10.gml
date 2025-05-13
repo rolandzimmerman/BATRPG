@@ -83,7 +83,7 @@ if (_can_still_recruit) {
         can_recruit = false; 
         // Set dialogue for successful recruitment
         if (variable_instance_exists(id,"dialogue_data_recruit")) { dialogue_data = dialogue_data_recruit; } 
-        else { dialogue_data = [ { name: "System", msg: string(_char_key) + " joined the party!" } ]; }
+        else { dialogue_data = [ { name: "System", msg: "Gub joined the party!" } ]; }
         if(script_exists(create_dialog)) create_dialog(dialogue_data); else show_debug_message("ERROR: create_dialog script missing!");
 
         // Optional: Change sprite, destroy instance, etc.

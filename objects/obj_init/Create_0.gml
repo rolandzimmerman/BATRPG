@@ -9,9 +9,10 @@ show_debug_message("========================================");
 // --- Dialog Colors ---
 show_debug_message("Initializing Dialog System...");
 global.char_colors = {
-    "System": c_white,
-    "Hero":   c_aqua,
-    "Claude": c_lime
+    "System": c_silver,
+    "Moth":   c_aqua,
+    "Boy":   c_purple,
+    "Gub": c_orange
     // …add others…
 };
 show_debug_message("    -> global.char_colors initialized.");

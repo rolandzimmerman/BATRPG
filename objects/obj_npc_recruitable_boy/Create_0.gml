@@ -10,7 +10,7 @@ character_key = "claude";                    // Key matching the entry in scr_Ch
 
 // Initial dialogue before recruitment
 dialogue_data = [
-    { name: "Claude", msg: "Looking for adventure? Maybe we should team up!" }
+    { name: "Boy", msg: "Looking for adventure? Maybe we should team up!" }
 ];
 
 show_debug_message("Created recruitable NPC: Claude (ID: " + string(id) + ")"); // Optional debug
