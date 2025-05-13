@@ -31,9 +31,9 @@ function scr_BuildCharacterDB() {
 
         skills             : [ ],
 
-        equipment          : { weapon:"bronze_sword",
+        equipment          : { weapon:noone,
                                offhand:noone,
-                               armor:"leather_armor",
+                               armor:noone,
                                helm:noone,
                                accessory:noone
                              },
@@ -60,20 +60,9 @@ function scr_BuildCharacterDB() {
         level              :  1,   xp: 0, xp_require: 100,
         overdrive          :  0,   overdrive_max: 100,
 
-        skills             : [
-            { name:"Heal", cost:5,  effect:"heal_hp",     target_type:"ally",
-              heal_amount:25, power_stat:"matk", animation_type:"magic",
-              fx_sprite:default_heal_fx, fx_sound:default_heal_snd,
-              usable_in_field:true
-            },
-            { name:"Zap",  cost:4,  effect:"damage_enemy", target_type:"enemy",
-              damage:15, element:"lightning", power_stat:"matk",
-              animation_type:"magic",
-              fx_sprite:default_damage_fx, fx_sound:default_damage_snd
-            }
-        ],
+        skills             : [ ],
 
-        equipment          : { weapon:"iron_dagger",
+        equipment          : { weapon:noone,
                                offhand:noone,
                                armor:noone,
                                helm:noone,
@@ -112,11 +101,11 @@ function scr_BuildCharacterDB() {
             }
         ],
 
-        equipment          : { weapon:"wooden_staff",
+        equipment          : { weapon:noone,
                                offhand:noone,
                                armor:noone,
                                helm:noone,
-                               accessory:"lucky_charm"
+                               accessory:noone
                              },
         resistances        : variable_clone(base_resistances, true),
         character_key      : "gabby",
@@ -143,11 +132,11 @@ function scr_BuildCharacterDB() {
 
         skills             : [ ],
 
-        equipment          : { weapon:"iron_dagger",
+        equipment          : { weapon:noone,
                                offhand:noone,
                                armor:noone,
                                helm:noone,
-                               accessory:"thief_gloves"
+                               accessory:noone
                              },
         resistances        : variable_clone(base_resistances, true),
         character_key      : "izzy",

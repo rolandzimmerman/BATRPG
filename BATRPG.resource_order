@@ -433,6 +433,7 @@
     {"name":"Silence","order":166,"path":"sounds/Silence/Silence.yy",},
     {"name":"Sleep","order":167,"path":"sounds/Sleep/Sleep.yy",},
     {"name":"snd_buy","order":15,"path":"sounds/snd_buy/snd_buy.yy",},
+    {"name":"snd_item_get","order":23,"path":"sounds/snd_item_get/snd_item_get.yy",},
     {"name":"snd_item_use","order":5,"path":"sounds/snd_item_use/snd_item_use.yy",},
     {"name":"snd_menu_select","order":11,"path":"sounds/snd_menu_select/snd_menu_select.yy",},
     {"name":"snd_sell","order":16,"path":"sounds/snd_sell/snd_sell.yy",},

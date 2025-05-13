@@ -1,6 +1,6 @@
 {
   "$GMSound":"",
-  "%Name":"snd_buy",
+  "%Name":"snd_item_get",
   "audioGroupId":{
     "name":"audio_group_sfx",
     "path":"audiogroups/audio_group_sfx",
@@ -10,7 +10,7 @@
   "compression":0,
   "conversionMode":0,
   "duration":0.7327891,
-  "name":"snd_buy",
+  "name":"snd_item_get",
   "parent":{
     "name":"Sounds",
     "path":"folders/Sounds.yy",
@@ -19,7 +19,7 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"snd_buy.mp3",
+  "soundFile":"snd_item_get.mp3",
   "type":0,
   "volume":1.0,
 }
