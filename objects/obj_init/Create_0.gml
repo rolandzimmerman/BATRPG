@@ -1,6 +1,16 @@
 /// obj_init :: Create Event
 /// @description Initializes global game variables and systems ONCE at game start.
 
+if (variable_global_exists("init_has_run_deep_check") && global.init_has_run_deep_check == true) {
+    show_debug_message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    show_debug_message("!!! CRITICAL ERROR: OBJ_INIT CREATE EVENT RUNNING AGAIN !!!");
+    show_debug_message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // This should NOT happen if obj_init is persistent and created only once.
+} else {
+    show_debug_message("!!! obj_init Create Event Running for the FIRST TIME (or init_has_run_deep_check was cleared) !!!");
+    global.init_has_run_deep_check = true;
+}
+
 show_debug_message("!!! obj_init Create Event Running !!!");
 show_debug_message("========================================");
 show_debug_message("GAME INITIALIZATION STARTING");
