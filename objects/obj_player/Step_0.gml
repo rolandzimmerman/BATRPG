@@ -1,4 +1,107 @@
 /// obj_player :: Step Event
+
+// --- Invulnerability and Flashing Logic ---
+if (invulnerable_timer > 0) {
+    invulnerable_timer -= 1;
+
+    flash_cycle_timer -= 1;
+    if (flash_cycle_timer <= 0) {
+        flash_cycle_timer = flash_interval;
+        is_flashing_visible = !is_flashing_visible;
+    }
+
+    // Your existing debug message for Step event is good here:
+    // show_debug_message("Player Step (Invulnerable): Timer: " + string(invulnerable_timer) + 
+    //                   ", FlashCycleTimer: " + string(flash_cycle_timer) + 
+    //                   ", IsVisiblePhase: " + string(is_flashing_visible));
+
+    if (invulnerable_timer == 0) {
+        is_flashing_visible = true; // Ensure fully visible when invulnerability ends
+        // show_debug_message("Player invulnerability ended. Forced visible.");
+    }
+} else {
+    if (!is_flashing_visible) { // If left in a non-visible state
+        is_flashing_visible = true;
+    }
+}
+
+// --- KNOCKBACK HANDLING (New Block - Place this high in the Step Event) ---
+if (variable_instance_exists(id, "is_in_knockback") && is_in_knockback) {
+    if (knockback_timer > 0) {
+        knockback_timer -= 1;
+
+        // Apply knockback movement using your existing collision system
+        // We are effectively overriding player input for this frame
+        // We'll directly use knockback_hspeed and knockback_vspeed
+        // Your scr_player_update_state_and_movement needs to respect these if they are set,
+        // OR we apply a simplified move here.
+        // For now, let's make scr_player_update_state_and_movement take direct dx, dy.
+        // This requires modifying scr_player_update_state_and_movement.
+
+        // --- OPTION 1: Modify scr_player_update_state_and_movement to accept dx, dy ---
+        // (See below for how to modify the script)
+        // scr_player_update_state_and_movement_with_direct_velocity(knockback_hspeed, knockback_vspeed);
+
+        // --- OPTION 2: Simpler direct move with basic collision (if modifying the script is too much now) ---
+        // This is a basic move; your main script is more complex.
+        // For a quick test, this can show the push.
+        var _kb_dx = knockback_hspeed;
+        var _kb_dy = knockback_vspeed;
+        
+        // Simplified collision for knockback movement (can be improved)
+        // Horizontal
+        if (tilemap != -1 && place_meeting(x + _kb_dx, y, tilemap)) {
+            while(!place_meeting(x + sign(_kb_dx), y, tilemap)) { x += sign(_kb_dx); }
+            knockback_hspeed = 0; // Stop horizontal movement on collision
+        } else {
+            x += _kb_dx;
+        }
+        // Vertical
+        if (tilemap != -1 && place_meeting(x, y + _kb_dy, tilemap)) {
+            while(!place_meeting(x, y + sign(_kb_dy), tilemap)) { y += sign(_kb_dy); }
+            knockback_vspeed = 0; // Stop vertical movement on collision
+            v_speed = 0;          // Also kill any regular falling/rising speed
+        } else {
+            y += _kb_dy;
+        }
+        // --- End Option 2 ---
+
+        // Apply friction to the knockback speeds
+        knockback_hspeed *= knockback_friction;
+        knockback_vspeed *= knockback_friction;
+
+        // If speeds are very low, end knockback early
+        if (abs(knockback_hspeed) < 0.1 && abs(knockback_vspeed) < 0.1) {
+            knockback_timer = 0;
+        }
+
+        if (knockback_timer == 0) {
+            is_in_knockback = false;
+            knockback_hspeed = 0; // Ensure speeds are zeroed out
+            knockback_vspeed = 0;
+            // Potentially reset player_state to FLYING if they were knocked into the air
+            // if (player_state == PLAYER_STATE.WALKING_FLOOR || player_state == PLAYER_STATE.WALKING_CEILING) {
+            //     if (!place_meeting(x, y + 2, tilemap) && !place_meeting(x, y - 2, tilemap)) { // Check if not on ground/ceiling
+            //         player_state = PLAYER_STATE.FLYING;
+            //     }
+            // }
+            show_debug_message("Player " + string(id) + " knockback effect ended.");
+        }
+        
+        // IMPORTANT: Skip normal player input and movement logic while being knocked back
+        // Update animation based on knockback (optional, e.g., a "hit" sprite)
+        // For now, let the existing animation code run, or add specific knockback animation here.
+        // Example: sprite_index = spr_player_hit; image_speed = 0; 
+        //          if(knockback_hspeed != 0) image_xscale = sign(knockback_hspeed) * original_scale;
+
+        exit; // Exit the Step event to prevent normal movement/input processing
+    } else {
+        is_in_knockback = false; // Timer ran out, ensure flag is false
+        knockback_hspeed = 0;
+        knockback_vspeed = 0;
+    }
+}
+// --- END KNOCKBACK HANDLING ---
 /// ——— Dive Mode Handler ———
 // 1) ——— Dash Mode Handler ———
 if (isDashing) {

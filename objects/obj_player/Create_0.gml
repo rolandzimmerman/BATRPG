@@ -175,7 +175,18 @@ missile_speed        = 10;    // pixels per frame
 missile_max_distance = 500;  // in pixels
     
 
-
-
+// Invulnerability and Flashing
+invulnerable_timer = 0;
+is_flashing_visible = true; // true = fully visible, false = dimmed/invisible phase
+flash_cycle_timer = 0;
+flash_interval = 20;       // Toggle flash state every 4 frames
+    
+// === Knockback State Variables ===
+is_in_knockback = false;     // True if player is currently being knocked back
+knockback_timer = 0;         // Duration of the current knockback effect (in frames)
+knockback_hspeed = 0;      // Horizontal speed component of the knockback
+knockback_vspeed = 0;      // Vertical speed component of the knockback
+knockback_friction = 0.85; // How quickly knockback speed reduces (e.g., 0.85 = 15% friction per step)
+                           // Lower value = more friction, faster stop. Higher (closer to 1) = less friction.
 
 show_debug_message("--- obj_player Create Event FINISHED ---");
