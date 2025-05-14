@@ -162,8 +162,8 @@
   ],
   "name":"Room1",
   "parent":{
-    "name":"Rooms",
-    "path":"folders/Rooms.yy",
+    "name":"Bat",
+    "path":"folders/Rooms/Bat.yy",
   },
   "parentRoom":null,
   "physicsSettings":{
