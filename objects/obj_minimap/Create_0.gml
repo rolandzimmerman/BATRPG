@@ -1,5 +1,5 @@
 visible = false;
-scale = 48; // Size of each room box
+scale = 24; // Size of each room box
 
 // Fullscreen minimap
 frame_width = 1280;

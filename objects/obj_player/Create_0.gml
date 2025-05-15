@@ -189,4 +189,52 @@ knockback_vspeed = 0;      // Vertical speed component of the knockback
 knockback_friction = 0.85; // How quickly knockback speed reduces (e.g., 0.85 = 15% friction per step)
                            // Lower value = more friction, faster stop. Higher (closer to 1) = less friction.
 
+// --- ADD/CONFIRM THIS LINE ---
+dir_x = 0; // Initialize instance variable for horizontal input direction
+// --- END ADD/CONFIRM ---
+
+if (variable_global_exists("entry_direction") && global.entry_direction != "none") {
+    // This block runs if the player is entering this room via a defined transition
+    show_debug_message("Player entering room " + room_get_name(room) + " from direction: " + global.entry_direction);
+    if (variable_global_exists("return_x") && !is_undefined(global.return_x)) {
+        x = global.return_x;
+        global.return_x = undefined; // Consume the value
+        show_debug_message("  Set player x to: " + string(x));
+    }
+    if (variable_global_exists("return_y") && !is_undefined(global.return_y)) {
+        y = global.return_y;
+        global.return_y = undefined; // Consume the value
+        show_debug_message("  Set player y to: " + string(y));
+    }
+    
+    // Optional: Adjust facing direction based on entry
+    // if (global.entry_direction == "left") self.face_dir = 1; // Entered from left, so facing right
+    // else if (global.entry_direction == "right") self.face_dir = -1; // Entered from right, so facing left
+
+    global.entry_direction = "none"; // Reset for next time
+} else {
+    // Player is starting in this room without a defined transition (e.g., game start, load game)
+    // Use default spawn point logic for this room
+    show_debug_message("Player starting in room " + room_get_name(room) + " without transition. Looking for default spawn point...");
+
+    // --- MODIFICATION START ---
+    var _spawn_object_asset = asset_get_index("obj_player_spawn_point"); // Get the asset index by its string name
+
+    if (object_exists(_spawn_object_asset)) { // Check if the object asset itself exists in the project
+        var _default_spawn = instance_find(_spawn_object_asset, 0); // Find the first instance of this object
+        if (instance_exists(_default_spawn)) {
+            x = _default_spawn.x;
+            y = _default_spawn.y;
+            show_debug_message("Player spawned at default point (obj_player_spawn_point instance found at " + string(x) + "," + string(y) + ") in " + room_get_name(room));
+        } else {
+            show_debug_message("WARNING: No instance of obj_player_spawn_point found in room " + room_get_name(room) + ". Player will spawn at instance's default room editor position or (0,0) if created by code.");
+            // Player will remain at its default placed position in the room editor, or (0,0) if created by code without specific coords.
+        }
+    } else {
+        show_debug_message("CRITICAL WARNING: Object asset 'obj_player_spawn_point' does not exist in the project! Player cannot be positioned at default spawn.");
+        // Player will remain at its default placed position in the room editor, or (0,0) if created by code without specific coords.
+    }
+    // --- MODIFICATION END ---
+}
+    
 show_debug_message("--- obj_player Create Event FINISHED ---");

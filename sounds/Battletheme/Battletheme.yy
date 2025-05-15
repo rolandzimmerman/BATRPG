@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":0,
   "conversionMode":0,
-  "duration":149.78612,
+  "duration":109.71429,
   "name":"Battletheme",
   "parent":{
     "name":"Music",

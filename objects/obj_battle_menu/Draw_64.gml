@@ -83,7 +83,7 @@ var menu_y_offset = 632;
 // var menu_cx = 160; // Not used in provided item/skill list code
 // var menu_cy = 600; // Not used
 // var menu_r = 80;   // Not used
-var button_scale = .8;
+var button_scale = .9;
 var list_x_base = (160 + menu_x_offset) + 80 + 80; // (menu_cx + menu_x_offset) + menu_r + 80; -> 160+48+80+80 = 368
 var list_y = menu_y_offset; // Base Y for lists
 

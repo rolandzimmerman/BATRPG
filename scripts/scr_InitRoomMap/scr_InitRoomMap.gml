@@ -18,23 +18,32 @@ function scr_InitRoomMap() {
     global.room_map = ds_map_create();
     show_debug_message("Initializing Room Map...");
 
-    // Room1 connections
-    var r1 = Room1;
+    // rm_cave_tutorial connections
+    var r1 = rm_cave_tutorial;
     var m1 = ds_map_create();
-    ds_map_add(m1, "left",  Room2);
-    ds_map_add(m1, "right", noone);
+    ds_map_add(m1, "left",  rm_bat_debug);
+    ds_map_add(m1, "right", rm_cave_2);
     ds_map_add(m1, "above", noone);
     ds_map_add(m1, "below", noone);
     ds_map_add(global.room_map, r1, m1);
 
-    // Room2 connections
-    var r2 = Room2;
+    // rm_cave_2 connections
+    var r2 = rm_cave_2;
     var m2 = ds_map_create();
-    ds_map_add(m2, "left",  noone);
-    ds_map_add(m2, "right", Room1);
+    ds_map_add(m2, "left",  rm_cave_tutorial);
+    ds_map_add(m2, "right", noone);
     ds_map_add(m2, "above", noone);
     ds_map_add(m2, "below", noone);
     ds_map_add(global.room_map, r2, m2);
+    
+    // rm_cave_2 connections
+    var r3 = rm_bat_debug;
+    var m3 = ds_map_create();
+    ds_map_add(m3, "left",  noone);
+    ds_map_add(m3, "right", rm_cave_tutorial);
+    ds_map_add(m3, "above", noone);
+    ds_map_add(m3, "below", noone);
+    ds_map_add(global.room_map, r3, m3);
 
     // …add more rooms here…
 
@@ -42,6 +51,6 @@ function scr_InitRoomMap() {
 }
 // Layout coordinates for minimap display (example layout)
 global.room_coords = ds_map_create();
-ds_map_add(global.room_coords, Room1, {x: 1, y: 1});
-ds_map_add(global.room_coords, Room2, {x: 0, y: 1});
+ds_map_add(global.room_coords, rm_cave_tutorial, {x: 42, y: 26});
+ds_map_add(global.room_coords, rm_cave_2, {x: 43, y: 26});
 // Add more as needed

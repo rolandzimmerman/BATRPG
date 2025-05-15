@@ -120,7 +120,7 @@ if (!variable_global_exists("party_currency")) {
     show_debug_message("  -> global.party_currency already exists.");
 }
 
-// --- PERSISTENT WORLD STATES (Pickups, Gates, etc.) --- <<< NEW SECTION
+// --- PERSISTENT WORLD STATES (Pickups, Gates, Room Connections, etc.) ---
 show_debug_message("Initializing Persistent World States...");
 
 // For Item Pickups (one flag per unique persistent item)
@@ -145,22 +145,65 @@ if (!variable_global_exists("has_collected_main_meteor_shard")) {
     show_debug_message("  -> global.has_collected_main_meteor_shard already exists.");
 }
 
-// For Gates/Switches System (using group_id as keys)
+// --- CORRECTED: For Room Connection Map (used by player transitions) ---
+show_debug_message("Initializing Room Connection Map (global.room_map)...");
+if (!variable_global_exists("room_map")) {
+    global.room_map = ds_map_create();
+    show_debug_message("  -> Initialized global.room_map (ds_map created).");
+    // Populate it immediately after creation
+    if (script_exists(scr_InitRoomMap)) {
+        scr_InitRoomMap(); // This script will fill global.room_map
+        show_debug_message("  -> Called scr_InitRoomMap to populate global.room_map.");
+    } else {
+        show_debug_message("  -> WARNING: scr_InitRoomMap script not found! global.room_map will be empty.");
+    }
+} else {
+    // If it exists, ensure it's actually a ds_map. If not, this is a critical issue.
+    if (!ds_exists(global.room_map, ds_type_map)) {
+        show_debug_message("  -> CRITICAL WARNING: global.room_map existed but was NOT a ds_map! Re-creating and populating.");
+        // Potentially destroy if it was another DS type with the same ID, though ds_map_create will get a new ID.
+        // if (is_real(global.room_map) && global.room_map >= 0) { ds_destroy(global.room_map); } // Careful with generic ds_destroy
+        global.room_map = ds_map_create();
+        if (script_exists(scr_InitRoomMap)) {
+            scr_InitRoomMap();
+            show_debug_message("  -> Called scr_InitRoomMap to populate re-created global.room_map.");
+        } else {
+            show_debug_message("  -> WARNING: scr_InitRoomMap script not found for re-created global.room_map!");
+        }
+    } else {
+        show_debug_message("  -> global.room_map already exists and is a ds_map. Assuming it was correctly populated (e.g., by a previous call to scr_InitRoomMap if obj_init logic allows re-entry, or if this is not the true first run).");
+        // If obj_init is truly persistent and runs its Create ONCE, this 'else' for room_map
+        // should ideally not be hit after the very first initialization.
+        // If scr_InitRoomMap is safe to call multiple times (it is, as it clears itself), you could call it here too,
+        // but it's better if this whole block runs only once.
+    }
+}
+
+// For Gates/Switches System (if you have a separate one, e.g., global.gate_states_map)
+// If your gate persistence also uses a map named global.gate_states_map, initialize it here too.
+// For example:
 if (!variable_global_exists("gate_states_map")) {
     global.gate_states_map = ds_map_create();
-    show_debug_message("  -> Initialized global.gate_states_map (ds_map created).");
+    show_debug_message("  -> Initialized global.gate_states_map (ds_map created for gates/switches).");
 } else {
-    // If it exists, ensure it's actually a ds_map. If not, something is wrong.
     if (!ds_exists(global.gate_states_map, ds_type_map)) {
-        show_debug_message("  -> WARNING: global.gate_states_map existed but was NOT a ds_map! Re-creating it.");
-        // Attempt to destroy if it was a valid ID of another DS type to prevent memory leaks
-        // This is defensive. If this happens, there's a deeper issue with how global.gate_states_map is handled elsewhere.
-        if (is_real(global.gate_states_map) && global.gate_states_map >= 0) { // Check if it looks like a DS ID
-             // ds_destroy(global.gate_states_map); // Be very careful with a generic ds_destroy
-        }
+        show_debug_message("  -> WARNING: global.gate_states_map existed but was NOT a ds_map! Re-creating.");
         global.gate_states_map = ds_map_create();
     } else {
-        show_debug_message("  -> global.gate_states_map already exists and is a ds_map.");
+        show_debug_message("  -> global.gate_states_map (for gates/switches) already exists and is a ds_map.");
+    }
+}
+
+// For Recruited NPCs (if you use this map)
+if (!variable_global_exists("recruited_npcs_map")) {
+    global.recruited_npcs_map = ds_map_create();
+    show_debug_message("  -> Initialized global.recruited_npcs_map (ds_map created for recruited NPCs).");
+} else {
+     if (!ds_exists(global.recruited_npcs_map, ds_type_map)) {
+        show_debug_message("  -> WARNING: global.recruited_npcs_map existed but was NOT a ds_map! Re-creating.");
+        global.recruited_npcs_map = ds_map_create();
+    } else {
+        show_debug_message("  -> global.recruited_npcs_map already exists and is a ds_map.");
     }
 }
 // --- END PERSISTENT WORLD STATES ---

@@ -22,7 +22,7 @@ function scr_GetEnemyDataFromName(_obj) {
         case obj_enemy_goblin:
             return {
                 // Identity
-                name               : "Nut Thief Chief",
+                name               : "Soot",
                 sprite_index       : spr_enemy_goblin,
                 status             : "none",
 
@@ -61,7 +61,7 @@ function scr_GetEnemyDataFromName(_obj) {
         case obj_enemy_slime:
             return {
                 // Identity
-                name               : "Green Slime",
+                name               : "Slim",
                 sprite_index       : spr_enemy_slime,
                 status             : "none",
 
@@ -103,7 +103,7 @@ function scr_GetEnemyDataFromName(_obj) {
         case obj_enemy_nut_thief:
             return {
                 // Identity
-                name               : "Nut Thief",
+                name               : "Orc",
                 sprite_index       : spr_enemy_nut_thief_2,
                 status             : "none",
 
