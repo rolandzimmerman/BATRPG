@@ -213,7 +213,17 @@ if (pause_input && !instance_exists(obj_pause_menu)) {
 var key_x_keyboard = keyboard_check(ord("D")) - keyboard_check(ord("A"));
 var joy_x_gamepad = gamepad_axis_value(0, gp_axislh);
 if (abs(joy_x_gamepad) < 0.25) joy_x_gamepad = 0; // Deadzone
-var dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad);
+dir_x = (key_x_keyboard != 0) ? key_x_keyboard : sign(joy_x_gamepad); // Assign to INSTANCE variable
+
+// Vertical Movement Input (Example - adjust to your game's controls)
+// This is for direct up/down input. If your flying uses flap and gravity, 
+// dir_y might represent an "intent" if you allow moving towards top/bottom edges while flying.
+// If your game doesn't have active vertical input for transitions (e.g., only falling off bottom),
+// then dir_y might always be 0 unless a specific action sets it for transition.
+var key_y_keyboard = keyboard_check(ord("S")) - keyboard_check(ord("W")); // Example: S for down, W for up
+var joy_y_gamepad_v = gamepad_axis_value(0, gp_axislv);
+if (abs(joy_y_gamepad_v) < 0.25) joy_y_gamepad_v = 0; // Deadzone
+dir_y = (key_y_keyboard != 0) ? key_y_keyboard : sign(joy_y_gamepad_v); // Assign to INSTANCE variable
 
 // Flap/Action Key (Pressed this step - used for flapping, phasing, detaching)
 var key_action_initiated_this_step = keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1);
@@ -336,8 +346,9 @@ if (keyboard_check_pressed(ord("X"))
 
 
 // --- Room Transitions & Out of Bounds ---
-// Place this in obj_player :: Step Event, AFTER input has set instance variables 'dir_x' and 'dir_y'
-// AND AFTER your main movement script (e.g., scr_player_update_state_and_movement) has updated x/y.
+// Place this ENTIRE block in obj_player :: Step Event.
+// It should run AFTER player's x/y for the current step have been determined by movement scripts,
+// AND AFTER the instance variables 'dir_x' and 'dir_y' have been updated with current frame's input.
 
 show_debug_message("--- Transition Block START ---");
 
@@ -362,42 +373,72 @@ show_debug_message("  Room - W: " + string(room_width) + ", H: " + string(room_h
 
 var _exit_margin = 55;      
 var _room_edge_buffer = 16; 
-var _exit_dir = "none";     
+// --- THIS LINE DECLARES _exit_dir ---
+var _exit_dir = "none";     // Initialize _exit_dir for this step's logic
+// --- END DECLARATION ---
 
-// --- Vertical Out of Bounds (Basic clamp - adjust if needed) ---
-var _vertical_oob_buffer = 32; 
-if (bbox_bottom > room_height + _vertical_oob_buffer) { 
-    y -= (bbox_bottom - (room_height + _vertical_oob_buffer)); 
-    if(variable_instance_exists(id,"v_speed")) self.v_speed = 0; 
-    show_debug_message("  Clamped at bottom. New Y: " + string(y));
-}
-if (bbox_top < -_vertical_oob_buffer) { 
-    y += (-_vertical_oob_buffer - bbox_top); 
-    if(variable_instance_exists(id,"v_speed")) self.v_speed = 0; 
-    show_debug_message("  Clamped at top. New Y: " + string(y));
-}
+// ——— ROOM TRANSITION (DROP-IN) ———
 
-// --- Horizontal Room Transition Detection ---
-if (_current_h_input_dir < 0 && bbox_left <= _exit_margin) { 
-    _exit_dir = "left";
-    show_debug_message("  Horizontal Check: Potential LEFT exit. (BboxLeft: " + string(bbox_left) + " <= Margin: " + string(_exit_margin) + ")");
-} else if (_current_h_input_dir > 0 && bbox_right >= room_width - _exit_margin) { 
-    _exit_dir = "right";
-    show_debug_message("  Horizontal Check: Potential RIGHT exit. (BboxRight: " + string(bbox_right) + " >= RoomWidth-Margin: " + string(room_width - _exit_margin) + ")");
-}
-
-// --- Vertical Room Transition Detection ---
-if (_exit_dir == "none") { // Only check if no horizontal exit was already determined
-    if (_current_v_input_dir < 0 && bbox_top <= _exit_margin) { 
-        _exit_dir = "above";
-        show_debug_message("  Vertical Check: Potential ABOVE exit. (BboxTop: " + string(bbox_top) + " <= Margin: " + string(_exit_margin) + ")");
-    } else if (_current_v_input_dir > 0 && bbox_bottom >= room_height - _exit_margin) { 
-        _exit_dir = "below";
-        show_debug_message("  Vertical Check: Potential BELOW exit. (BboxBottom: " + string(bbox_bottom) + " >= RoomHeight-Margin: " + string(room_height - _exit_margin) + ")");
+// Make sure we have a valid map for this room
+var conn = ds_map_find_value(global.room_map, room);
+if (ds_exists(conn, ds_type_map)) {
+    
+    // LEFT exit
+    if (bbox_left <= _exit_margin) {
+        if (ds_map_exists(conn, "left")) {
+            var dest = ds_map_find_value(conn, "left");
+            if (room_exists(dest)) {
+                global.next_spawn_object = obj_spawn_point_right;
+                room_goto(dest);
+                exit;
+            }
+        }
+    }
+    
+    // RIGHT exit
+    if (bbox_right >= room_width - _exit_margin) {
+        if (ds_map_exists(conn, "right")) {
+            var dest = ds_map_find_value(conn, "right");
+            if (room_exists(dest)) {
+                global.next_spawn_object = obj_spawn_point_left;
+                room_goto(dest);
+                exit;
+            }
+        }
+    }
+    
+    // ABOVE exit
+    if (bbox_top <= _exit_margin) {
+        if (ds_map_exists(conn, "above")) {
+            var dest = ds_map_find_value(conn, "above");
+            if (room_exists(dest)) {
+                global.next_spawn_object = obj_spawn_point_bottom;
+                room_goto(dest);
+                exit;
+            }
+        }
+    }
+    
+    // BELOW exit
+    if (bbox_bottom >= room_height - _exit_margin) {
+        if (ds_map_exists(conn, "below")) {
+            var dest = ds_map_find_value(conn, "below");
+            if (room_exists(dest)) {
+                global.next_spawn_object = obj_spawn_point_top;
+                room_goto(dest);
+                exit;
+            }
+        }
     }
 }
 
+// ——— END DROP-IN ———
+
+
+
+
 // --- Attempt Room Transition ---
+// This is your line 354 where the error occurs if _exit_dir was not declared above
 if (_exit_dir != "none") {
     show_debug_message("  Attempting Transition! Direction: " + _exit_dir);
 
@@ -406,71 +447,36 @@ if (_exit_dir != "none") {
 
         if (ds_exists(_connection_map_for_current_room, ds_type_map)) {
             if (ds_map_exists(_connection_map_for_current_room, _exit_dir)) {
-                var _destination_room_id = ds_map_find_value(_connection_map_for_current_room, _exit_dir);
+                var _connection_data = ds_map_find_value(_connection_map_for_current_room, _exit_dir);
                 
-                show_debug_message("    Connection lookup: CurrentRoomKey=" + string(room) + 
-                                   ", ExitDirKey='" + _exit_dir + 
-                                   "', FoundDestID_RawValue=" + string(_destination_room_id) +
-                                   ", Type of DestID: " + typeof(_destination_room_id));
+                var _destination_room_id = noone;
+                var _target_spawn_point_id_in_dest_room = "default_entry"; 
+
+                if (is_struct(_connection_data)) {
+                    _destination_room_id = variable_struct_exists(_connection_data, "room_asset") ? _connection_data.room_asset : noone;
+                    _target_spawn_point_id_in_dest_room = variable_struct_exists(_connection_data, "target_spawn_id") ? _connection_data.target_spawn_id : "default_entry";
+                } else if (_connection_data != noone) { 
+                    _destination_room_id = _connection_data;
+                     show_debug_message("    Warning: Connection data is not a struct, assuming it's a room ID. Using default spawn ID for transition.");
+                }
+                
+                show_debug_message("    Connection lookup: DestRoomID=" + string(_destination_room_id) + ", TargetSpawnID='" + _target_spawn_point_id_in_dest_room + "'");
 
                 if (_destination_room_id != noone && room_exists(_destination_room_id)) {
-                    show_debug_message("    Valid connection found: " + _exit_dir + " -> " + room_get_name(_destination_room_id) + " (Asset ID: " + string(_destination_room_id) + ")");
+                    show_debug_message("    Valid connection found: " + _exit_dir + " -> " + room_get_name(_destination_room_id));
                     global.entry_direction = _exit_dir; 
                     global.original_room = room;   
-
-                    var _spawn_x = x; 
-                    var _spawn_y = y; 
-                    var _player_current_bbox_left = bbox_left;
-                    var _player_current_bbox_top = bbox_top; 
-                    var _player_visual_width = bbox_right - _player_current_bbox_left;
-                    var _player_visual_height = bbox_bottom - _player_current_bbox_top; 
-                    var _offset_origin_to_bbox_left = (x - _player_current_bbox_left);
-                    var _offset_origin_to_bbox_top = (y - _player_current_bbox_top); 
-                    
-                    var _dest_room_info = room_get_info(_destination_room_id);
-                    var _dest_room_actual_width = -1;
-                    var _dest_room_actual_height = -1;
-
-                    if (is_struct(_dest_room_info)) {
-                        if (variable_struct_exists(_dest_room_info, "width")) _dest_room_actual_width = _dest_room_info.width;
-                        if (variable_struct_exists(_dest_room_info, "height")) _dest_room_actual_height = _dest_room_info.height;
-                        show_debug_message("      Destination Room Info: Width=" + string(_dest_room_actual_width) + ", Height=" + string(_dest_room_actual_height));
-                    } else {
-                        show_debug_message("      ERROR: room_get_info(" + string(_destination_room_id) + ") did not return a valid struct. Cannot determine destination room dimensions.");
-                        _exit_dir = "none"; 
-                    }
-                    
-                    if (_exit_dir != "none") { 
-                        switch (_exit_dir) {
-                            case "left": 
-                                var _target_bbox_left_in_new_room = _dest_room_actual_width - _room_edge_buffer - _player_visual_width;
-                                _spawn_x = _target_bbox_left_in_new_room + _offset_origin_to_bbox_left;
-                                break;
-                            case "right": 
-                                var _target_bbox_left_in_new_room = _room_edge_buffer;
-                                _spawn_x = _target_bbox_left_in_new_room + _offset_origin_to_bbox_left;
-                                break;
-                            case "above": 
-                                var _target_bbox_top_in_new_room = _dest_room_actual_height - _room_edge_buffer - _player_visual_height;
-                                _spawn_y = _target_bbox_top_in_new_room + _offset_origin_to_bbox_top;
-                                break;
-                            case "below": 
-                                var _target_bbox_top_in_new_room = _room_edge_buffer;
-                                _spawn_y = _target_bbox_top_in_new_room + _offset_origin_to_bbox_top;
-                                break;
-                        }
-                        global.return_x = _spawn_x;
-                        global.return_y = _spawn_y; 
-                        
-                        show_debug_message("    Transitioning to " + room_get_name(_destination_room_id) + 
-                                           ". Player spawn target x=" + string(global.return_x) + ", y=" + string(global.return_y));
-                                           
-                        room_goto(_destination_room_id);
-                        exit; 
-                    }
+                    global.target_spawn_id = _target_spawn_point_id_in_dest_room; 
+                    global.return_x = x; 
+                    global.return_y = y; 
+                                        
+                    show_debug_message("    Transitioning to " + room_get_name(_destination_room_id) + ". Target Spawn ID for new room: '" + global.target_spawn_id + "'");
+                                       
+                    room_goto(_destination_room_id);
+                    exit; 
                 } else {
-                    if (_destination_room_id == noone) { show_debug_message("    No room connection defined for '" + _exit_dir + "' (destination is 'noone'). Player stays."); }
-                    else { show_debug_message("    Destination room ID '" + string(_destination_room_id) + "' (for direction '" + _exit_dir + "') does not exist as a valid room. Player stays."); }
+                    if (_destination_room_id == noone) { show_debug_message("    No room connection defined for '" + _exit_dir + "'. Player stays."); }
+                    else { show_debug_message("    Destination room ID '" + string(_destination_room_id) + "' does not exist. Player stays."); }
                     if (_destination_room_id == noone) _exit_dir = "none"; 
                 }
             } else { _exit_dir = "none"; show_debug_message("    Current room's connection map does not have an entry for exit_dir: '" + _exit_dir + "'. Player stays.");}
@@ -478,7 +484,7 @@ if (_exit_dir != "none") {
     } else { _exit_dir = "none"; show_debug_message("    CRITICAL: global.room_map does not exist or is not a ds_map. Player stays. Check obj_init.");}
 }
 
-// --- Fallback: Hard Clamps if No Valid Room Transition Occurred ---
+// --- Fallback: Hard Clamps ---
 if (_exit_dir == "none") {
     var _sprite_x_origin_clamp = sprite_get_xoffset(sprite_index);
     var _sprite_width_clamp = sprite_get_width(sprite_index);
@@ -487,7 +493,6 @@ if (_exit_dir == "none") {
     } else if (x - _sprite_x_origin_clamp < 0) {
         x = _sprite_x_origin_clamp;
     }
-    // Add similar vertical clamps if desired using room_height, sprite_get_yoffset, sprite_get_height
 }
 show_debug_message("--- Transition Block END (ExitDir: " + _exit_dir + ") ---");
 

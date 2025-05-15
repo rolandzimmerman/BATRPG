@@ -7,8 +7,16 @@ enum PLAYER_STATE {
     WALKING_FLOOR,
     WALKING_CEILING
 }
-player_state = PLAYER_STATE.FLYING;
 
+player_state = PLAYER_STATE.FLYING;
+/// Define exit‐direction codes
+enum EXIT_DIR {
+    NONE,  // 0
+    LEFT,  // 1
+    RIGHT, // 2
+    ABOVE, // 3
+    BELOW  // 4
+}
 TILE_SIZE = 12; // IMPORTANT: Set this to your game's actual tile size (e.g., 16, 32, etc.)
 
 /// obj_player :: Create Event (add near the top)
@@ -67,6 +75,8 @@ if (tilemap_phase_id == -1) {
 } else {
     show_debug_message("obj_player Create: Phasing tilemap ID successfully found: " + string(tilemap_phase_id));
 }
+
+
 
 // === Persistent RPG Data Setup ===
 // This ensures player stats and party info are initialized or loaded.
@@ -190,7 +200,8 @@ knockback_friction = 0.85; // How quickly knockback speed reduces (e.g., 0.85 = 
                            // Lower value = more friction, faster stop. Higher (closer to 1) = less friction.
 
 // --- ADD/CONFIRM THIS LINE ---
-dir_x = 0; // Initialize instance variable for horizontal input direction
+dir_x = 0; // For horizontal input
+dir_y = 0; // For vertical input (NEW - if you haven't added it yet)
 // --- END ADD/CONFIRM ---
 
 if (variable_global_exists("entry_direction") && global.entry_direction != "none") {
@@ -218,7 +229,7 @@ if (variable_global_exists("entry_direction") && global.entry_direction != "none
     show_debug_message("Player starting in room " + room_get_name(room) + " without transition. Looking for default spawn point...");
 
     // --- MODIFICATION START ---
-    var _spawn_object_asset = asset_get_index("obj_player_spawn_point"); // Get the asset index by its string name
+    var _spawn_object_asset = asset_get_index("obj_player_spawn_point_save"); // Get the asset index by its string name
 
     if (object_exists(_spawn_object_asset)) { // Check if the object asset itself exists in the project
         var _default_spawn = instance_find(_spawn_object_asset, 0); // Find the first instance of this object
