@@ -31,7 +31,7 @@ function scr_InitRoomMap() {
     var r2 = rm_cave_2;
     var m2 = ds_map_create();
     ds_map_add(m2, "left",  rm_cave_tutorial);
-    ds_map_add(m2, "right", noone);
+    ds_map_add(m2, "right", rm_cave_3);
     ds_map_add(m2, "above", noone);
     ds_map_add(m2, "below", noone);
     ds_map_add(global.room_map, r2, m2);
@@ -44,6 +44,15 @@ function scr_InitRoomMap() {
     ds_map_add(m3, "above", noone);
     ds_map_add(m3, "below", noone);
     ds_map_add(global.room_map, r3, m3);
+    
+    // rm_cave_2 connections
+    var r4 = rm_cave_3;
+    var m4 = ds_map_create();
+    ds_map_add(m4, "left",  rm_cave_2);
+    ds_map_add(m4, "right", noone);
+    ds_map_add(m4, "above", noone);
+    ds_map_add(m4, "below", noone);
+    ds_map_add(global.room_map, r4, m4);
 
     // …add more rooms here…
 
@@ -53,4 +62,5 @@ function scr_InitRoomMap() {
 global.room_coords = ds_map_create();
 ds_map_add(global.room_coords, rm_cave_tutorial, {x: 42, y: 26});
 ds_map_add(global.room_coords, rm_cave_2, {x: 43, y: 26});
+ds_map_add(global.room_coords, rm_cave_3, {x: 44, y: 26});
 // Add more as needed

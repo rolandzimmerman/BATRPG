@@ -3,7 +3,7 @@
 // Initialize load state variables
 load_pending = false;
 loaded_data = undefined;
-
+global.player_position_handled_by_battle_return = false;
 // Add this if you don't have a game state variable yet
 if (!variable_instance_exists(id, "game_state")) { // Prevent re-init if already exists (e.g., if persistent)
     game_state = "playing"; // Possible states: "playing", "paused", "dialogue", "battle", etc.
