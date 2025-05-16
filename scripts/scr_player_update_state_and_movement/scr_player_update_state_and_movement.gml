@@ -8,10 +8,10 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
     if (self.tilemap_phase_id != -1) {
         array_push(targets, self.tilemap_phase_id);
     }
-    array_push(targets, obj_destructible_block, obj_gate, obj_boss_map_parent);
+    array_push(targets, obj_destructible_block, obj_gate, obj_map_boss_parent);
     var can_phase = (self.tilemap_phase_id != -1);
 
-    // Escape hatch
+   // Escape hatch
     var desired_h = _input_dir_x;
     if (self.stuck_counter > 10) {
         desired_h = 0;
@@ -53,12 +53,12 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
         }
         // micro-nudge not needed vertically
 
-        // vertical fallback
+/*        // vertical fallback
         if ((place_meeting(old_x, y, self.tilemap) || place_meeting(old_x, y, self.tilemap_phase_id))) {
             y = old_y;
             v_speed = 0;
         }
-
+*/
         // Transition
         if (array_length(vcols) > 0) {
             if (v_speed >= 0) player_state = PLAYER_STATE.WALKING_FLOOR;
@@ -118,7 +118,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
         var ground = (place_meeting(x, y+2, tilemap) || place_meeting(x, y+2, tilemap_phase_id));
         if (!ground) player_state = PLAYER_STATE.FLYING;
         break;
-
+              
 
     // ===== WALKING ON CEILING =====
     case PLAYER_STATE.WALKING_CEILING:

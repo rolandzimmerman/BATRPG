@@ -371,130 +371,105 @@ show_debug_message("  Position - X: " + string(x) + ", Y: " + string(y));
 show_debug_message("  BBox - L: " + string(bbox_left) + ", R: " + string(bbox_right) + ", T: " + string(bbox_top) + ", B: " + string(bbox_bottom));
 show_debug_message("  Room - W: " + string(room_width) + ", H: " + string(room_height));
 
-var _exit_margin = 55;      
-var _room_edge_buffer = 16; 
+
 // --- THIS LINE DECLARES _exit_dir ---
-var _exit_dir = "none";     // Initialize _exit_dir for this step's logic
-// --- END DECLARATION ---
-
-// ——— ROOM TRANSITION (DROP-IN) ———
-
-// Make sure we have a valid map for this room
+// var _exit_dir = "none"; // This can be removed if the second transition block is gone.
+var _exit_margin = 3;
 var conn = ds_map_find_value(global.room_map, room);
+
 if (ds_exists(conn, ds_type_map)) {
-    
-    // LEFT exit
-    if (bbox_left <= _exit_margin) {
+// LEFT exit
+if (bbox_left <= _exit_margin) {
+    show_debug_message("LEFT EXIT: Checking room: " + room_get_name(room) + ", bbox_left: " + string(bbox_left));
+    if (ds_exists(conn, ds_type_map)) { // conn = ds_map_find_value(global.room_map, room);
         if (ds_map_exists(conn, "left")) {
             var dest = ds_map_find_value(conn, "left");
-            if (room_exists(dest)) {
+            var dest_name = (dest == noone) ? "noone" : ((asset_get_type(dest) == asset_room) ? room_get_name(dest) : "INVALID_ASSET_TYPE");
+            show_debug_message("LEFT EXIT: 'left' key exists. dest asset: " + string(dest) + " (" + dest_name + ")");
+
+            if (dest != noone && asset_get_type(dest) == asset_room && room_exists(dest)) {
+                show_debug_message("LEFT EXIT: Destination is VALID. Transitioning to " + room_get_name(dest));
+                global.entry_direction = "none";
                 global.next_spawn_object = obj_spawn_point_right;
                 room_goto(dest);
                 exit;
+            } else {
+                show_debug_message("LEFT EXIT: Transition FAILED. dest: " + string(dest) + " (" + dest_name + "), asset_type_is_room: " + string(asset_get_type(dest) == asset_room) + ", room_exists(dest): " + string(room_exists(dest)));
+                // Player remains in current room. Clamps will apply.
             }
+        } else {
+            show_debug_message("LEFT EXIT: No 'left' connection in ds_map for " + room_get_name(room));
         }
+    } else {
+         show_debug_message("LEFT EXIT: Current room " + room_get_name(room) + " not found as key in global.room_map OR its value isn't a map.");
     }
-    
+}
+
     // RIGHT exit
     if (bbox_right >= room_width - _exit_margin) {
         if (ds_map_exists(conn, "right")) {
             var dest = ds_map_find_value(conn, "right");
             if (room_exists(dest)) {
-                global.next_spawn_object = obj_spawn_point_left;
+                global.entry_direction = "none"; // PREVENT INTERFERENCE
+                global.next_spawn_object = obj_spawn_point_left; // Arriving at new room's LEFT side
                 room_goto(dest);
-                exit;
+                exit; // Essential
             }
         }
     }
-    
+
     // ABOVE exit
     if (bbox_top <= _exit_margin) {
         if (ds_map_exists(conn, "above")) {
             var dest = ds_map_find_value(conn, "above");
             if (room_exists(dest)) {
-                global.next_spawn_object = obj_spawn_point_bottom;
+                global.entry_direction = "none"; // PREVENT INTERFERENCE
+                global.next_spawn_object = obj_spawn_point_bottom; // Arriving at new room's BOTTOM side
                 room_goto(dest);
-                exit;
+                exit; // Essential
             }
         }
     }
-    
+
     // BELOW exit
     if (bbox_bottom >= room_height - _exit_margin) {
         if (ds_map_exists(conn, "below")) {
             var dest = ds_map_find_value(conn, "below");
             if (room_exists(dest)) {
-                global.next_spawn_object = obj_spawn_point_top;
+                global.entry_direction = "none"; // PREVENT INTERFERENCE
+                global.next_spawn_object = obj_spawn_point_top; // Arriving at new room's TOP side
                 room_goto(dest);
-                exit;
+                exit; // Essential
             }
         }
     }
 }
 
-// ——— END DROP-IN ———
 
+// --- Fallback: Hard Clamps to Room Edges (Revised) ---
+// This logic runs if no room_goto() and exit; was called by the transition logic above it.
 
+var _player_bbox_left = bbox_left;
+var _player_bbox_right = bbox_right;
+var _player_bbox_top = bbox_top;
+var _player_bbox_bottom = bbox_bottom;
 
-
-// --- Attempt Room Transition ---
-// This is your line 354 where the error occurs if _exit_dir was not declared above
-if (_exit_dir != "none") {
-    show_debug_message("  Attempting Transition! Direction: " + _exit_dir);
-
-    if (variable_global_exists("room_map") && ds_exists(global.room_map, ds_type_map)) {
-        var _connection_map_for_current_room = ds_map_find_value(global.room_map, room);
-
-        if (ds_exists(_connection_map_for_current_room, ds_type_map)) {
-            if (ds_map_exists(_connection_map_for_current_room, _exit_dir)) {
-                var _connection_data = ds_map_find_value(_connection_map_for_current_room, _exit_dir);
-                
-                var _destination_room_id = noone;
-                var _target_spawn_point_id_in_dest_room = "default_entry"; 
-
-                if (is_struct(_connection_data)) {
-                    _destination_room_id = variable_struct_exists(_connection_data, "room_asset") ? _connection_data.room_asset : noone;
-                    _target_spawn_point_id_in_dest_room = variable_struct_exists(_connection_data, "target_spawn_id") ? _connection_data.target_spawn_id : "default_entry";
-                } else if (_connection_data != noone) { 
-                    _destination_room_id = _connection_data;
-                     show_debug_message("    Warning: Connection data is not a struct, assuming it's a room ID. Using default spawn ID for transition.");
-                }
-                
-                show_debug_message("    Connection lookup: DestRoomID=" + string(_destination_room_id) + ", TargetSpawnID='" + _target_spawn_point_id_in_dest_room + "'");
-
-                if (_destination_room_id != noone && room_exists(_destination_room_id)) {
-                    show_debug_message("    Valid connection found: " + _exit_dir + " -> " + room_get_name(_destination_room_id));
-                    global.entry_direction = _exit_dir; 
-                    global.original_room = room;   
-                    global.target_spawn_id = _target_spawn_point_id_in_dest_room; 
-                    global.return_x = x; 
-                    global.return_y = y; 
-                                        
-                    show_debug_message("    Transitioning to " + room_get_name(_destination_room_id) + ". Target Spawn ID for new room: '" + global.target_spawn_id + "'");
-                                       
-                    room_goto(_destination_room_id);
-                    exit; 
-                } else {
-                    if (_destination_room_id == noone) { show_debug_message("    No room connection defined for '" + _exit_dir + "'. Player stays."); }
-                    else { show_debug_message("    Destination room ID '" + string(_destination_room_id) + "' does not exist. Player stays."); }
-                    if (_destination_room_id == noone) _exit_dir = "none"; 
-                }
-            } else { _exit_dir = "none"; show_debug_message("    Current room's connection map does not have an entry for exit_dir: '" + _exit_dir + "'. Player stays.");}
-        } else { _exit_dir = "none"; show_debug_message("    No connection map (or not a map) found in global.room_map for current room ID: " + string(room) + ". Player stays.");}
-    } else { _exit_dir = "none"; show_debug_message("    CRITICAL: global.room_map does not exist or is not a ds_map. Player stays. Check obj_init.");}
+// Horizontal Clamping
+if (_player_bbox_left < 0) {
+    x = x - _player_bbox_left; // Adjust x so bbox_left is 0
+} else if (_player_bbox_right > room_width) {
+    x = x - (_player_bbox_right - room_width); // Adjust x so bbox_right is room_width
 }
 
-// --- Fallback: Hard Clamps ---
-if (_exit_dir == "none") {
-    var _sprite_x_origin_clamp = sprite_get_xoffset(sprite_index);
-    var _sprite_width_clamp = sprite_get_width(sprite_index);
-    if (x + (_sprite_width_clamp - _sprite_x_origin_clamp) > room_width) {
-        x = room_width - (_sprite_width_clamp - _sprite_x_origin_clamp);
-    } else if (x - _sprite_x_origin_clamp < 0) {
-        x = _sprite_x_origin_clamp;
-    }
+// Vertical Clamping (you might want this too, especially if you have vertical movement without defined top/bottom exits)
+if (_player_bbox_top < 0) {
+    y = y - _player_bbox_top;
+} else if (_player_bbox_bottom > room_height) {
+    y = y - (_player_bbox_bottom - room_height);
 }
-show_debug_message("--- Transition Block END (ExitDir: " + _exit_dir + ") ---");
+
+show_debug_message("--- Transition Block END (No transition occurred, clamps applied if needed) ---");
+
 
 
 
@@ -530,6 +505,7 @@ if (global.encounter_timer >= encounter_threshold) {
         }
     }
 }
+
 // ——— Soft “push out of solid” fallback ———
 // If you somehow still end up inside a tile, nudge you 1px up
 if ((tilemap != -1 && place_meeting(x, y, tilemap))

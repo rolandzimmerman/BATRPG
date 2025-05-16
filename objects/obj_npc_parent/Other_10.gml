@@ -1,9 +1,21 @@
 /// obj_npc_parent :: User Event 0
 // Generic interaction logic triggered by player action.
 
-// Prevent triggering new dialog if one is already active
-if (instance_exists(obj_dialog)) {
-    exit; // Ignore interaction if dialogue box exists
+// (1) Make sure this is actually executing!
+show_debug_message("PARENT STEP for NPC " + string(id) + 
+                  " | spoken=" + string(has_spoken_to) + 
+                  " | dialog_exists=" + string(instance_exists(obj_dialog)));
+
+/// (2) Destroy after dialogue closes
+if (has_spoken_to && !instance_exists(obj_dialog)) {
+    show_debug_message("NPC " + string(id) + " self‐destructing after dialog.");
+    instance_destroy();
+    exit;
+}
+
+// (3) Pause handling
+if (instance_exists(obj_game_manager) && obj_game_manager.game_state == "paused") {
+    exit;
 }
 
 // Select the appropriate dialog variable based on interaction history

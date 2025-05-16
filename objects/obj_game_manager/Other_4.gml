@@ -81,69 +81,42 @@ global.return_y      = undefined;
 return; // Early exit
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 3) Standard Entry Spawn (Start)
-////////////////////////////////////////////////////////////////////////////////
-else
-{
-    show_debug_message(" > Handling normal room entry spawn (Load Pending is FALSE)...");
+// 3) Standard Entry Spawn (Game Manager's own fallback, mostly for non-transition scenarios or if Player Room Start failed utterly)
+else {
+    // This block runs if not loading and not returning from battle.
+    // obj_player::Room Start should have run before this (or concurrently) and attempted positioning.
+    // If global.player_position_handled_by_battle_return was set to true by Player Room Start (if it succeeded),
+    // we might even skip this. However, that flag's name is specific.
+    // For now, let this logic run. It will likely see entry_direction as "none" for transitions.
 
-    if (!instance_exists(_player)) {
-        show_debug_message(" >> WARNING: Player instance not found at start of normal spawn logic!");
-    }
-
+    show_debug_message(" > Game Manager: Not load/battle. Checking its own spawn logic (likely fallback to default).");
+    var _player = instance_find(obj_player, 0);
     if (instance_exists(_player)) {
+        // Check if player was ALREADY handled by its own Room Start for a transition.
+        // This requires Player Room Start to set a flag if it successfully positioned the player.
+        // Let's assume Player Room Start does NOT set global.player_position_handled_by_battle_return for its own success.
+        // So, GM proceeds with its logic.
+
         var _entry_dir = variable_global_exists("entry_direction") ? global.entry_direction : "none";
-        var _target_spawn_id;
+        var _target_spawn_id_str; // For spawn_id string on obj_spawn_point
 
+        // This switch translates an abstract direction to a string ID for obj_spawn_point's variable.
+        // This is different from Player Room Start which uses the direction to pick an object *type*.
         switch (_entry_dir) {
-            case "left":  _target_spawn_id = "entry_from_left";  break;
-            case "right": _target_spawn_id = "entry_from_right"; break;
-            case "above": _target_spawn_id = "entry_from_above"; break;
-            case "below": _target_spawn_id = "entry_from_below"; break;
-            default:      _target_spawn_id = "default";           break;
+            case "left":  _target_spawn_id_str = "entry_from_left";  break;
+            case "right": _target_spawn_id_str = "entry_from_right"; break;
+            case "above": _target_spawn_id_str = "entry_from_above"; break;
+            case "below": _target_spawn_id_str = "entry_from_below"; break;
+            default:      _target_spawn_id_str = "default";           break;
         }
+        // ... (Your existing loop to find obj_spawn_point with matching spawn_id string variable _target_spawn_id_str) ...
+        // This part of Game Manager is now mostly for handling "default" spawns if entry_direction was "none",
+        // or for other systems that might use entry_direction with these string spawn_id markers.
 
-        var _spawn = noone;
-        if (object_exists(obj_spawn_point)) {
-            var _count = instance_number(obj_spawn_point);
-
-            // First, look for matching entry ID
-            for (var i = 0; i < _count; i++) {
-                var inst = instance_find(obj_spawn_point, i);
-                if (inst.spawn_id == _target_spawn_id) {
-                    _spawn = inst;
-                    break;
-                }
-            }
-
-            // Next, fallback to default ID if needed
-            if (_spawn == noone && _target_spawn_id != "default") {
-                for (var i = 0; i < _count; i++) {
-                    var inst = instance_find(obj_spawn_point, i);
-                    if (inst.spawn_id == "default") {
-                        _spawn = inst;
-                        break;
-                    }
-                }
-            }
-
-            // Finally, fallback to the first instance
-            if (_spawn == noone && _count > 0) {
-                _spawn = instance_find(obj_spawn_point, 0);
-            }
-        }
-
-        if (_spawn != noone) {
-            _player.x = _spawn.x;
-            _player.y = _spawn.y;
-            show_debug_message(" >> Positioned player using spawn point: " + string(_spawn));
-        } else {
-            show_debug_message(" >> WARNING: No valid spawn point found for entry.");
-        }
-
-        global.entry_direction = "none";
+        // If GM's logic positions the player, it should also consume global.entry_direction.
+        // if (spawn found and player positioned by GM) {
+        //     global.entry_direction = "none";
+        // }
     }
 }
-
 show_debug_message("Game Manager: End of Room Start Event.");

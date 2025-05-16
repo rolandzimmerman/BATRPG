@@ -1,19 +1,20 @@
 {
   "$GMObject":"",
-  "%Name":"obj_boss_map_ogre",
+  "%Name":"obj_map_boss_ogre",
   "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":11,"eventType":7,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"obj_boss_map_ogre",
+  "name":"obj_map_boss_ogre",
   "overriddenProperties":[],
   "parent":{
     "name":"Map Bosses",
     "path":"folders/Objects/Battle/Map Bosses.yy",
   },
   "parentObjectId":{
-    "name":"obj_boss_map_parent",
-    "path":"objects/obj_boss_map_parent/obj_boss_map_parent.yy",
+    "name":"obj_map_boss_parent",
+    "path":"objects/obj_map_boss_parent/obj_map_boss_parent.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,
