@@ -8,7 +8,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
     if (self.tilemap_phase_id != -1) {
         array_push(targets, self.tilemap_phase_id);
     }
-    array_push(targets, obj_destructible_block, obj_gate);
+    array_push(targets, obj_destructible_block, obj_gate, obj_boss_map_parent);
     var can_phase = (self.tilemap_phase_id != -1);
 
     // Escape hatch

@@ -84,13 +84,13 @@
     {"name":"inst_498A948A","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_EBA9427","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_5A35EBB1","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
-    {"name":"inst_29F349ED","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_6C261E90","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_3730C0BF","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_78807098","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_122481D4","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_77CF596C","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
     {"name":"inst_7C95A42D","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
+    {"name":"inst_4FB6F53C","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -106,7 +106,7 @@
         {"$GMRInstance":"v2","%Name":"inst_24508CDF","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_24508CDF","objectId":{"name":"obj_spawn_point_left","path":"objects/obj_spawn_point_left/obj_spawn_point_left.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":256.0,"y":1024.0,},
         {"$GMRInstance":"v2","%Name":"inst_6D43140B","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6D43140B","objectId":{"name":"obj_spawn_point_right","path":"objects/obj_spawn_point_right/obj_spawn_point_right.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":7520.0,"y":1056.0,},
         {"$GMRInstance":"v2","%Name":"inst_7D18E929","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7D18E929","objectId":{"name":"obj_spawn_point","path":"objects/obj_spawn_point/obj_spawn_point.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":352.0,"y":992.0,},
-        {"$GMRInstance":"v2","%Name":"inst_29F349ED","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_29F349ED","objectId":{"name":"obj_pickup_echo_gem","path":"objects/obj_pickup_echo_gem/obj_pickup_echo_gem.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":416.0,"y":1092.0,},
+        {"$GMRInstance":"v2","%Name":"inst_4FB6F53C","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4FB6F53C","objectId":{"name":"obj_pickup_echo_gem","path":"objects/obj_pickup_echo_gem/obj_pickup_echo_gem.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":414.0,"y":1036.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances_NPCs","depth":300,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v2","%Name":"inst_39015630","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_39015630","objectId":{"name":"obj_destructible_block","path":"objects/obj_destructible_block/obj_destructible_block.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":70.0,"y":1103.0,},

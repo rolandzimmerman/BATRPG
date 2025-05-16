@@ -1,17 +1,19 @@
 {
   "$GMObject":"",
-  "%Name":"obj_enemy_nut_thief",
-  "eventList":[],
+  "%Name":"obj_boss_map_ogre",
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":11,"eventType":7,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
-  "name":"obj_enemy_nut_thief",
+  "name":"obj_boss_map_ogre",
   "overriddenProperties":[],
   "parent":{
-    "name":"Enemies",
-    "path":"folders/Objects/Battle/Enemies.yy",
+    "name":"Map Bosses",
+    "path":"folders/Objects/Battle/Map Bosses.yy",
   },
   "parentObjectId":{
-    "name":"obj_battle_enemy",
-    "path":"objects/obj_battle_enemy/obj_battle_enemy.yy",
+    "name":"obj_boss_map_parent",
+    "path":"objects/obj_boss_map_parent/obj_boss_map_parent.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,
@@ -31,8 +33,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_enemy_nut_thief_2",
-    "path":"sprites/spr_enemy_nut_thief_2/spr_enemy_nut_thief_2.yy",
+    "name":"spr_enemy_nut_thief_map",
+    "path":"sprites/spr_enemy_nut_thief_map/spr_enemy_nut_thief_map.yy",
   },
   "spriteMaskId":null,
   "visible":true,

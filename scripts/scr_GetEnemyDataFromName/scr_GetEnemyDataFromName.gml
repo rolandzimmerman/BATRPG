@@ -50,7 +50,6 @@ function scr_GetEnemyDataFromName(_obj) {
                 // Loot
                 drop_table         : [
                     { item_key:"potion",   chance:0.30 },
-                    { item_key:"antidote", chance:0.10 }
                 ],
                 steal_table        : [
                     { item_key:"potion",   chance:0.50 }
@@ -103,26 +102,29 @@ function scr_GetEnemyDataFromName(_obj) {
         case obj_enemy_nut_thief:
             return {
                 // Identity
-                name               : "Orc",
+                name               : "Ogre",
                 sprite_index       : spr_enemy_nut_thief_2,
                 status             : "none",
 
                 // Stats
-                hp                 : 25,
-                maxhp              : 25,
-                atk                :  5,
-                def                :  1,
+                hp                 : 60,
+                maxhp              : 60,
+                atk                :  15,
+                def                :  12,
                 matk               :  2,
-                mdef               :  2,
-                spd                :  7,
-                luk                :  4,
-                xp                 : 35,
+                mdef               :  1,
+                spd                :  5,
+                luk                :  2,
+                xp                 : 300,
 
                 // Combat FX
                 attack_sprite      : spr_pow,
                 attack_sound       : snd_punch,
                 attack_element     : "physical",
-                resistances        : default_resistances,
+                resistances        : {
+        physical: 0, fire: 0, ice: 0, lightning: -1,
+        poison: 0, holy: 0, dark: 0
+    },
 
                 // Death & Corpse
                 death_anim_sprite  : default_death_anim,

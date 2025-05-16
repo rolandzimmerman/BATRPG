@@ -53,10 +53,10 @@ if (room == rm_battle) {
     pre_battle_music_asset = noone; pre_battle_music_position = 0; pre_battle_room = noone; // Clear just in case
     var _new_music = noone;
     switch (room) {
-        case Room2: _new_music = noone; break;
+        //case Room2: _new_music = noone; break;
         case rm_battle: _new_music = Battletheme; break;
         //case Room1: noone;
-        case Room1: _new_music = NighttimeintheCity; break;
+        //case Room1: _new_music = NighttimeintheCity; break;
         //case rm_dungeon1: _new_music = mus_dungeon_theme; break;
         // Add other rooms
     }

@@ -36,13 +36,13 @@ function scr_InitEncounterTable() {
     ds_map_add_list(global.encounter_table, rm_cave_3, list_room2); // Using Room2 as key
     show_debug_message("  -> Added formations for Room: Room2");
     
-        // === Room 2 Encounters ===
+   /*     // === Room 2 Encounters ===
     var list_room3 = ds_list_create();
     ds_list_add(list_room3, [obj_enemy_slime]);
     ds_list_add(list_room3, [obj_enemy_goblin]);
     ds_map_add_list(global.encounter_table, rm_cave_tutorial, list_room3); // Using Room2 as key
     show_debug_message("  -> Added formations for Room: Room3");
-
+*/
     // Add other rooms and their formation lists...
 
     show_debug_message("💾 Encounter Table Initialized. Size: " + string(ds_map_size(global.encounter_table)));

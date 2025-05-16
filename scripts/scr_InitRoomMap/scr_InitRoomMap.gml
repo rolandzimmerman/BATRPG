@@ -21,7 +21,7 @@ function scr_InitRoomMap() {
     // rm_cave_tutorial connections
     var r1 = rm_cave_tutorial;
     var m1 = ds_map_create();
-    ds_map_add(m1, "left",  rm_bat_debug);
+    ds_map_add(m1, "left",  rm_cave_boss);
     ds_map_add(m1, "right", rm_cave_2);
     ds_map_add(m1, "above", noone);
     ds_map_add(m1, "below", noone);
@@ -36,16 +36,7 @@ function scr_InitRoomMap() {
     ds_map_add(m2, "below", noone);
     ds_map_add(global.room_map, r2, m2);
     
-    // rm_cave_2 connections
-    var r3 = rm_bat_debug;
-    var m3 = ds_map_create();
-    ds_map_add(m3, "left",  noone);
-    ds_map_add(m3, "right", rm_cave_tutorial);
-    ds_map_add(m3, "above", noone);
-    ds_map_add(m3, "below", noone);
-    ds_map_add(global.room_map, r3, m3);
-    
-    // rm_cave_2 connections
+        // rm_cave_3 connections
     var r4 = rm_cave_3;
     var m4 = ds_map_create();
     ds_map_add(m4, "left",  rm_cave_2);
@@ -53,6 +44,26 @@ function scr_InitRoomMap() {
     ds_map_add(m4, "above", noone);
     ds_map_add(m4, "below", noone);
     ds_map_add(global.room_map, r4, m4);
+    
+            // rm_cave_3 connections
+    var r5 = rm_cave_boss;
+    var m5 = ds_map_create();
+    ds_map_add(m5, "left",  noone);
+    ds_map_add(m5, "right", rm_cave_tutorial);
+    ds_map_add(m5, "above", noone);
+    ds_map_add(m5, "below", noone);
+    ds_map_add(global.room_map, r5, m5);
+    
+    /*// rm_cave_2 connections
+    var r3 = rm_bat_debug;
+    var m3 = ds_map_create();
+    ds_map_add(m3, "left",  rm_cave_3);
+    ds_map_add(m3, "right", noone);
+    ds_map_add(m3, "above", noone);
+    ds_map_add(m3, "below", noone);
+    ds_map_add(global.room_map, r3, m3);
+    */
+
 
     // …add more rooms here…
 
