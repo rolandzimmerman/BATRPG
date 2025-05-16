@@ -25,13 +25,14 @@
   "physicsShape":1,
   "physicsShapePoints":[],
   "physicsStartAwake":true,
-  "properties":[
-    {"$GMObjectProperty":"v1","%Name":"spawn_id","filters":[],"listItems":[],"multiselect":false,"name":"spawn_id","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"-1","varType":2,},
-  ],
+  "properties":[],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"babybat",
+    "path":"sprites/babybat/babybat.yy",
+  },
   "spriteMaskId":null,
-  "visible":true,
+  "visible":false,
 }

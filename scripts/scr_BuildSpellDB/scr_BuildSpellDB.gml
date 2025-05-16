@@ -132,9 +132,9 @@ function scr_BuildSpellDB() {
             effect:          "echo_wave",
             target_type:     "enemy",
             damage:          25,
-            element:         "physical",
+            element:         "lightning",
             power_stat:      "matk",
-            fx_sprite:       spr_echo,
+            fx_sprite:       spr_echo_right,
             fx_sound:        snd_sfx_magic,
             usable_in_field: false,
             unlock_item:     "echo_gem"   // <— tag it here
@@ -145,9 +145,9 @@ function scr_BuildSpellDB() {
             effect:          "meteor_dive",
             target_type:     "enemy",
             damage:          40,
-            element:         "physical",
+            element:         "lightning",
             power_stat:      "atk",
-            fx_sprite:       spr_echo,
+            fx_sprite:       spr_echo_right,
             fx_sound:        snd_sfx_magic,
             usable_in_field: false,
             unlock_item:     "meteor_shard"   // <— tag it here

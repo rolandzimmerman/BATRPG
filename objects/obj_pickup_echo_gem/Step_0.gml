@@ -108,7 +108,7 @@ if (script_exists(create_dialog)) {
     create_dialog([
         { 
             name: "", 
-            msg: added ? "You got the Echo Gem! Press X to fire the Echo Wave." : "You already have an Echo Gem." 
+            msg: added ? "You got the Echo Gem! Press X to fire the Echo Wave. Select it in combat by pressing X to bring up the skills menu!" : "You already have an Echo Gem." 
         }
     ]);
 } else {
