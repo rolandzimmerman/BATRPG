@@ -614,6 +614,7 @@
     {"id":{"name":"spr_death","path":"sprites/spr_death/spr_death.yy",},},
     {"id":{"name":"spr_defend","path":"sprites/spr_defend/spr_defend.yy",},},
     {"id":{"name":"spr_destructible_block_break","path":"sprites/spr_destructible_block_break/spr_destructible_block_break.yy",},},
+    {"id":{"name":"spr_destructible_block_mask","path":"sprites/spr_destructible_block_mask/spr_destructible_block_mask.yy",},},
     {"id":{"name":"spr_destructible_block","path":"sprites/spr_destructible_block/spr_destructible_block.yy",},},
     {"id":{"name":"spr_dive_slam","path":"sprites/spr_dive_slam/spr_dive_slam.yy",},},
     {"id":{"name":"spr_dive","path":"sprites/spr_dive/spr_dive.yy",},},

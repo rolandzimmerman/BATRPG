@@ -555,6 +555,7 @@
     {"name":"spr_death","order":18,"path":"sprites/spr_death/spr_death.yy",},
     {"name":"spr_defend","order":19,"path":"sprites/spr_defend/spr_defend.yy",},
     {"name":"spr_destructible_block_break","order":1,"path":"sprites/spr_destructible_block_break/spr_destructible_block_break.yy",},
+    {"name":"spr_destructible_block_mask","order":12,"path":"sprites/spr_destructible_block_mask/spr_destructible_block_mask.yy",},
     {"name":"spr_dive_slam","order":10,"path":"sprites/spr_dive_slam/spr_dive_slam.yy",},
     {"name":"spr_dpad","order":21,"path":"sprites/spr_dpad/spr_dpad.yy",},
     {"name":"spr_echo_gem","order":5,"path":"sprites/spr_echo_gem/spr_echo_gem.yy",},

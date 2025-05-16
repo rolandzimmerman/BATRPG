@@ -53,12 +53,12 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
         }
         // micro-nudge not needed vertically
 
-/*        // vertical fallback
+       // vertical fallback
         if ((place_meeting(old_x, y, self.tilemap) || place_meeting(old_x, y, self.tilemap_phase_id))) {
             y = old_y;
             v_speed = 0;
         }
-*/
+
         // Transition
         if (array_length(vcols) > 0) {
             if (v_speed >= 0) player_state = PLAYER_STATE.WALKING_FLOOR;
@@ -100,9 +100,9 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
                 y -= 1; move_and_collide(hspd2,0,targets); y += 1;
             }
             // corner-slide
-            if (x==old_x2) {
-                x += sign(hspd2); y += 1; v_speed = 0;
-            }
+            //if (x==old_x2) {
+            //    x += sign(hspd2); y += 1; v_speed = 0;
+            //}
         }
 
         // horizontal fallback
@@ -152,9 +152,9 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
                 y += 1; move_and_collide(hspd3,0,targets); y -= 1;
             }
             // corner-slide
-            if (x==old_x3) {
-                x += sign(hspd3); y -= 1; v_speed = 0;
-            }
+            ///if (x==old_x3) {
+            ///    x += sign(hspd3); y -= 1; v_speed = 0;
+            //}
         }
 
         // horizontal fallback

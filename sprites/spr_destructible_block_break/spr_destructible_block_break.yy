@@ -1,9 +1,9 @@
 {
   "$GMSprite":"",
   "%Name":"spr_destructible_block_break",
-  "bboxMode":0,
+  "bboxMode":1,
   "bbox_bottom":191,
-  "bbox_left":4,
+  "bbox_left":0,
   "bbox_right":191,
   "bbox_top":0,
   "collisionKind":1,
