@@ -23,5 +23,5 @@ pre_battle_room = noone;
 
 // --- NEW: Variable to track instance fading out ---
 instance_fading_out = noone;
-fade_time_ms = 500; // Default fade time: 1000ms = 1 second
+fade_time_ms = 250; // Default fade time: 1000ms = 1 second
 // --- END NEW VARIABLE ---

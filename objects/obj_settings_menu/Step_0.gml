@@ -85,19 +85,33 @@ if (_down_pressed) {
     input_cooldown = _nav_cooldown_time;
 }
 
-// --- Handle Actions for Selected Main Menu Item ---
-var current_setting_item = settings_items[settings_index]; // settings_items is an instance variable
-
+// --- Handle Actions for Selected Main Menu Item (Specifically the "Back" case) ---
 if (_confirm_pressed) {
     input_cooldown = _nav_cooldown_time; 
+    var current_setting_item = settings_items[settings_index]; // Ensure this is fetched if not already
+
     switch (current_setting_item) {
         case "Back":
-            active = false; 
-            var pause_menu_inst = instance_find(obj_pause_menu, 0); // pause_menu_inst is local
-            if (instance_exists(pause_menu_inst)) {
-                pause_menu_inst.active = true;
+            show_debug_message("Settings: 'Back' item confirmed.");
+            active = false; // Deactivate self
+
+            if (variable_instance_exists(id, "opened_by_instance_id") && instance_exists(opened_by_instance_id)) {
+                var _target_menu_id = opened_by_instance_id; // Store in a local var for clarity
+                _target_menu_id.active = true;
+                show_debug_message("Settings: Reactivated calling instance ID: " + string(_target_menu_id) + ". Its active state: " + string(_target_menu_id.active));
+            } else {
+                show_debug_message("Settings: 'opened_by_instance_id' (" + string(opened_by_instance_id) + ") is invalid or instance no longer exists. Attempting fallback to obj_title_menu.");
+                // Fallback: Try to find and activate any obj_title_menu
+                var _title_menu_fallback = instance_find(obj_title_menu, 0);
+                if (instance_exists(_title_menu_fallback)) {
+                    _title_menu_fallback.active = true;
+                    show_debug_message("Settings: Fallback reactivated obj_title_menu (ID: " + string(_title_menu_fallback.id) + ")");
+                } else {
+                    show_debug_message("Settings: Fallback failed - no obj_title_menu instance found.");
+                }
             }
-            exit; 
+            opened_by_instance_id = noone; // Reset for future use
+            exit; // Stop further processing in this step for obj_settings_menu
             break; 
         case "Display Mode":
             dropdown_display_open = !dropdown_display_open;
@@ -112,14 +126,30 @@ if (_confirm_pressed) {
     }
 }
 
-// Handle "Back" button press to close the menu entirely (if not in a dropdown and not handled by confirm on "Back" item)
-if (_back_pressed) {
-    active = false; 
-    var pause_menu_inst = instance_find(obj_pause_menu, 0); // pause_menu_inst is local
-    if (instance_exists(pause_menu_inst)) {
-        pause_menu_inst.active = true;
+// Handle "Back" button press (Escape key / Gamepad B) to close the settings menu
+// This runs if not in a dropdown and "Back" item wasn't just confirmed
+if (_back_pressed && !dropdown_display_open && !dropdown_resolution_open) {
+    show_debug_message("Settings: General 'Back' button pressed (ESC/B).");
+    active = false; // Deactivate self
+
+    if (variable_instance_exists(id, "opened_by_instance_id") && instance_exists(opened_by_instance_id)) {
+        var _target_menu_id_esc = opened_by_instance_id;
+        _target_menu_id_esc.active = true;
+        show_debug_message("Settings (ESC/B): Reactivated calling instance ID: " + string(_target_menu_id_esc) + ". Its active state: " + string(_target_menu_id_esc.active));
+    } else {
+        show_debug_message("Settings (ESC/B): 'opened_by_instance_id' (" + string(opened_by_instance_id) + ") is invalid or instance no longer exists. Attempting fallback to obj_title_menu.");
+        // Fallback
+        var _title_menu_fallback_esc = instance_find(obj_title_menu, 0);
+        if (instance_exists(_title_menu_fallback_esc)) {
+            _title_menu_fallback_esc.active = true;
+            show_debug_message("Settings (ESC/B): Fallback reactivated obj_title_menu (ID: " + string(_title_menu_fallback_esc.id) + ")");
+        } else {
+            show_debug_message("Settings (ESC/B): Fallback failed - no obj_title_menu instance found.");
+        }
     }
-    exit; 
+    opened_by_instance_id = noone; // Reset for future use
+    input_cooldown = _nav_cooldown_time; // Add cooldown to prevent back button from affecting reactivated menu immediately
+    exit; // Stop further processing in this step for obj_settings_menu
 }
 
 // Handle Left/Right for sliders (Volume controls)

@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"WeOnlyComeOutAtNight",
+  "audioGroupId":{
+    "name":"audio_group_music",
+    "path":"audiogroups/audio_group_music",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":0,
+  "conversionMode":0,
+  "duration":64.0,
+  "name":"WeOnlyComeOutAtNight",
+  "parent":{
+    "name":"Music",
+    "path":"folders/Sounds/Music.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"WeOnlyComeOutAtNight.mp3",
+  "type":0,
+  "volume":1.0,
+}
