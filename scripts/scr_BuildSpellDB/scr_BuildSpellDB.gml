@@ -129,12 +129,12 @@ function scr_BuildSpellDB() {
         echo_wave: {
             name:            "Echo Wave",
             cost:            3,
-            effect:          "echo_wave",
+            effect:          "damage_enemy",
             target_type:     "enemy",
             damage:          25,
             element:         "lightning",
             power_stat:      "matk",
-            fx_sprite:       spr_echo_right,
+            fx_sprite:       spr_echo_spell,
             fx_sound:        snd_sfx_magic,
             usable_in_field: false,
             unlock_item:     "echo_gem"   // <— tag it here
@@ -142,7 +142,7 @@ function scr_BuildSpellDB() {
         meteor_dive: {
             name:            "Meteor Dive",
             cost:            5,
-            effect:          "meteor_dive",
+            effect:          "damage_enemy",
             target_type:     "enemy",
             damage:          40,
             element:         "lightning",
@@ -225,15 +225,15 @@ function scr_BuildSpellDB() {
     var hero_map = ds_map_create();
     ds_map_add(hero_map, "1", "echo_wave");   // ← now the hero “learns” Echo Wave
     ds_map_add(hero_map, "2", "overdrive_strike");
-    ds_map_add(hero_map, "3", "greater_heal");
+    ds_map_add(hero_map, "3", "heal");
     ds_map_add(hero_map, "5", "frostbolt");
     ds_map_add(sched, "hero", hero_map);
 
 
     // Boy schedule
     var claude_map = ds_map_create();
-    ds_map_add(claude_map, "2", "overdrive_heal");
-    ds_map_add(claude_map, "3", "fireball");
+    ds_map_add(claude_map, "2", "heal");
+    ds_map_add(claude_map, "3", "overdrive_heal");
     ds_map_add(claude_map, "4", "bind");
     ds_map_add(claude_map, "6", "heal");
     ds_map_add(sched, "claude", claude_map);
@@ -247,10 +247,10 @@ function scr_BuildSpellDB() {
     
     // Goblin schedule
     var gabby_map = ds_map_create();
-    ds_map_add(gabby_map, "2", "overcast");
+    ds_map_add(gabby_map, "2", "fireball");
     ds_map_add(gabby_map, "3", "greater_heal");
     ds_map_add(gabby_map, "5", "frostbolt");
-    ds_map_add(sched, "izzy", gabby_map);
+    ds_map_add(sched, "gabby", gabby_map);
 
     // 3) Attach it to the struct
     _spell_db.learning_schedule = sched;
