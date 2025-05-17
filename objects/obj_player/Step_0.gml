@@ -391,8 +391,9 @@ if (bbox_left <= _exit_margin) {
                 show_debug_message("LEFT EXIT: Destination is VALID. Transitioning to " + room_get_name(dest));
                 global.entry_direction = "none";
                 global.next_spawn_object = obj_spawn_point_right;
-                room_goto(dest);
-                exit;
+                show_debug_message("STEP EVENT: Transitioning to " + room_get_name(dest) + ". Setting global.next_spawn_object to: " + ((global.next_spawn_object != noone && global.next_spawn_object != undefined) ? object_get_name(global.next_spawn_object) : string(global.next_spawn_object)) );
+room_goto(dest);
+exit;
             } else {
                 show_debug_message("LEFT EXIT: Transition FAILED. dest: " + string(dest) + " (" + dest_name + "), asset_type_is_room: " + string(asset_get_type(dest) == asset_room) + ", room_exists(dest): " + string(room_exists(dest)));
                 // Player remains in current room. Clamps will apply.

@@ -55,30 +55,23 @@ if (variable_instance_exists(id, "load_pending")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 2) Battle Return Handling
+// 2) Battle Return Handling (SIMPLIFIED IN GAME MANAGER)
 ////////////////////////////////////////////////////////////////////////////////
 else if (
-    variable_global_exists("original_room")
- && room == global.original_room
- && variable_global_exists("return_x")
- && variable_global_exists("return_y")
+    variable_global_exists("original_room") // Check if a battle return was even initiated
+ && room == global.original_room          // Check if we are in the correct room for that return
+ && variable_global_exists("return_x")    // And if the coordinates are still pending
  && !is_undefined(global.return_x)
- && !is_undefined(global.return_y)
 )
 {
-    var _player = instance_find(obj_player,0);
-if (instance_exists(_player)) {
-    _player.x = global.return_x;
-    _player.y = global.return_y;
-    show_debug_message("Game Manager: Player position restored to battle return coordinates (" + string(_player.x) + "," + string(_player.y) + ")");
-    global.player_position_handled_by_battle_return = true; // SET THE FLAG HERE
-}
-// clear global variables
-global.original_room = undefined;
-global.return_x      = undefined;
-global.return_y      = undefined;
-
-return; // Early exit
+    // obj_player's Room Start is now responsible for using and clearing
+    // global.return_x, global.return_y, and global.original_room.
+    // The Game Manager's role here is minimal, perhaps just logging or ensuring obj_player exists.
+    // The flag global.player_position_handled_by_battle_return is NO LONGER NEEDED by obj_player.
+    // GM can still clear its *own* general global state variables if it has any, but not the player's positioning ones.
+    show_debug_message("Game Manager: In original battle room. obj_player should handle its positioning using globals.");
+    // No 'return;' or 'exit;' here, let GM's other Room Start logic (like Standard Entry) run if needed,
+    // though standard entry is a fallback and player should ideally always be positioned by its own Room Start.
 }
 
 // 3) Standard Entry Spawn (Game Manager's own fallback, mostly for non-transition scenarios or if Player Room Start failed utterly)

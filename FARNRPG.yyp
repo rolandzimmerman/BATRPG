@@ -754,10 +754,10 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
+    {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
     {"roomId":{"name":"FARN","path":"rooms/FARN/FARN.yy",},},
     {"roomId":{"name":"Titlescreen","path":"rooms/Titlescreen/Titlescreen.yy",},},
     {"children":[
-        {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
         {"roomId":{"name":"rm_cave_2","path":"rooms/rm_cave_2/rm_cave_2.yy",},},
         {"roomId":{"name":"rm_battle","path":"rooms/rm_battle/rm_battle.yy",},},
         {"roomId":{"name":"rm_cave_3","path":"rooms/rm_cave_3/rm_cave_3.yy",},},
