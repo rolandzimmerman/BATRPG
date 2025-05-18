@@ -1,0 +1,18 @@
+{
+  "$GMPath":"",
+  "%Name":"opening_cutscene_rm_1",
+  "closed":false,
+  "kind":0,
+  "name":"opening_cutscene_rm_1",
+  "parent":{
+    "name":"Paths",
+    "path":"folders/Paths.yy",
+  },
+  "points":[
+    {"speed":100.0,"x":758.0,"y":864.0,},
+    {"speed":100.0,"x":3744.0,"y":864.0,},
+  ],
+  "precision":4,
+  "resourceType":"GMPath",
+  "resourceVersion":"2.0",
+}

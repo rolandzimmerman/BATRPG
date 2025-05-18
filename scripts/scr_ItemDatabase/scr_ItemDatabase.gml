@@ -128,12 +128,12 @@ function scr_ItemDatabase() {
     // --- ARMOR & ACCESSORIES ---
     ds_map_add(_item_map, "leather_armor", {
         item_key        : "leather_armor", 
-        name            : "Leather Wing Armor", 
+        name            : "Leather Ear Covers", 
         description     : "+3 DEF.",
         type            : "equipment", 
         equip_slot      : "armor",
         bonuses         : { def:3 },
-        allowed_classes : ["Hero", "Thief"],
+        allowed_classes : ["Hero"],
         usable_in_battle: false, 
         usable_in_field : false, 
         value           : 110,
@@ -143,7 +143,7 @@ function scr_ItemDatabase() {
     
     ds_map_add(_item_map, "thief_gloves", {
         item_key        : "thief_gloves", 
-        name            : "Thief Gloves", 
+        name            : "Thief Boots x6", 
         description     : "+2 SPD, +2 LUK.",
         type            : "equipment", 
         equip_slot      : "accessory",

@@ -55,6 +55,7 @@ if (room == rm_battle) {
     switch (room) {
         //case Room2: _new_music = noone; break; 
         case Titlescreen: _new_music = WeOnlyComeOutAtNight; break;
+        case rm_opening_cutscene_1: _new_music = TorchesScorches; break;
         //case rm_dungeon1: _new_music = mus_dungeon_theme; break;
         // Add other rooms
     }

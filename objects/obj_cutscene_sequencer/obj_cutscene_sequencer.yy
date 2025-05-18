@@ -11,8 +11,8 @@
   "name":"obj_cutscene_sequencer",
   "overriddenProperties":[],
   "parent":{
-    "name":"Game",
-    "path":"folders/Objects/Game.yy",
+    "name":"Cutscenes",
+    "path":"folders/Objects/Cutscenes.yy",
   },
   "parentObjectId":null,
   "persistent":false,
