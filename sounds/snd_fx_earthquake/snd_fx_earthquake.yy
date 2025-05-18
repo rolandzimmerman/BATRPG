@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":0,
   "conversionMode":0,
-  "duration":9.999909,
+  "duration":12.016327,
   "name":"snd_fx_earthquake",
   "parent":{
     "name":"Sounds",
@@ -19,7 +19,7 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"snd_fx_earthquake.wav",
+  "soundFile":"snd_fx_earthquake.mp3",
   "type":0,
   "volume":1.0,
 }

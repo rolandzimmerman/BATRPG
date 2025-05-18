@@ -768,8 +768,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rm_opening_cutscene_2","path":"rooms/rm_opening_cutscene_2/rm_opening_cutscene_2.yy",},},
     {"roomId":{"name":"FARN","path":"rooms/FARN/FARN.yy",},},
+    {"roomId":{"name":"rm_opening_cutscene_2","path":"rooms/rm_opening_cutscene_2/rm_opening_cutscene_2.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_3","path":"rooms/rm_opening_cutscene_3/rm_opening_cutscene_3.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_1","path":"rooms/rm_opening_cutscene_1/rm_opening_cutscene_1.yy",},},
     {"roomId":{"name":"Titlescreen","path":"rooms/Titlescreen/Titlescreen.yy",},},
