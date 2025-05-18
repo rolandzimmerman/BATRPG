@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_player_handle_npc_interaction",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_player_handle_npc_interaction",
+  "parent":{
+    "name":"Movement",
+    "path":"folders/Scripts/Movement.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -76,7 +76,7 @@ function scr_ItemDatabase() {
     // --- WEAPONS ---
     ds_map_add(_item_map, "bronze_sword", {
         item_key        : "bronze_sword", 
-        name            : "Bronze Sword", 
+        name            : "Wooden Teeth", 
         description     : "+4 ATK.",
         type            : "equipment", 
         equip_slot      : "weapon",
@@ -93,12 +93,12 @@ function scr_ItemDatabase() {
     
     ds_map_add(_item_map, "wooden_staff", {
         item_key        : "wooden_staff", 
-        name            : "Wooden Staff", 
+        name            : "Wooden Broom", 
         description     : "+4 MATK.",
         type            : "equipment", 
         equip_slot      : "weapon",
         bonuses         : { matk:4 },
-        allowed_classes : ["Cleric","Mage"],
+        allowed_classes : ["Mage"],
         usable_in_battle: false, 
         usable_in_field : false, 
         value           : 140,
@@ -110,12 +110,12 @@ function scr_ItemDatabase() {
 
     ds_map_add(_item_map, "iron_dagger", {
         item_key        : "iron_dagger", 
-        name            : "Iron Dagger", 
+        name            : "Iron Dust", 
         description     : "+3 ATK, +1 SPD.",
         type            : "equipment", 
         equip_slot      : "weapon",
         bonuses         : { atk:3, spd:1 },
-        allowed_classes : ["Hero","Thief"],
+        allowed_classes : ["Thief"],
         usable_in_battle: false, 
         usable_in_field : false, 
         value           : 100,
@@ -128,12 +128,12 @@ function scr_ItemDatabase() {
     // --- ARMOR & ACCESSORIES ---
     ds_map_add(_item_map, "leather_armor", {
         item_key        : "leather_armor", 
-        name            : "Leather Armor", 
+        name            : "Leather Wing Armor", 
         description     : "+3 DEF.",
         type            : "equipment", 
         equip_slot      : "armor",
         bonuses         : { def:3 },
-        allowed_classes : [],
+        allowed_classes : ["Hero", "Thief"],
         usable_in_battle: false, 
         usable_in_field : false, 
         value           : 110,

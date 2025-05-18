@@ -10,7 +10,7 @@ function scr_player_update_state_and_movement(_input_dir_x, _action_key_pressed,
     if (self.tilemap_phase_id != -1) {
         array_push(targets, self.tilemap_phase_id);
     }
-    array_push(targets, obj_destructible_block, obj_gate, obj_map_boss_parent);
+    array_push(targets, obj_destructible_block, obj_gate);
     var can_phase = (self.tilemap_phase_id != -1);
 
     var desired_h = _input_dir_x;

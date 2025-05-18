@@ -754,7 +754,6 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
     {"roomId":{"name":"FARN","path":"rooms/FARN/FARN.yy",},},
     {"roomId":{"name":"Titlescreen","path":"rooms/Titlescreen/Titlescreen.yy",},},
     {"children":[
@@ -763,6 +762,7 @@
         {"roomId":{"name":"rm_cave_3","path":"rooms/rm_cave_3/rm_cave_3.yy",},},
         {"roomId":{"name":"rm_bat_debug","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},},
         {"roomId":{"name":"rm_cave_template","path":"rooms/rm_cave_template/rm_cave_template.yy",},},
+        {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
       ],"groupName":"Caves",},
     {"children":[],"groupName":"Forest",},
     {"children":[],"groupName":"Town",},
