@@ -55,7 +55,7 @@ function scr_InitRoomMap() {
     ds_map_add(global.room_map, r5, m5);
     
     // rm_cave_5 connections
-    var r6 = rm_cave_boss;
+    var r6 = rm_cave_goblins;
     var m6 = ds_map_create();
     ds_map_add(m6, "left",  noone);
     ds_map_add(m6, "right", rm_cave_boss);

@@ -1,7 +1,7 @@
 /// obj_npc_recruitable_gabby :: Step Event
 /// @description Handles Gob's cinematic recruitment sequence.
 
-// --- Game Pause Check (Affects this instance's animation/path speed) ---
+// --- Game Pause Check ---
 var _is_game_paused_externally = (instance_exists(obj_game_manager) && 
                                 obj_game_manager.game_state != "playing" && 
                                 obj_game_manager.game_state != "cutscene_gob_recruit");
@@ -17,7 +17,6 @@ if (_is_game_paused_externally &&
 // --- Recruitment Sequence State Machine ---
 switch (sequence_state) {
     case GOB_RECRUIT_SEQ.PRE_SEQUENCE_CHECK:
-        // ... (same as previous answer) ...
         var _is_already_in_party = false;
         if (variable_global_exists("party_members") && is_array(global.party_members)) {
             for (var i = 0; i < array_length(global.party_members); i++) {
@@ -40,7 +39,6 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.START_CUTSCENE:
-        // ... (same as previous answer) ...
         show_debug_message(character_key + " Seq: START_CUTSCENE -> Pausing game and starting WALK_PATH_1");
         if (instance_exists(obj_game_manager)) {
             obj_game_manager.game_state = "cutscene_gob_recruit"; 
@@ -49,17 +47,16 @@ switch (sequence_state) {
         
         is_busy = true;
         path_start(path1_asset, path1_walk_speed, path_action_stop, true);
-        sprite_index = sprite_walk;
+        sprite_index = sprite_walk; // Start with walk sprite
         image_speed = 1; 
         sequence_state = GOB_RECRUIT_SEQ.WALK_PATH_1;
         break;
 
     case GOB_RECRUIT_SEQ.WALK_PATH_1:
-        // ... (same as previous answer) ...
         if (path_position >= 1) {
             show_debug_message(character_key + " Seq: WALK_PATH_1 -> DIALOGUE_1_SETUP");
             path_end();
-            sprite_index = sprite_idle;
+            sprite_index = sprite_idle; // Change to idle after first walk
             image_speed = 0;
             image_index = 0;
             sequence_state = GOB_RECRUIT_SEQ.DIALOGUE_1_SETUP;
@@ -68,7 +65,6 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.DIALOGUE_1_SETUP:
-        // ... (same as previous answer) ...
         show_debug_message(character_key + " Seq: DIALOGUE_1_SETUP -> DIALOGUE_1_WAIT");
         if (script_exists(create_dialog) && !instance_exists(obj_dialog)) {
             create_dialog(dialogue_set_1);
@@ -82,7 +78,6 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.DIALOGUE_1_WAIT:
-        // ... (same as previous answer) ...
         if (!instance_exists(obj_dialog)) { 
             show_debug_message(character_key + " Seq: DIALOGUE_1_WAIT -> WALK_PATH_2_FAST");
             sequence_state = GOB_RECRUIT_SEQ.WALK_PATH_2_FAST;
@@ -90,63 +85,65 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.WALK_PATH_2_FAST:
-        // ... (blast sound and start path, same as previous) ...
         show_debug_message(character_key + " Seq: WALK_PATH_2_FAST (starting)");
-        if (audio_exists(snd_sfx_gob_blast)) { 
+        if (audio_exists(snd_sfx_gob_blast)) {
              audio_play_sound(snd_sfx_gob_blast, 10, false, 1); 
         }
         path_start(path2_asset, path2_super_fast_speed, path_action_stop, true);
-        sprite_index = sprite_walk; 
-        image_speed = 2; 
+        sprite_index = sprite_walk; // Use walk/run sprite for fast movement
+        image_speed = 2; // Faster animation
         sequence_state = GOB_RECRUIT_SEQ.WALK_PATH_2_REVERSE_SETUP;
         break;
 
     case GOB_RECRUIT_SEQ.WALK_PATH_2_REVERSE_SETUP:
-        if (path_position >= 1) { // Fast path ended
-            show_debug_message(character_key + " Seq: WALK_PATH_2_FAST ended -> CRASH, SHAKE, and starting REVERSE");
+        if (path_position >= 1) { // Reached "ceiling" (end of fast forward path)
+            show_debug_message(character_key + " Seq: WALK_PATH_2_FAST ended -> CRASH, SHAKE, change to SMASHED sprite, and starting REVERSE");
             path_end(); 
+            
+            // --- Change to Smashed Sprite and make it static ---
+            sprite_index = sprite_smashed; // <<<< SET TO SMASHED SPRITE
+            image_index = 0;               // Start at first frame of smashed sprite
+            image_speed = 0;               // Keep it static (not animating)
             
             // --- Play Crash Sound ---
             if (audio_exists(snd_fx_crash)) {
                 audio_play_sound(snd_fx_crash, 8, false, 1);
             }
             
-            // --- Trigger Screen Shake by Toggling Layer Visibility ---
-            if (script_exists(scr_show_layer_for_duration)) {
-                // Use the EXACT name of your Effect Layer from the Room Editor
-                var _effect_layer_name_to_show = "MyScreenShakeEffect"; // FROM YOUR SCREENSHOT
-                var _shake_duration_frames = floor(game_get_speed(gamespeed_fps) * 0.5); // 0.5 seconds
-                
+            // --- Trigger Screen Shake via Effect Layer ---
+            if (script_exists(scr_show_layer_for_duration)) { // Using the layer visibility toggle method
+                var _effect_layer_name_to_show = "MyScreenShakeEffect"; 
+                var _shake_duration_frames = floor(game_get_speed(gamespeed_fps) * 0.5);
                 show_debug_message(character_key + ": Calling scr_show_layer_for_duration for Layer: '" + _effect_layer_name_to_show + "'");
                 scr_show_layer_for_duration(_effect_layer_name_to_show, _shake_duration_frames);
             } else {
                 show_debug_message("ERROR: scr_show_layer_for_duration script not found!");
             }
             
-            // Start reverse path
+            // Start reverse path (Gob is already spr_gob_smashed and image_speed = 0)
             path_start(path2_asset, path2_reverse_slow_speed, path_action_stop, true);
-            sprite_index = sprite_walk;
-            image_speed = 0.75; 
+            // No need to set sprite_index or image_speed here again, as it should stay smashed & static
             sequence_state = GOB_RECRUIT_SEQ.WALK_PATH_2_REVERSE;
         }
+        // Update facing for forward movement if still moving forward before impact
         if (path_speed > 0 && x != xprevious) { image_xscale = sign(x - xprevious); }
         break;
         
     case GOB_RECRUIT_SEQ.WALK_PATH_2_REVERSE:
-        // ... (same as previous answer) ...
-         if (path_position <= 0) { 
+         // Gob is currently sprite_smashed and image_speed = 0
+         if (path_position <= 0) { // Reached beginning of path (end of reverse)
             show_debug_message(character_key + " Seq: WALK_PATH_2_REVERSE ended -> DIALOGUE_2_SETUP");
             path_end();
-            sprite_index = sprite_idle;
-            image_speed = 0;
-            image_index = 0;
+            // image_speed is already 0. Sprite remains spr_gob_smashed.
+            // No need to set sprite_index = sprite_idle here anymore.
             sequence_state = GOB_RECRUIT_SEQ.DIALOGUE_2_SETUP;
         }
+        // Gob might still "face" direction of movement if smashed sprite is flippable
         if (path_speed < 0 && x != xprevious) { image_xscale = sign(x - xprevious); }
         break;
 
     case GOB_RECRUIT_SEQ.DIALOGUE_2_SETUP:
-        // ... (same as previous answer) ...
+        // Gob is still spr_gob_smashed, image_speed = 0
         show_debug_message(character_key + " Seq: DIALOGUE_2_SETUP -> DIALOGUE_2_WAIT");
         if (script_exists(create_dialog) && !instance_exists(obj_dialog)) {
             create_dialog(dialogue_set_2);
@@ -160,7 +157,7 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.DIALOGUE_2_WAIT:
-        // ... (same as previous answer) ...
+        // Gob is still spr_gob_smashed, image_speed = 0
         if (!instance_exists(obj_dialog)) {
             show_debug_message(character_key + " Seq: DIALOGUE_2_WAIT -> PERFORM_RECRUIT");
             sequence_state = GOB_RECRUIT_SEQ.PERFORM_RECRUIT;
@@ -168,7 +165,7 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.PERFORM_RECRUIT:
-        // ... (Full recruitment logic, same as previous answer) ...
+        // Gob is still spr_gob_smashed, image_speed = 0
         show_debug_message(character_key + " Seq: PERFORM_RECRUIT");
         var _char_key = character_key; 
         
@@ -230,7 +227,7 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.UNPAUSE_AND_FINISH:
-        // ... (same as previous answer) ...
+        // Gob is still spr_gob_smashed, image_speed = 0
         if (!instance_exists(obj_dialog)) { 
             show_debug_message(character_key + " Seq: UNPAUSE_AND_FINISH -> DONE. Unpausing game.");
             if (instance_exists(obj_game_manager)) {
@@ -242,7 +239,7 @@ switch (sequence_state) {
         break;
 
     case GOB_RECRUIT_SEQ.DONE:
-        // ... (same as previous answer) ...
+        // Gob is still spr_gob_smashed, image_speed = 0
         show_debug_message(character_key + " Seq: DONE. Destroying instance " + string(id));
         instance_destroy();
         break;

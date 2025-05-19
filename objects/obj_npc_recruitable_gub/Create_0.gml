@@ -56,6 +56,7 @@ can_recruit = false;
 // Animation Sprites (Ensure these sprite assets exist)
 sprite_idle = gob; // Replace with your actual sprite names
 sprite_walk = gob; // Replace with your actual sprite names
+sprite_smashed = gob_smashed; // <<< ADD THIS LINE (Your new smashed sprite)
 sprite_index = sprite_idle;
 image_speed = 0;
 image_xscale = 1;
