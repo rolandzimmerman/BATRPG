@@ -31,3 +31,12 @@ if (keyboard_check_pressed(vk_f9)) {
     // Log whether the load script initiated the process (doesn't mean loading finished)
     show_debug_message("--- scr_load_game Initiated: " + string(_load_initiated) + " ---"); // DEBUG
 }
+
+layer_to_hide_on_alarm = ""; // Stores the name of the layer to hide via Alarm 1
+
+// --- Variables for other methods (can be commented out if not used) ---
+// active_shake_fx_struct_on_layer = undefined; 
+// fx_to_disable_on_alarm = "";
+// shake_active = false;
+// shake_timer = 0;
+// shake_magnitude = 0;

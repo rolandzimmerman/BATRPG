@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"snd_sfx_gob_blast",
+  "audioGroupId":{
+    "name":"audio_group_sfx",
+    "path":"audiogroups/audio_group_sfx",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":0,
+  "conversionMode":0,
+  "duration":1.4564172,
+  "name":"snd_sfx_gob_blast",
+  "parent":{
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"snd_sfx_gob_blast.mp3",
+  "type":0,
+  "volume":1.0,
+}

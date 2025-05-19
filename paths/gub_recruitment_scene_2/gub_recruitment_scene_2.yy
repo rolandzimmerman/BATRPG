@@ -1,0 +1,18 @@
+{
+  "$GMPath":"",
+  "%Name":"gub_recruitment_scene_2",
+  "closed":false,
+  "kind":0,
+  "name":"gub_recruitment_scene_2",
+  "parent":{
+    "name":"Paths",
+    "path":"folders/Paths.yy",
+  },
+  "points":[
+    {"speed":100.0,"x":3490.0,"y":862.0,},
+    {"speed":100.0,"x":3490.0,"y":0.0,},
+  ],
+  "precision":4,
+  "resourceType":"GMPath",
+  "resourceVersion":"2.0",
+}

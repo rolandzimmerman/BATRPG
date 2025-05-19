@@ -50,6 +50,56 @@ function scr_BuildSpellDB() {
             fx_sprite:   spr_fx_magic, // <<< ADDED (Example sprite)
             fx_sound:    snd_sfx_magic     // <<< ADDED (Example sound)
         },
+        // MODIFIED/AUGMENTED STEAL
+        steal: { 
+            name: "Steal",
+            cost: 5, // Example cost, can be 0
+            effect: "steal_item", 
+            target_type: "enemy",
+            animation_type: "physical", 
+            fx_sprite: spr_slash, 
+            fx_sound: snd_sfx_status,
+            // Properties for steal calculation
+            base_chance: 30,    // Base success rate (percentage)
+            speed_factor: 0.5,  // Bonus chance per point of user's speed
+            luck_factor: 1.0,   // Bonus chance per point of user's luck
+            power_stat: "spd"   // Indicates speed might be relevant beyond just chance
+        },
+        // --- NEW AOE DAMAGE SPELL ---
+        earthquake: {
+            name: "Earthquake",
+            cost: 22,
+            effect: "damage_enemies", // New effect type for clarity, or reuse existing
+            target_type: "all_enemies", 
+            damage: 40, 
+            element: "earth",
+            power_stat: "atk", // Or "matk"
+            fx_sprite: spr_fx_magic, // Example
+            fx_sound: snd_sfx_magic  // Example
+        },
+        quick_attack: { 
+            name:"Quick Attack", cost:3, 
+            effect:"damage_enemy", 
+            target_type:"enemy",
+            damage:10, 
+            element:"physical", 
+            power_stat:"atk",
+            animation_type:"physical", 
+            fx_sprite:spr_slash, 
+            fx_sound:snd_punch
+        },
+        // --- NEW PARTY HEAL SPELL ---
+        mass_heal: {
+            name: "Mass Heal",
+            cost: 18,
+            effect: "heal_party", // New effect type for clarity, or reuse existing
+            target_type: "all_allies",
+            heal_amount: 50,
+            power_stat: "matk",
+            fx_sprite: spr_fx_magic, // Example
+            fx_sound: snd_sfx_magic, // Example
+            usable_in_field: true
+        },
         // --- Status Effect Spells ---
          blind: {
             name:        "Blind",
@@ -119,13 +169,25 @@ function scr_BuildSpellDB() {
             name:        "OVERDRIVE HEAL",  // ← now uppercase
             cost:        0,
             overdrive:   true,
-            effect:      "heal_hp",
-            target_type: "ally",
+            effect:      "heal_party",
+            target_type: "all_allies",
             heal_amount: 9999,
             power_stat:  "matk",
-            fx_sprite:   spr_fx_magic,
-            fx_sound:    snd_sfx_magic
+            fx_sprite:   spr_fx_heal,
+            fx_sound:    snd_sfx_heal
         },
+        overcast: { 
+            name: "OVERCAST",
+            cost: 0,
+            overdrive: true,
+            effect: "damage_enemies", // This effect already exists
+            target_type: "all_enemies", // Changed from "party" if it means all enemies
+            damage: 100, // Assuming this was intended instead of heal_amount
+            power_stat: "matk",
+            fx_sprite: spr_fx_magic,
+            fx_sound: snd_sfx_magic
+        },
+        //unlockables
         echo_wave: {
             name:            "Echo Wave",
             cost:            3,
@@ -162,26 +224,7 @@ function scr_BuildSpellDB() {
             usable_in_field: false,
             unlock_item:     "flurry_flower"   // <— tag it here
         },
-        steal: { 
-            name:"Steal",        
-            cost:0, 
-            effect:"steal_item", 
-            target_type:"enemy",
-            animation_type:"physical",
-            fx_sprite: spr_slash, 
-            fx_sound: snd_sfx_status
-        },
-        quick_attack: { 
-            name:"Quick Attack", cost:3, 
-            effect:"damage_enemy", 
-            target_type:"enemy",
-            damage:10, 
-            element:"physical", 
-            power_stat:"atk",
-            animation_type:"physical", 
-            fx_sprite:spr_slash, 
-            fx_sound:snd_punch
-        }
+
 
 
 
