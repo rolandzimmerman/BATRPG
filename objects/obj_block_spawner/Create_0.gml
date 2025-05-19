@@ -49,7 +49,7 @@ if (total_blocks_to_spawn > 0) {
         // Arguments: sound_index, priority, loop, gain (optional), offset (optional), pitch (optional)
         // Lower priority number (e.g., 5) means it's more important than higher numbers if channels are limited.
         // Let's give it a moderate priority and ensure it loops.
-        earthquake_sound_instance = audio_play_sound(continuous_background_sound, 5, true);
+        earthquake_sound_instance = audio_play_sound(continuous_background_sound, 5, false);
         show_debug_message("Block Spawner: Started snd_fx_earthquake (Instance ID: " + string(earthquake_sound_instance) + ")");
     } else {
         show_debug_message("Block Spawner Warning: continuous_background_sound (snd_fx_earthquake) not found!");

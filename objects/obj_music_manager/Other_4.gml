@@ -58,6 +58,10 @@ if (room == rm_battle) {
         case rm_opening_cutscene_1: _new_music = TorchesScorches; break;
         case rm_opening_cutscene_2: _new_music = TorchesScorches; break;
         case rm_opening_cutscene_3: _new_music = TorchesScorches; break;
+        case rm_cave_tutorial: _new_music = CrystalCave; break;
+        case rm_cave_2: _new_music = CrystalCave; break;
+        case rm_cave_3: _new_music = CrystalCave; break;
+        case rm_cave_boss: _new_music = CrystalCave; break;
         //case rm_dungeon1: _new_music = mus_dungeon_theme; break;
         // Add other rooms
     }

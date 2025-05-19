@@ -2,8 +2,8 @@
   "$GMSound":"",
   "%Name":"snd_shop_open",
   "audioGroupId":{
-    "name":"audiogroup_default",
-    "path":"audiogroups/audiogroup_default",
+    "name":"audio_group_sfx",
+    "path":"audiogroups/audio_group_sfx",
   },
   "bitDepth":1,
   "bitRate":128,
