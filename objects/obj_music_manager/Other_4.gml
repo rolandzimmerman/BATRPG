@@ -62,6 +62,7 @@ if (room == rm_battle) {
         case rm_cave_2: _new_music = CrystalCave; break;
         case rm_cave_3: _new_music = CrystalCave; break;
         case rm_cave_boss: _new_music = CrystalCave; break;
+        case rm_cave_goblins: _new_music = GoblinTown; break;
         //case rm_dungeon1: _new_music = mus_dungeon_theme; break;
         // Add other rooms
     }
