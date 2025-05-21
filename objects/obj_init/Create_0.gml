@@ -179,22 +179,23 @@ if (!variable_global_exists("room_map")) {
     }
 }
 
-// For Gates/Switches System (if you have a separate one, e.g., global.gate_states_map)
-// If your gate persistence also uses a map named global.gate_states_map, initialize it here too.
-// For example:
+// --- Gates/Switches System (global.gate_states_map) ---
+// Your existing initialization for global.gate_states_map is good:
 if (!variable_global_exists("gate_states_map")) {
     global.gate_states_map = ds_map_create();
-    show_debug_message("  -> Initialized global.gate_states_map (ds_map created for gates/switches).");
+    show_debug_message("obj_init: SUCCESS - Created global.gate_states_map. ID: " + string(global.gate_states_map) + ", Type: " + string(ds_type_to_string(ds_exists(global.gate_states_map, ds_type_map) ? ds_type_map : -1)));
 } else {
     if (!ds_exists(global.gate_states_map, ds_type_map)) {
-        show_debug_message("  -> WARNING: global.gate_states_map existed but was NOT a ds_map! Re-creating.");
+        show_debug_message("obj_init: CRITICAL WARNING - global.gate_states_map existed but was NOT a ds_map! Recreating. Old value: " + string(global.gate_states_map));
         global.gate_states_map = ds_map_create();
+        show_debug_message("obj_init: SUCCESS - Recreated global.gate_states_map. ID: " + string(global.gate_states_map));
     } else {
-        show_debug_message("  -> global.gate_states_map (for gates/switches) already exists and is a ds_map.");
+        show_debug_message("obj_init: global.gate_states_map already exists and is a ds_map. ID: " + string(global.gate_states_map));
     }
 }
 
-// For Recruited NPCs (if you use this map)
+// --- Recruited NPCs Map (global.recruited_npcs_map) ---
+// Your existing initialization for global.recruited_npcs_map is good:
 if (!variable_global_exists("recruited_npcs_map")) {
     global.recruited_npcs_map = ds_map_create();
     show_debug_message("  -> Initialized global.recruited_npcs_map (ds_map created for recruited NPCs).");
@@ -206,7 +207,61 @@ if (!variable_global_exists("recruited_npcs_map")) {
         show_debug_message("  -> global.recruited_npcs_map already exists and is a ds_map.");
     }
 }
+
+// --- ADDED: Broken Blocks Map (global.broken_blocks_map) ---
+show_debug_message("Initializing Broken Blocks Map (global.broken_blocks_map)...");
+if (!variable_global_exists("broken_blocks_map")) {
+    global.broken_blocks_map = ds_map_create();
+    show_debug_message("  -> Initialized global.broken_blocks_map (ds_map created).");
+} else {
+    // If it exists, ensure it's actually a ds_map.
+    if (!ds_exists(global.broken_blocks_map, ds_type_map)) {
+        show_debug_message("  -> CRITICAL WARNING: global.broken_blocks_map existed but was NOT a ds_map! Re-creating.");
+        global.broken_blocks_map = ds_map_create();
+    } else {
+        show_debug_message("  -> global.broken_blocks_map already exists and is a ds_map.");
+    }
+}
+
+// --- ADDED: Loot Drops Map (global.loot_drops_map) ---
+show_debug_message("Initializing Loot Drops Map (global.loot_drops_map)...");
+if (!variable_global_exists("loot_drops_map")) {
+    global.loot_drops_map = ds_map_create();
+    show_debug_message("  -> Initialized global.loot_drops_map (ds_map created).");
+} else {
+    // If it exists, ensure it's actually a ds_map.
+    if (!ds_exists(global.loot_drops_map, ds_type_map)) {
+        show_debug_message("  -> CRITICAL WARNING: global.loot_drops_map existed but was NOT a ds_map! Re-creating.");
+        global.loot_drops_map = ds_map_create();
+    } else {
+        show_debug_message("  -> global.loot_drops_map already exists and is a ds_map.");
+    }
+}
 // --- END PERSISTENT WORLD STATES ---
+
+
+// It's also good practice to initialize global.party_current_stats here,
+// as it's a DS map that your save system handles.
+// obj_player can then rely on it existing and populate it for a new game if it's empty.
+
+// --- Party Stats Map (global.party_current_stats) ---
+show_debug_message("Initializing Party Stats Map (global.party_current_stats)...");
+if (!variable_global_exists("party_current_stats")) {
+    global.party_current_stats = ds_map_create();
+    show_debug_message("  -> Initialized global.party_current_stats (ds_map created). Populated by obj_player on new game or by load game.");
+} else {
+    if (!ds_exists(global.party_current_stats, ds_type_map)) {
+        show_debug_message("  -> CRITICAL WARNING: global.party_current_stats existed but was NOT a ds_map! Re-creating.");
+        global.party_current_stats = ds_map_create();
+    } else {
+        show_debug_message("  -> global.party_current_stats already exists and is a ds_map.");
+        // If it already exists and is a map, it might have been populated by a previous game run (if obj_init isn't truly first)
+        // or by an earlier part of obj_init if you had split logic. Generally, it's fine.
+        // For a truly fresh game start (where obj_init runs for the very first time), this 'else' for an existing map would be less common
+        // unless you have complex game launch sequences.
+    }
+}
+
 
 // --- Miscellaneous ---
 if (!variable_global_exists("entry_direction")) { // Check if it exists before setting
@@ -237,3 +292,11 @@ show_debug_message("========================================");
 // or that it runs before any other game logic that might depend on these globals.
 // If obj_init is not persistent, ensure it's in a room that is only visited once at launch.
 // If it can be run multiple times, the `if (!variable_global_exists(...))` checks are crucial.
+
+/// obj_init :: Create Event
+global.quest_stage = 0
+global.party_members       = [];          // force it into existence
+global.party_inventory     = [];
+global.party_current_stats = ds_map_create();
+global.load_pending        = false;
+global.loaded_data         = undefined;

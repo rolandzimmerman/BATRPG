@@ -40,3 +40,12 @@ layer_to_hide_on_alarm = ""; // Stores the name of the layer to hide via Alarm 1
 // shake_active = false;
 // shake_timer = 0;
 // shake_magnitude = 0;
+// Initialize save/load flags
+global.load_pending            = false;
+global.loaded_data             = undefined;
+global.game_was_loaded_this_frame = false;
+
+// Initialize party data defaults
+global.party_members           = [];
+global.party_inventory         = [];
+global.party_current_stats     = ds_map_create();

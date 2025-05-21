@@ -2,14 +2,14 @@
   "$GMSound":"",
   "%Name":"snd_sleep",
   "audioGroupId":{
-    "name":"audio_group_music",
-    "path":"audiogroups/audio_group_music",
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
   },
   "bitDepth":1,
   "bitRate":128,
   "compression":0,
   "conversionMode":0,
-  "duration":9.900408,
+  "duration":7.288163,
   "name":"snd_sleep",
   "parent":{
     "name":"Music",
