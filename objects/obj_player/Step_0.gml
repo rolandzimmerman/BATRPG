@@ -380,7 +380,7 @@ if (dir_x != 0 || v_speed != 0) {
     global.encounter_timer++;
 }
 var encounter_threshold = 300;
-var encounter_chance = 10;
+var encounter_chance = 15;
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;
     if (random(100) < encounter_chance) {
