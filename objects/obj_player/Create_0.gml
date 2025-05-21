@@ -1,14 +1,9 @@
 /// obj_player :: Create Event
 persistent = true;
 
-// Define Player States
-enum PLAYER_STATE {
-    FLYING,
-    WALKING_FLOOR,
-    WALKING_CEILING
-}
+// PLAYER_STATE enum is now defined globally in scr_enums
+player_state = PLAYER_STATE.FLYING; // This will correctly use the global enum
 
-player_state = PLAYER_STATE.FLYING;
 /// Define exit‐direction codes
 enum EXIT_DIR {
     NONE,  // 0

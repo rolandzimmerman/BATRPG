@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_player_state_name",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_player_state_name",
+  "parent":{
+    "name":"Helpers",
+    "path":"folders/Scripts/Helpers.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

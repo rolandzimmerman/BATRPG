@@ -154,6 +154,7 @@
     {"name":"apply_resolution","order":1,"path":"scripts/apply_resolution/apply_resolution.yy",},
     {"name":"array_index_of","order":2,"path":"scripts/array_index_of/array_index_of.yy",},
     {"name":"ds_type_to_string","order":8,"path":"scripts/ds_type_to_string/ds_type_to_string.yy",},
+    {"name":"get_player_state_name","order":10,"path":"scripts/get_player_state_name/get_player_state_name.yy",},
     {"name":"load_settings_ini","order":3,"path":"scripts/load_settings_ini/load_settings_ini.yy",},
     {"name":"save_settings_ini","order":4,"path":"scripts/save_settings_ini/save_settings_ini.yy",},
     {"name":"scr_activate_dive_switch","order":4,"path":"scripts/scr_activate_dive_switch/scr_activate_dive_switch.yy",},
