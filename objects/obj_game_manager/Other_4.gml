@@ -1,7 +1,11 @@
 /// obj_game_manager :: Room Start Event (NEW - Replaces ALL existing Room Start code)
 
 show_debug_message("[GameManager_RoomStart] In room: " + room_get_name(room) + ". My ID: " + string(id) + ", My Depth: " + string(depth));
-
+if (global.isLoadingGame) {
+    scr_apply_post_load_state();  // this will restore player/NPC state *and* remove any instances that shouldn’t respawn
+    // after this point, normal game_start logic can run
+    return; // skip the rest of this event for the load frame
+}
 // Log obj_player status for debugging event order
 if (instance_exists(obj_player)) {
     show_debug_message("[GameManager_RoomStart] obj_player (ID: " + string(obj_player.id) + ") exists. Its Depth: " + string(obj_player.depth));

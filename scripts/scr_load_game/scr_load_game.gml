@@ -1,18 +1,13 @@
 /// @function scr_load_game(filename)
-/// @description Deserializes and reads game state from JSON file, loading the room by name.
-/// @param filename {string}
-/// @returns {bool}
+/// @description Deserializes JSON, resets globals, restores party & DS maps, then jumps to saved room.
 function scr_load_game(filename) {
     show_debug_message("[Load] Starting load from: " + filename);
 
-    //
-    // 1) Read from disk
-    //
+    // 1) Read file
     if (!file_exists(filename)) {
         show_debug_message("[Load] File not found: " + filename);
         return false;
     }
-
     var fh = file_text_open_read(filename);
     if (fh < 0) {
         show_debug_message("[Load] Could not open file: " + filename);
@@ -21,292 +16,167 @@ function scr_load_game(filename) {
     var json_in = "";
     while (!file_text_eof(fh)) {
         json_in += file_text_read_string(fh);
-        file_text_readln(fh); // Read the newline character
+        file_text_readln(fh);
     }
     file_text_close(fh);
-
     if (json_in == "") {
-        show_debug_message("[Load] File was empty: " + filename);
+        show_debug_message("[Load] Empty save file.");
         return false;
     }
 
-    //
-    // 2) JSON parse
-    //
-    var data;
+    // 2) Parse JSON
+    var saveData;
     try {
-        data = json_parse(json_in);
+        saveData = json_parse(json_in);
     } catch (e) {
-        show_debug_message("[Load] JSON parse failed: " + string(e));
+        show_debug_message("[Load] JSON parse error: " + string(e));
+        return false;
+    }
+    if (!is_struct(saveData)) {
+        show_debug_message("[Load] Parsed data is not a struct.");
         return false;
     }
 
-    if (!is_struct(data)) {
-        show_debug_message("[Load] Parsed JSON is not a struct.");
-        return false;
-    }
-    show_debug_message("[Load] JSON parsed successfully.");
-
-    //
-    // 3) Restore game state
-    //
-
-    // 3.a) Ensure party globals are initialized (as in save script, in case they weren't already)
-    //      This is crucial if loading from a state where these weren't saved or are corrupt.
-    if (!variable_global_exists("party_members") || !is_array(variable_global_get("party_members"))) {
-        variable_global_set("party_members", []);
-    }
-    if (!variable_global_exists("party_inventory") || !is_array(variable_global_get("party_inventory"))) {
-        variable_global_set("party_inventory", []);
-    }
-    if (!variable_global_exists("party_current_stats")
-     || !is_real(variable_global_get("party_current_stats"))
-     || !ds_exists(variable_global_get("party_current_stats"), ds_type_map)) {
-        // If a map already exists, destroy it before creating a new one to prevent memory leaks
-        if (variable_global_exists("party_current_stats") && is_real(variable_global_get("party_current_stats")) && ds_exists(variable_global_get("party_current_stats"), ds_type_map)) {
-            ds_map_destroy(variable_global_get("party_current_stats"));
-        }
-        variable_global_set("party_current_stats", ds_map_create());
+    // 3) Reset core globals
+    // party_members
+    if (variable_struct_exists(saveData, "party_members") && is_array(saveData.party_members)) {
+        global.party_members = saveData.party_members;
     } else {
-        // Clear existing map if it's valid, to ensure fresh data is loaded
-        ds_map_clear(variable_global_get("party_current_stats"));
+        global.party_members = [];
     }
-
-
-    // 3.b) Simple globals
-    if (variable_struct_exists(data, "globals")) {
-        var _globals = data.globals;
-        if (variable_struct_exists(_globals, "quest_stage")) {
-            variable_global_set("quest_stage", _globals.quest_stage);
-        }
-        if (variable_struct_exists(_globals, "party_currency")) {
-            variable_global_set("party_currency", _globals.party_currency);
-        }
-        // …add any other simple globals here…
-    }
-
-    // 3.c) DS-map globals ← JSON strings
-    if (variable_struct_exists(data, "ds")) {
-        var _ds_data = data.ds;
-        var dsNames = [
-            "gate_states_map",
-            "recruited_npcs_map",
-            "broken_blocks_map",
-            "loot_drops_map"
-        ];
-        for (var i = 0; i < array_length(dsNames); i++) {
-            var mn = dsNames[i];
-            var key = mn + "_string";
-            if (variable_struct_exists(_ds_data, key)) {
-                var map_string = _ds_data[$ key];
-                if (map_string != "") {
-                    // Destroy existing map if it exists, to prevent memory leaks
-                    if (variable_global_exists(mn)) {
-                        var old_map_id = variable_global_get(mn);
-                        if (is_real(old_map_id) && ds_exists(old_map_id, ds_type_map)) {
-                            ds_map_destroy(old_map_id);
-                        }
-                    }
-                    var new_map_id = ds_map_create();
-                    ds_map_read(new_map_id, map_string);
-                    variable_global_set(mn, new_map_id);
-                } else {
-                    // If the string is empty, ensure the global map is also empty or a new empty map
-                    if (variable_global_exists(mn)) {
-                         var old_map_id = variable_global_get(mn);
-                        if (is_real(old_map_id) && ds_exists(old_map_id, ds_type_map)) {
-                            ds_map_clear(old_map_id); // Clear it
-                        } else { // Or it wasn't a valid map, so create a new empty one
-                            variable_global_set(mn, ds_map_create());
-                        }
-                    } else {
-                        variable_global_set(mn, ds_map_create());
-                    }
-                }
-            }
-        }
-    }
-
-    // 3.d) Party arrays & stats
-    if (variable_struct_exists(data, "party_members")) {
-        variable_global_set("party_members", data.party_members);
-    }
-    if (variable_struct_exists(data, "party_inventory")) {
-        variable_global_set("party_inventory", data.party_inventory);
-    }
-    if (variable_struct_exists(data, "party_stats")) {
-        var party_stats_string = data.party_stats;
-        if (party_stats_string != "") {
-            // The party_current_stats map should have been initialized/cleared in step 3.a
-            ds_map_read(variable_global_get("party_current_stats"), party_stats_string);
-        }
-    }
-
-    //
-    // 4) Room transition and Player/NPC state (MUST be done after other globals are loaded)
-    //
-    var target_room_asset = -1;
-    if (variable_struct_exists(data, "player") && variable_struct_exists(data.player, "room")) {
-        target_room_asset = asset_get_index(data.player.room);
-    }
-
-    if (target_room_asset != -1 && room_exists(target_room_asset)) {
-        // Set up a persistent controller object or use a global struct to pass load data to the next room
-        // This is because instance variables are reset on room_goto
-        // We'll use a temporary global struct for this example
-        global.pending_load_data = {
-            player_data : variable_struct_exists(data, "player") ? data.player : undefined,
-            npc_data    : variable_struct_exists(data, "npcs") ? data.npcs : undefined
-        };
-        
-        // Add a marker to indicate a load is in progress
-        global.isLoadingGame = true; 
-
-        room_goto(target_room_asset);
-        // The actual restoration of player/NPC positions will happen in the Room Start event
-        // or a persistent controller's Room Start event, after the new room is loaded.
+    // party_inventory
+    if (variable_struct_exists(saveData, "party_inventory") && is_array(saveData.party_inventory)) {
+        global.party_inventory = saveData.party_inventory;
     } else {
-        show_debug_message("[Load] Target room '" + (variable_struct_exists(data, "player") ? data.player.room : "undefined") + "' not found or invalid. Game state partially loaded.");
-        // If no room change, attempt to apply NPC states to current room if applicable
-        // This scenario might be undesirable, consider if this is the correct fallback.
-        if (variable_struct_exists(data, "npcs")) {
-            apply_npc_states(data.npcs); // You'll need to implement this helper function
-        }
-         // And player position if player exists in current room
-        if (instance_exists(obj_player) && variable_struct_exists(data, "player")) {
-            obj_player.x = data.player.x;
-            obj_player.y = data.player.y;
-        }
-        global.isLoadingGame = false; // No room change, loading considered complete for current context
-        return true; // Or false, depending on how critical the room change is
+        global.party_inventory = [];
+    }
+    // party_current_stats
+    var pcs_id = variable_global_exists("party_current_stats") ? global.party_current_stats : -1;
+    if (!is_real(pcs_id) || !ds_exists(pcs_id, ds_type_map)) {
+        if (is_real(pcs_id) && ds_exists(pcs_id, ds_type_map)) ds_map_destroy(pcs_id);
+        global.party_current_stats = ds_map_create();
+    } else {
+        ds_map_clear(global.party_current_stats);
+    }
+    if (variable_struct_exists(saveData, "party_stats") && is_string(saveData.party_stats) && saveData.party_stats != "") {
+        ds_map_read(global.party_current_stats, saveData.party_stats);
     }
 
-    show_debug_message("[Load] Success: Game state loaded. Room transition initiated if applicable.");
+    // 4) Restore simple globals
+    if (variable_struct_exists(saveData, "globals")) {
+        var G = saveData.globals;
+        if (variable_struct_exists(G, "quest_stage"))    global.quest_stage    = G.quest_stage;
+        if (variable_struct_exists(G, "party_currency")) global.party_currency = G.party_currency;
+    }
+
+    // 5) Queue up the room transition + pending world data
+    var targetRoom = -1;
+    var P = undefined;
+    if (variable_struct_exists(saveData, "player") && is_struct(saveData.player)) {
+        P = saveData.player;
+        if (variable_struct_exists(P, "room") && is_string(P.room)) {
+            targetRoom = asset_get_index(P.room);
+        }
+    }
+
+    global.pending_load_data = {
+        player_data : P,
+        ds_data     : variable_struct_exists(saveData, "ds") && is_struct(saveData.ds) ? saveData.ds : undefined
+    };
+    global.isLoadingGame = true;
+
+    if (targetRoom != -1 && room_exists(targetRoom)) {
+        show_debug_message("[Load] Going to saved room: " + room_get_name(targetRoom));
+        room_goto(targetRoom);
+    } else {
+        show_debug_message("[Load] Invalid saved room name: " + string(P.room));
+    }
+
     return true;
 }
 
 /// @function scr_apply_post_load_state()
-/// @description Applies loaded player and NPC states after a room transition.
-///              Handles instance activation and game unpausing.
-///              Should be called from a persistent controller's Room Start event.
+/// @description After room change, restores player position/state and prunes saved world state.
 function scr_apply_post_load_state() {
-    show_debug_message("[Load_Apply] scr_apply_post_load_state called in room: " + room_get_name(room));
-
-    // This flag will be checked by obj_player's Room Start event.
-    // It's set to true only if player data is successfully found and applied by this script.
-    global.player_state_loaded_this_frame = false;
-
-    if (!variable_global_exists("isLoadingGame") || !global.isLoadingGame) {
-        show_debug_message("[Load_Apply] Not currently loading a game (isLoadingGame is false). Aborting.");
+    if (!global.isLoadingGame || !variable_struct_exists(global.pending_load_data, "player_data")) {
         return;
     }
-    if (!variable_global_exists("pending_load_data") || !is_struct(global.pending_load_data)) {
-        show_debug_message("[Load_Apply] pending_load_data is missing or not a struct. Cleaning up and aborting.");
-        global.isLoadingGame = false; // Critical: Reset flag if data is bad
-        variable_global_set("pending_load_data", undefined);
-        return;
-    }
+    var D = global.pending_load_data;
 
-    var _load_data = global.pending_load_data;
-    show_debug_message("[Load_Apply] Pending load data found: " + string(_load_data));
-
-    // --- 1) Reactivate Instances ---
-    // Matching the logic from your original player load sequence.
-    // Activate player specifically if it exists, then all other instances.
-    if (instance_exists(obj_player)) {
-        instance_activate_object(obj_player);
-        show_debug_message("[Load_Apply] obj_player activated (if it was inactive).");
-    }
+    // 1) Activate everything
     instance_activate_all();
-    show_debug_message("[Load_Apply] instance_activate_all() called.");
 
-    // --- 2) Restore Player State ---
-    if (variable_struct_exists(_load_data, "player_data") && is_struct(_load_data.player_data)) {
-        var _player_save_data = _load_data.player_data;
-        show_debug_message("[Load_Apply] Attempting to restore player data: " + string(_player_save_data));
-
-        if (instance_exists(obj_player)) {
-            show_debug_message("[Load_Apply] obj_player instance (ID: " + string(obj_player.id) + ") found. Current pos: " + string(obj_player.x) + "," + string(obj_player.y));
-            obj_player.x = _player_save_data.x;
-            obj_player.y = _player_save_data.y;
-            show_debug_message("[Load_Apply] Player position RESTORED to: " + string(obj_player.x) + ", " + string(obj_player.y));
-
-            // --- Restore Core States ---
-            if (variable_struct_exists(_player_save_data, "p_state")) {
-                obj_player.player_state = _player_save_data.p_state;
-                show_debug_message("[Load_Apply] Restored obj_player.player_state to: " + string(obj_player.player_state) + " (" + get_player_state_name(obj_player.player_state) + ")");
-            } else {
-                obj_player.player_state = PLAYER_STATE.FLYING; // Default if not found in save
-                show_debug_message("[Load_Apply] 'p_state' not in save. Defaulted obj_player.player_state to FLYING.");
-            }
-            if (variable_struct_exists(_player_save_data, "f_dir")) {
-                obj_player.face_dir = _player_save_data.f_dir;
-                show_debug_message("[Load_Apply] Restored obj_player.face_dir to: " + string(obj_player.face_dir));
-            } else {
-                obj_player.face_dir = 1; // Default if not found
-            }
-            // if (variable_struct_exists(_player_save_data, "hp")) { obj_player.hp = _player_save_data.hp; }
-            // if (variable_struct_exists(_player_save_data, "mp")) { obj_player.mp = _player_save_data.mp; }
-
-
-            // --- CRITICAL: Reset Transient/Action States ---
-            show_debug_message("[Load_Apply] Resetting transient player states (dash, dive, knockback, physics)...");
-            obj_player.isDashing = false;
-            obj_player.dash_timer = 0;
-            obj_player.isDiving = false;
-            obj_player.isSlamming = false;
-            obj_player.is_in_knockback = false;
-            obj_player.knockback_timer = 0;
-            obj_player.knockback_hspeed = 0;
-            obj_player.knockback_vspeed = 0;
-            obj_player.v_speed = 0; // Reset vertical speed from physics
-            // obj_player.h_speed = 0; // If you use a horizontal physics variable directly
-
-            // Ensure input flags are sensible (if you use them directly on player)
-            // obj_player.input_locked = false;
-            // obj_player.movement_paused = false;
-
-            global.player_state_loaded_this_frame = true;
-            show_debug_message("[Load_Apply] player_state_loaded_this_frame SET TO TRUE.");
-
-        } else {
-            show_debug_message("[Load_Apply] obj_player NOT found in room " + room_get_name(room) + ". Cannot restore player position. Player might need to be created if not persistent and not in room by default.");
-            // Fallback: If obj_player is supposed to be dynamically created on load if not present:
-            // var _p = instance_create_layer(_player_save_data.x, _player_save_data.y, "Instances", obj_player); // Ensure "Instances" layer is correct
-            // if (instance_exists(_p)) {
-            //    show_debug_message("[Load_Apply] CREATED obj_player (ID: " + string(_p.id) + ") at " + string(_p.x) + "," + string(_p.y));
-            //    // Apply other saved player states to _p here as above (_p.state = ..., etc.)
-            //    global.player_state_loaded_this_frame = true;
-            // }
+    // 2) Restore player
+    if (is_struct(D.player_data) && instance_exists(obj_player)) {
+        var P = D.player_data;
+        with (obj_player) {
+            x = P.x; y = P.y;
+            if (variable_struct_exists(P, "p_state")) player_state = P.p_state;
+            if (variable_struct_exists(P, "f_dir"))   face_dir    = P.f_dir;
+            // clear transient motion
+            isDashing = false; dash_timer = 0;
+            isDiving  = false; v_speed = 0;
+            is_in_knockback = false; knockback_timer = 0;
         }
-    } else {
-        show_debug_message("[Load_Apply] No valid player_data struct found in pending_load_data.");
     }
 
-    // --- 3) Restore NPC states ---
-    if (variable_struct_exists(_load_data, "npc_data") && is_struct(_load_data.npc_data)) {
-        show_debug_message("[Load_Apply] Restoring NPC data.");
-        apply_npc_states(_load_data.npc_data); // Ensure this helper function exists and works
-    } else {
-        show_debug_message("[Load_Apply] No npc_data struct found in pending_load_data.");
+    // 3) Rebuild world DS-maps from D.ds_data JSON blobs
+    var mapList = ["gate_states_map","recruited_npcs_map","broken_blocks_map","loot_drops_map"];
+    var S = D.ds_data;
+    for (var i = 0; i < array_length(mapList); i++) {
+        var nm  = mapList[i];
+        var key = nm + "_string";
+
+        // destroy old
+        if (variable_global_exists(nm)) {
+            var oldId = variable_global_get(nm);
+            if (is_real(oldId) && ds_exists(oldId, ds_type_map)) ds_map_destroy(oldId);
+        }
+        // create new
+        var newId = ds_map_create();
+        if (is_struct(S) && variable_struct_exists(S, key)) {
+            var blob = variable_struct_get(S, key);
+            if (is_string(blob) && blob != "") {
+                ds_map_read(newId, blob);
+            }
+        }
+        variable_global_set(nm, newId);
     }
 
-    // --- 4) Unpause Game & Set Game State ---
-    if (variable_global_exists("game_paused")) {
-        global.game_paused = false; // This might be a general flag
-        show_debug_message("[Load_Apply] Game unpaused (global.game_paused = false).");
-    }
-    // Also ensure the game manager's state is "playing"
-    if (instance_exists(obj_game_manager)) {
-        obj_game_manager.game_state = "playing";
-        show_debug_message("[Load_Apply] obj_game_manager.game_state SET to 'playing'.");
-    } else {
-        show_debug_message("[Load_Apply] WARNING: obj_game_manager not found to set game_state to 'playing'.");
-    }
+// 4) Unpause the game manager so obj_player's Step will run again
+if (instance_exists(obj_game_manager)) {
+    obj_game_manager.game_state = "playing";
+    show_debug_message("[Load_Apply] obj_game_manager.game_state set to 'playing'");
+}
 
-    // --- 5) Clean up Load Flags ---
-    show_debug_message("[Load_Apply] Post-load state application finished. Cleaning up global load flags.");
-    global.isLoadingGame = false; // This is the primary flag for the loading *process*
-    variable_global_set("pending_load_data", undefined);
-    // global.player_state_loaded_this_frame is used by obj_player this frame and can be reset there or simply ignored next frame.
+// 5) Clean up Load Flags
+global.isLoadingGame = false;
+variable_global_set("pending_load_data", undefined);
+}
+
+/// @function scr_apply_instance_states()
+/// @description Destroys any destructible blocks, loot, or pickups that were already consumed.
+function scr_apply_instance_states() {
+    // A) Destructible blocks
+    if (ds_exists(global.broken_blocks_map, ds_type_map)) {
+        with (obj_destructible_block) {
+            if (ds_map_exists(global.broken_blocks_map, block_unique_key)) instance_destroy();
+        }
+    }
+    // B) Loot drops
+    if (ds_exists(global.loot_drops_map, ds_type_map)) {
+        with (obj_loot_drop) {
+            if (ds_map_exists(global.loot_drops_map, loot_key)) instance_destroy();
+        }
+    }
+    // C) One-time pickups
+    if (variable_global_exists("has_collected_main_echo_gem") && global.has_collected_main_echo_gem) {
+        with (obj_pickup_echo_gem) instance_destroy();
+    }
+    if (variable_global_exists("has_collected_main_flurry_flower") && global.has_collected_main_flurry_flower) {
+        with (obj_pickup_flurry_flower) instance_destroy();
+    }
+    if (variable_global_exists("has_collected_main_meteor_shard") && global.has_collected_main_meteor_shard) {
+        with (obj_pickup_meteor_shard) instance_destroy();
+    }
 }
