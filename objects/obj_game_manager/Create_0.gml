@@ -1,51 +1,52 @@
-//obj_game_manager create
+// obj_game_manager :: Create Event
 
-// Initialize load state variables
-load_pending = false;
-loaded_data = undefined;
-global.player_position_handled_by_battle_return = false;
-// Add this if you don't have a game state variable yet
-if (!variable_instance_exists(id, "game_state")) { // Prevent re-init if already exists (e.g., if persistent)
-    game_state = "playing"; // Possible states: "playing", "paused", "dialogue", "battle", etc.
+// global.player_position_handled_by_battle_return = false; // This seems specific, keep if needed for battle logic
+
+if (!variable_instance_exists(id, "game_state")) {
+    game_state = "playing";
 }
 
-// Make sure these exist from the save/load setup (redundant if initialized above, but harmless)
-if (!variable_instance_exists(id, "load_pending")) { load_pending = false; }
-if (!variable_instance_exists(id, "loaded_data")) { loaded_data = undefined; }
+// NEW: Initialize the primary flag for our loading system
+if (!variable_global_exists("isLoadingGame")) {
+    global.isLoadingGame = false;
+}
+// These are primarily managed by the new load/apply scripts, but initializing is okay.
+if (!variable_global_exists("pending_load_data")) {
+    global.pending_load_data = undefined;
+}
+if (!variable_global_exists("player_state_loaded_this_frame")) {
+    global.player_state_loaded_this_frame = false;
+}
 
-// Make sure the manager itself is persistent (Check the box in the Object Editor!)
 
+// Make sure the manager itself is persistent (Object Editor checkbox)
 
-// Save Trigger (Can be kept for debugging, but rely on menu save eventually)
+// Debug Save Trigger
 if (keyboard_check_pressed(vk_f5)) {
-    show_debug_message("--- F5 Pressed! Attempting Save ---"); // DEBUG
-    var _save_success = scr_save_game("mysave.json"); // Make sure filename matches
-    // Log whether the save script reported success or failure
-    show_debug_message("--- scr_save_game Result: " + string(_save_success) + " ---"); // DEBUG
+    show_debug_message("--- F5 Pressed! Attempting Save (using scr_save_game) ---");
+    var _save_success = scr_save_game("mysave.json");
+    show_debug_message("--- scr_save_game Result: " + string(_save_success) + " ---");
 }
 
-// Load Trigger (Can be kept for debugging, but rely on menu load eventually)
+// Debug Load Trigger
 if (keyboard_check_pressed(vk_f9)) {
-    show_debug_message("--- F9 Pressed! Attempting Load ---"); // DEBUG
-    var _load_initiated = scr_load_game("mysave.json"); // Make sure filename matches
-    // Log whether the load script initiated the process (doesn't mean loading finished)
-    show_debug_message("--- scr_load_game Initiated: " + string(_load_initiated) + " ---"); // DEBUG
+    show_debug_message("--- F9 Pressed! Attempting Load (using scr_load_game) ---");
+    var _load_initiated = scr_load_game("mysave.json");
+    show_debug_message("--- scr_load_game Initiated: " + string(_load_initiated) + " ---");
 }
 
-layer_to_hide_on_alarm = ""; // Stores the name of the layer to hide via Alarm 1
+layer_to_hide_on_alarm = "";
 
-// --- Variables for other methods (can be commented out if not used) ---
-// active_shake_fx_struct_on_layer = undefined; 
-// fx_to_disable_on_alarm = "";
-// shake_active = false;
-// shake_timer = 0;
-// shake_magnitude = 0;
-// Initialize save/load flags
-global.load_pending            = false;
-global.loaded_data             = undefined;
-global.game_was_loaded_this_frame = false;
-
-// Initialize party data defaults
-global.party_members           = [];
-global.party_inventory         = [];
-global.party_current_stats     = ds_map_create();
+// Initialize party data defaults (scr_load_game will overwrite these on load)
+if (!variable_global_exists("party_members") || !is_array(global.party_members)) {
+    global.party_members = [];
+}
+if (!variable_global_exists("party_inventory") || !is_array(global.party_inventory)) {
+    global.party_inventory = [];
+}
+if (!variable_global_exists("party_current_stats") || !ds_exists(global.party_current_stats, ds_type_map)) {
+    if (variable_global_exists("party_current_stats") && is_real(global.party_current_stats)) {
+         ds_map_destroy(global.party_current_stats); // Destroy if it's a number but not a map
+    }
+    global.party_current_stats = ds_map_create();
+}

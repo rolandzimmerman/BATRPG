@@ -1,6 +1,6 @@
 /// obj_loot_drop :: Step Event
 
-show_debug_message("Loot Step (id:" + string(id) + ") BEGIN: y=" + string(y) + " v_spd=" + string(v_speed) + " landed=" + string(landed));
+//show_debug_message("Loot Step (id:" + string(id) + ") BEGIN: y=" + string(y) + " v_spd=" + string(v_speed) + " landed=" + string(landed));
 
 if (!landed) {
     // --- Falling + landing logic ---
@@ -17,11 +17,11 @@ if (!landed) {
             v_speed = 0;
             landed = true;
             pickup_delay_frames_actual = 3;
-            show_debug_message("Loot Step (id:" + string(id) + "): LANDED! y=" + string(y));
+            //show_debug_message("Loot Step (id:" + string(id) + "): LANDED! y=" + string(y));
         }
     } else {
         y += v_speed;
-        show_debug_message("Loot Step (id:" + string(id) + "): FALLING (no tilemaps). y=" + string(y));
+        //show_debug_message("Loot Step (id:" + string(id) + "): FALLING (no tilemaps). y=" + string(y));
     }
 } else {
     // --- Already landed: lock v_speed to zero ---
@@ -37,7 +37,7 @@ if (landed) {
         if (p != noone) {
             // If no drop key, just destroy
             if (!variable_instance_exists(id, "drop_item_key") || string_length(drop_item_key) == 0) {
-                show_debug_message("Loot Step (id:" + string(id) + "): No drop_item_key; destroying.");
+                //show_debug_message("Loot Step (id:" + string(id) + "): No drop_item_key; destroying.");
                 instance_destroy();
                 exit;
             }
@@ -65,7 +65,7 @@ if (landed) {
                 show_debug_message(msg);
             }
 
-            show_debug_message("Loot Step (id:" + string(id) + "): Picked up '" + drop_item_key + "'. Destroying.");
+            //show_debug_message("Loot Step (id:" + string(id) + "): Picked up '" + drop_item_key + "'. Destroying.");
             // record so it never respawns
 if (variable_instance_exists(id, "loot_key")) {
     ds_map_add(global.loot_drops_map, loot_key, true);
@@ -80,5 +80,5 @@ exit;
 }
 
 if (instance_exists(id)) {
-    show_debug_message("Loot Step (id:" + string(id) + ") END: y=" + string(y) + " v_spd=" + string(v_speed) + " landed=" + string(landed));
+    //show_debug_message("Loot Step (id:" + string(id) + ") END: y=" + string(y) + " v_spd=" + string(v_speed) + " landed=" + string(landed));
 }

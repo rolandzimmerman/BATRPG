@@ -1,38 +1,45 @@
 /// @function scr_save_game(filename)
-/// @description Serializes and writes game state to JSON file
+/// @description Serializes and writes game state to JSON file, saving the room by name.
 /// @param filename {string}
 /// @returns {bool}
 function scr_save_game(filename) {
     show_debug_message("[Save] Starting save to: " + filename);
 
-    // 0) Guarantee party globals
-    if (!variable_global_exists("party_members") 
-     || !is_array(variable_global_get("party_members")))
-    {
+    //
+    // 0) Ensure the three party globals exist and are valid types
+    //
+    if (!variable_global_exists("party_members") || !is_array(variable_global_get("party_members"))) {
         variable_global_set("party_members", []);
     }
-    if (!variable_global_exists("party_inventory") 
-     || !is_array(variable_global_get("party_inventory")))
-    {
+    if (!variable_global_exists("party_inventory") || !is_array(variable_global_get("party_inventory"))) {
         variable_global_set("party_inventory", []);
     }
     if (!variable_global_exists("party_current_stats")
      || !is_real(variable_global_get("party_current_stats"))
-     || !ds_exists(variable_global_get("party_current_stats"), ds_type_map))
-    {
+     || !ds_exists(variable_global_get("party_current_stats"), ds_type_map)) {
         variable_global_set("party_current_stats", ds_map_create());
     }
 
-    // 1) Build `data` struct
+    //
+    // 1) Build the save_data struct
+    //
     var data = {};
 
-    // 1.a) Player position/room
+    // 1.a) Player position & room *name*
     if (instance_exists(obj_player)) {
         data.player = {
             x    : obj_player.x,
             y    : obj_player.y,
-            room : room
+            room : room_get_name(room)
+            // ADD VARIABLES CRITICAL FOR PLAYER STATE AND MOVEMENT
+            // For example:
+            // , player_state : obj_player.state // If you have a state machine like variable 'state'
+            // , can_input    : obj_player.can_input // If you have an input flag
+            // , current_hp   : obj_player.hp
         };
+        show_debug_message("[Save] Player data to save: " + string(data.player));
+    } else {
+        show_debug_message("[Save] obj_player does not exist at save time. No player data saved.");
     }
 
     // 1.b) Simple globals
@@ -43,29 +50,30 @@ function scr_save_game(filename) {
     if (variable_global_exists("party_currency")) {
         data.globals.party_currency = variable_global_get("party_currency");
     }
-    // …add any additional simple globals…
+    // …add any other simple globals here…
 
-// 1.c) DS-map globals → JSON strings
-data.ds = {};  // a struct!
-
-var dsNames = ["gate_states_map","recruited_npcs_map","broken_blocks_map","loot_drops_map"];
-for (var i = 0; i < array_length(dsNames); i++) {
-    var mn  = dsNames[i];
-    var key = mn + "_string";
-
-    if (variable_global_exists(mn)) {
-        var mid = variable_global_get(mn);
-        if (is_real(mid) && ds_exists(mid, ds_type_map)) {
-            // Use variable_struct_set to write into data.ds dynamically
-            variable_struct_set(data.ds, key, ds_map_write(mid));
+    // 1.c) DS-map globals → JSON strings
+    data.ds = {};
+    var dsNames = [
+        "gate_states_map",
+        "recruited_npcs_map",
+        "broken_blocks_map",
+        "loot_drops_map"
+    ];
+    for (var i = 0; i < array_length(dsNames); i++) {
+        var mn  = dsNames[i];
+        var key = mn + "_string";
+        if (variable_global_exists(mn)) {
+            var mid = variable_global_get(mn);
+            if (is_real(mid) && ds_exists(mid, ds_type_map)) {
+                variable_struct_set(data.ds, key, ds_map_write(mid));
+            } else {
+                variable_struct_set(data.ds, key, "");
+            }
         } else {
             variable_struct_set(data.ds, key, "");
         }
-    } else {
-        variable_struct_set(data.ds, key, "");
     }
-}
-
 
     // 1.d) NPC states
     data.npcs = {};
@@ -83,11 +91,13 @@ for (var i = 0; i < array_length(dsNames); i++) {
     }
 
     // 1.e) Party arrays & stats
-    data.party_members   = variable_global_get("party_members");   // guaranteed array
-    data.party_inventory = variable_global_get("party_inventory"); // guaranteed array
+    data.party_members   = variable_global_get("party_members");
+    data.party_inventory = variable_global_get("party_inventory");
     data.party_stats     = ds_map_write(variable_global_get("party_current_stats"));
 
-    // 2) Stringify
+    //
+    // 2) JSON stringify
+    //
     var json_out;
     try {
         json_out = json_stringify(data);
@@ -100,7 +110,9 @@ for (var i = 0; i < array_length(dsNames); i++) {
         return false;
     }
 
-    // 3) Write out
+    //
+    // 3) Write to disk
+    //
     var fh = file_text_open_write(filename);
     if (fh < 0) {
         show_debug_message("[Save] Could not open file: " + filename);
@@ -109,5 +121,6 @@ for (var i = 0; i < array_length(dsNames); i++) {
     file_text_write_string(fh, json_out);
     file_text_close(fh);
 
+    show_debug_message("[Save] Success: wrote " + string(string_length(json_out)) + " bytes to " + filename);
     return true;
 }
