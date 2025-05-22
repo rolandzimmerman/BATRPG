@@ -48,7 +48,9 @@ function scr_load_game(filename) {
         var G = data.globals;
         if (variable_struct_exists(G, "quest_stage")) global.quest_stage   = G.quest_stage;
         if (variable_struct_exists(G, "party_currency")) global.party_currency = G.party_currency;
-        // …etc…
+        if (variable_struct_exists(G, "has_collected_main_echo_gem"))      global.has_collected_main_echo_gem      = G.has_collected_main_echo_gem;
+        if (variable_struct_exists(G, "has_collected_main_flurry_flower")) global.has_collected_main_flurry_flower = G.has_collected_main_flurry_flower;
+        if (variable_struct_exists(G, "has_collected_main_meteor_shard"))  global.has_collected_main_meteor_shard  = G.has_collected_main_meteor_shard;
     }
 
     // 5) Restore DS-map globals

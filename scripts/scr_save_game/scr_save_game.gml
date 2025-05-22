@@ -23,6 +23,11 @@ function scr_save_game(filename) {
     data.globals = {};
     if (variable_global_exists("quest_stage"))    data.globals.quest_stage    = variable_global_get("quest_stage");
     if (variable_global_exists("party_currency")) data.globals.party_currency = variable_global_get("party_currency");
+    data.globals.has_collected_main_echo_gem      = (variable_global_exists("has_collected_main_echo_gem")      ? global.has_collected_main_echo_gem      : false);
+    data.globals.has_collected_main_flurry_flower = (variable_global_exists("has_collected_main_flurry_flower") ? global.has_collected_main_flurry_flower : false);
+    data.globals.has_collected_main_meteor_shard  = (variable_global_exists("has_collected_main_meteor_shard")  ? global.has_collected_main_meteor_shard  : false);
+
+    show_debug_message("[Save] Simple globals to save: " + string(data.globals));
 
     // 1.c) DS-map globals → JSON strings
     // ---------------------------------------------------
