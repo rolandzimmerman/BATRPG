@@ -777,8 +777,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rm_bat_debug","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},},
     {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
+    {"roomId":{"name":"rm_bat_debug","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},},
     {"roomId":{"name":"FARN","path":"rooms/FARN/FARN.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_2","path":"rooms/rm_opening_cutscene_2/rm_opening_cutscene_2.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_3","path":"rooms/rm_opening_cutscene_3/rm_opening_cutscene_3.yy",},},

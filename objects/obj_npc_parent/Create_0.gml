@@ -1,4 +1,23 @@
 /// obj_npc_parent :: Create Event
+
+// 0) If loading a game, reposition this NPC immediately from pending_load_data.npc_data
+if (variable_global_exists("isLoadingGame") && global.isLoadingGame
+ && variable_global_exists("pending_load_data")
+ && is_struct(global.pending_load_data)
+ && variable_struct_exists(global.pending_load_data, "npc_data"))
+{
+    var nd = global.pending_load_data.npc_data;
+    if (is_struct(nd) && variable_struct_exists(nd, unique_npc_id)) {
+        var _S = nd[$ unique_npc_id];
+        if (is_struct(_S)) {
+            if (variable_struct_exists(_S, "x"))       x       = _S.x;
+            if (variable_struct_exists(_S, "y"))       y       = _S.y;
+            if (variable_struct_exists(_S, "visible")) visible = _S.visible;
+        }
+        // clear so post‐load step won’t reapply
+        nd[$ unique_npc_id] = undefined;
+    }
+}
 // Parent object for common NPC behaviors. Initializes variables and triggers dialog definition.
 
 show_debug_message("Parent NPC Create: Instance ID " + string(id) + ", Object: " + object_get_name(object_index));
