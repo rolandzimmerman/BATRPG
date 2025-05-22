@@ -295,7 +295,7 @@ if (keyboard_check_pressed(ord("X")) || gamepad_button_check_pressed(0, gp_face3
 
 // --- Room Transitions & Out of Bounds ---
 // (Your existing room transition and clamping logic remains here unchanged)
-show_debug_message("--- Transition Block START ---");
+//show_debug_message("--- Transition Block START ---");
 if (!variable_instance_exists(id, "dir_x")) {
     show_debug_message("  TRANSITION_ERROR: Instance variable 'dir_x' is MISSING! Defaulting to 0.");
     var _current_h_input_dir = 0; 
@@ -371,7 +371,7 @@ if (_player_bbox_left < 0) { x = x - _player_bbox_left; }
 else if (_player_bbox_right > room_width) { x = x - (_player_bbox_right - room_width); }
 if (_player_bbox_top < 0) { y = y - _player_bbox_top; } 
 else if (_player_bbox_bottom > room_height) { y = y - (_player_bbox_bottom - room_height); }
-show_debug_message("--- Transition Block END (No transition occurred, clamps applied if needed) ---");
+//show_debug_message("--- Transition Block END (No transition occurred, clamps applied if needed) ---");
 
 
 // --- Random Encounter ---
