@@ -195,6 +195,7 @@
     {"name":"scr_ProcessDeathIfNecessary","order":11,"path":"scripts/scr_ProcessDeathIfNecessary/scr_ProcessDeathIfNecessary.yy",},
     {"name":"scr_RemoveInventoryItem","order":5,"path":"scripts/scr_RemoveInventoryItem/scr_RemoveInventoryItem.yy",},
     {"name":"scr_resume_music","order":1,"path":"scripts/scr_resume_music/scr_resume_music.yy",},
+    {"name":"scr_sanitize_data_for_ds_write","order":11,"path":"scripts/scr_sanitize_data_for_ds_write/scr_sanitize_data_for_ds_write.yy",},
     {"name":"scr_save_game","order":2,"path":"scripts/scr_save_game/scr_save_game.yy",},
     {"name":"scr_show_layer_for_duration","order":3,"path":"scripts/scr_show_layer_for_duration/scr_show_layer_for_duration.yy",},
     {"name":"scr_SpeedQueue","order":6,"path":"scripts/scr_SpeedQueue/scr_SpeedQueue.yy",},
