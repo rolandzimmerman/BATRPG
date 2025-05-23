@@ -191,21 +191,30 @@ switch (combat_state) {
         }
         break;
 
-    case "corpse":
-        // Drop logic once
-        if (!has_been_dropped) {
-            has_been_dropped = true;
-            for (var i = 0; i < array_length(data.drop_table); i++) {
-                var e = data.drop_table[i];
-                if (irandom(999)/1000 < e.chance) {
-                    scr_AddInventoryItem(e.item_key, 1);
-                    // Log the drop
-                    var _ename = data.name ?? object_get_name(object_index);
-                    scr_AddBattleLog(_ename + " dropped " + e.item_key);
-                    show_debug_message(" Enemy " + string(id)
-                                    + " dropped: " + e.item_key);
-                }
+case "corpse":
+    // — Drop logic once —
+    if (!has_been_dropped) {
+        has_been_dropped = true;
+
+        // 1) Item drops (your existing code)…
+        for (var i = 0; i < array_length(data.drop_table); i++) {
+            var e = data.drop_table[i];
+            if (irandom(999)/1000 < e.chance) {
+                scr_AddInventoryItem(e.item_key, 1);
+                scr_AddBattleLog(data.name + " dropped " + e.item_key);
             }
         }
-        break;
+
+        // 2) **Currency drop** (new)
+        if (variable_struct_exists(data, "currency_drop")) {
+            var cd   = data.currency_drop;
+            var amt  = cd.min == cd.max
+                     ? cd.min
+                     : irandom_range(cd.min, cd.max);
+            scr_AddCurrency(amt);
+            scr_AddBattleLog(data.name + " dropped " + string(amt) + " gold.");
+            show_debug_message("    -> " + string(id) + " dropped " + string(amt) + " gold.");
+        }
+    }
+    break;
 } // End switch

@@ -1,6 +1,7 @@
 /// @function scr_GetEnemyDataFromName(_obj)
 /// @description Returns a data struct for a given enemy object type,
-///              including stats, FX, death/corpse sprites, and loot tables.
+///              including stats, FX, death/corpse sprites, loot tables,
+///              and a fixed currency_drop amount.
 function scr_GetEnemyDataFromName(_obj) {
     // --- Defaults ---
     var default_fx_sprite     = spr_pow;
@@ -12,8 +13,6 @@ function scr_GetEnemyDataFromName(_obj) {
     };
     var default_death_anim    = spr_death;
     var default_corpse_sprite = spr_dead;
-
-    // Empty loot tables by default
     var default_drop_table    = [];
     var default_steal_table   = [];
 
@@ -49,22 +48,23 @@ function scr_GetEnemyDataFromName(_obj) {
 
                 // Loot
                 drop_table         : [
-                    { item_key:"potion",   chance:0.30 },
+                    { item_key:"potion", chance:0.30 }
                 ],
                 steal_table        : [
-                    { item_key:"potion",   chance:0.50 }
-                ]
+                    { item_key:"potion", chance:0.50 }
+                ],
+
+                // Fixed currency drop for testing
+                currency_drop      : { min:10, max:10 }
             };
 
         // --- Slime ---
         case obj_enemy_slime:
             return {
-                // Identity
                 name               : "Slim",
                 sprite_index       : spr_enemy_slime,
                 status             : "none",
 
-                // Stats
                 hp                 : 20,
                 maxhp              : 20,
                 atk                :  4,
@@ -75,7 +75,6 @@ function scr_GetEnemyDataFromName(_obj) {
                 luk                :  1,
                 xp                 : 30,
 
-                // Combat FX
                 attack_sprite      : spr_pow,
                 attack_sound       : snd_punch,
                 attack_element     : "physical",
@@ -84,71 +83,66 @@ function scr_GetEnemyDataFromName(_obj) {
                     lightning:0, poison:1.0, holy:0, dark:0
                 },
 
-                // Death & Corpse
                 death_anim_sprite  : default_death_anim,
                 corpse_sprite      : default_corpse_sprite,
 
-                // Loot
                 drop_table         : [
-                    { item_key:"antidote",   chance:0.40 },
-                    { item_key:"potion",      chance:0.05 }
+                    { item_key:"antidote", chance:0.40 },
+                    { item_key:"potion",    chance:0.05 }
                 ],
                 steal_table        : [
-                    { item_key:"bomb",   chance:0.60 }
-                ]
+                    { item_key:"bomb",      chance:0.60 }
+                ],
+
+                currency_drop      : { min:3, max:3 }
             };
 
         // --- Nut Thief Runner ---
         case obj_enemy_nut_thief:
             return {
-                // Identity
                 name               : "Ogre",
                 sprite_index       : spr_enemy_nut_thief_2,
                 status             : "none",
 
-                // Stats
                 hp                 : 60,
                 maxhp              : 60,
-                atk                :  15,
-                def                :  12,
+                atk                : 15,
+                def                : 12,
                 matk               :  2,
                 mdef               :  1,
                 spd                :  5,
                 luk                :  2,
-                xp                 : 300,
+                xp                 :300,
 
-                // Combat FX
                 attack_sprite      : spr_pow,
                 attack_sound       : snd_punch,
                 attack_element     : "physical",
                 resistances        : {
-        physical: 0, fire: 0, ice: 0, lightning: -1,
-        poison: 0, holy: 0, dark: 0
-    },
+                    physical:0, fire:0, ice:0, lightning:-1,
+                    poison:0, holy:0, dark:0
+                },
 
-                // Death & Corpse
                 death_anim_sprite  : default_death_anim,
                 corpse_sprite      : default_corpse_sprite,
 
-                // Loot
                 drop_table         : [
-                    { item_key:"potion",   chance:0.20 },
-                    { item_key:"bomb", chance:0.50 }
+                    { item_key:"potion", chance:0.20 },
+                    { item_key:"bomb",   chance:0.50 }
                 ],
                 steal_table        : [
-                    { item_key:"bomb", chance:0.75 }
-                ]
+                    { item_key:"bomb",   chance:0.75 }
+                ],
+
+                currency_drop      : { min:15, max:15 }
             };
 
         // --- Default Fallback ---
         default:
             return {
-                // Identity
                 name               : "Unknown",
                 sprite_index       : spr_enemy_slime,
                 status             : "none",
 
-                // Stats
                 hp                 : 10,
                 maxhp              : 10,
                 atk                :  2,
@@ -159,19 +153,18 @@ function scr_GetEnemyDataFromName(_obj) {
                 luk                :  1,
                 xp                 :  5,
 
-                // Combat FX
                 attack_sprite      : default_fx_sprite,
                 attack_sound       : default_fx_sound,
                 attack_element     : default_element,
                 resistances        : default_resistances,
 
-                // Death & Corpse
                 death_anim_sprite  : default_death_anim,
                 corpse_sprite      : default_corpse_sprite,
 
-                // Loot
                 drop_table         : default_drop_table,
-                steal_table        : default_steal_table
+                steal_table        : default_steal_table,
+
+                currency_drop      : { min:1, max:1 }
             };
     }
 }
