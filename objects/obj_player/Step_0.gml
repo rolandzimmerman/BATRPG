@@ -379,8 +379,8 @@ if (dir_x != 0 || v_speed != 0) {
     if (!variable_global_exists("encounter_timer")) global.encounter_timer = 0;
     global.encounter_timer++;
 }
-var encounter_threshold = 300;
-var encounter_chance = 15;
+var encounter_threshold = 100;
+var encounter_chance = 100;
 if (global.encounter_timer >= encounter_threshold) {
     global.encounter_timer = 0;
     if (random(100) < encounter_chance) {

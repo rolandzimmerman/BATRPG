@@ -26,7 +26,7 @@ function scr_InitEncounterTable() {
     var list_room1 = ds_list_create();
     ds_list_add(list_room1, [obj_enemy_goblin]);
     ds_list_add(list_room1, [obj_enemy_slime]);
-    ds_map_add_list(global.encounter_table, rm_cave_2, list_room1); // Using Room1 as key
+    ds_map_add_list(global.encounter_table, rm_bat_debug, list_room1); // Using Room1 as key
     show_debug_message("  -> Added formations for Room: Room1");
 
     // === Room 2 Encounters ===
