@@ -18,7 +18,17 @@ if (!surface_exists(battle_fx_surface)) {
     surface_reset_target();
 }
 
-
+// --- Fade overlay ---
+if (fade_fading) {
+    var w = display_get_gui_width();
+    var h = display_get_gui_height();
+    draw_set_color(c_black);
+    draw_set_alpha(clamp(fade_alpha, 0, 1));
+    draw_rectangle(0, 0, w, h, false);
+    // reset
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+}
 // Potentially draw manager-specific debug info here if needed
 // draw_text(10, display_get_gui_height() - 30, "Manager State: " + global.battle_state);
 // draw_text(10, display_get_gui_height() - 50, "Current Actor: " + string(currentActor));

@@ -137,38 +137,12 @@ switch (global.battle_state) {
 
     case "defeat":
     {
-        show_debug_message("💀 Defeat! Showing game over dialog...");
-        var create_dialog_script_asset = asset_get_index("create_dialog");
-        if (create_dialog_script_asset != -1 && script_exists(create_dialog_script_asset)) {
-            create_dialog([{ name: "Defeat", msg: "You have been defeated..." }]);
-        } else if (asset_get_index("obj_dialog") != -1 && object_exists(obj_dialog)) {
-            var dialog_layer_name = "Instances"; // Default
-             if (layer_exists("UI")) {
-                dialog_layer_name = "UI";
-            } else if (!layer_exists("Instances")) {
-                var all_layer_ids_df = layer_get_all();
-                if (array_length(all_layer_ids_df) > 0) {
-                    dialog_layer_name = layer_get_name(all_layer_ids_df[0]);
-                } else { // Should be extremely rare
-                    instance_create_depth(0,0, -10000, obj_dialog); // High depth
-                    show_debug_message("Fallback: obj_dialog created at depth. Manual text setup might be needed.");
-                    break; // Skip instance_create_layer if depth created
-                }
-            }
-            if (layer_exists(dialog_layer_name)) {
-                instance_create_layer(0,0,dialog_layer_name, obj_dialog);
-                show_debug_message("Fallback: obj_dialog created on layer " + dialog_layer_name + ". Manual text setup might be needed.");
-            } else {
-                 instance_create_depth(0,0, -10000, obj_dialog); // High depth
-                 show_debug_message("Fallback: obj_dialog created at depth as layer "+dialog_layer_name+" not found. Manual text setup might be needed.");
-            }
-        } else {
-             show_debug_message("Warning: Neither create_dialog script nor obj_dialog object found for defeat message.");
-        }
-        global.battle_state = "return_to_field";
-        alarm[0] = 120; // Longer delay for game over message
+        show_debug_message("💀 Defeat! Starting fade to Game Over room.");
+        // Kick off the fade. The Step event will handle the rest.
+        fade_fading = true;
+        fade_alpha  = 0;
     }
-    break; // End of case "defeat"
+    break;
 
     case "return_to_field":
     {

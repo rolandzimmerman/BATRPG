@@ -549,3 +549,12 @@ if (screen_flash_timer > 0) {
 }
 
 show_debug_message("--- End of obj_battle_manager Step Event --- (State: " + global.battle_state + ")");
+            
+// --- Fade handling (after all battle logic) ---
+if (fade_fading) {
+    fade_alpha += fade_speed;
+    if (fade_alpha >= 1) {
+        // Fully black — now switch rooms
+        room_goto(rm_game_over);
+    }
+}

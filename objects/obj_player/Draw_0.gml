@@ -1,7 +1,7 @@
 /// obj_player :: Draw Event
 
 // Never draw the over-world sprite in the battle room
-if (room == rm_battle) {
+if (room == rm_battle || room = rm_game_over) {
     exit;
 }
 

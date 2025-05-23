@@ -223,3 +223,8 @@ battle_fx_surface = -1;
 
 // <<< NEW: Initialize flag to ignore B for one frame when cancelling target select >>>
 global.battle_ignore_b = false;
+    
+// --- Add Fade Vars ---
+fade_fading    = false;   // Are we currently fading out?
+fade_alpha     = 0;       // Current fade alpha (0–1)
+fade_speed     = 1/30;    // Fade in over 30 frames (adjust as needed)
