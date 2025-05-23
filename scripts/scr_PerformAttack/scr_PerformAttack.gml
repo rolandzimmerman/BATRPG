@@ -1,7 +1,8 @@
 /// @function scr_PerformAttack(_attacker_inst, _target_inst)
 /// @description Calculates and applies damage for a basic attack (enemy or player),
-/// handles element/resistance, popups, overdrive gain, death, and battle-log.
-/// Guards against missing struct fields (e.g. is_defending).
+/// with element/resistance, critical hits, popups, overdrive gain, death, and battle-log.
+/// Crit chance = 0.25% × attacker's LUK; crit multiplier = 1.5×.
+/// Guards against missing struct fields (e.g. is_defending, luck).
 function scr_PerformAttack(_attacker_inst, _target_inst) {
     // --- Validate ---
     if (!instance_exists(_attacker_inst) || !variable_instance_exists(_attacker_inst, "data") || !is_struct(_attacker_inst.data)) {
@@ -29,7 +30,6 @@ function scr_PerformAttack(_attacker_inst, _target_inst) {
         scr_AddBattleLog(nameA + " is blinded, rolling miss chance…");
         if (irandom(99) < 50) {
             scr_AddBattleLog(nameA + " missed " + nameT + " due to blind.");
-            // Optional Miss popup
             if (object_exists(obj_popup_damage)) {
                 var layM = layer_get_id("Instances");
                 if (layM != -1) {
@@ -47,23 +47,30 @@ function scr_PerformAttack(_attacker_inst, _target_inst) {
     var def = _target_inst.data.def ?? 0;
     var base = max(1, atk - def);
 
-    // --- Defend halving, only if the field exists ---
-    if (variable_struct_exists(_target_inst.data, "is_defending")
-     && _target_inst.data.is_defending) {
+    // --- Defend halving ---
+    if (variable_struct_exists(_target_inst.data, "is_defending") && _target_inst.data.is_defending) {
         base = max(1, floor(base / 2));
     }
 
     // --- Resistance multiplier ---
     var rm = 1.0;
-    if (script_exists(GetResistanceMultiplier)
-     && variable_struct_exists(_target_inst.data, "resistances")) {
+    if (script_exists(GetResistanceMultiplier) && variable_struct_exists(_target_inst.data, "resistances")) {
         rm = GetResistanceMultiplier(_target_inst.data.resistances, element);
     }
 
-    // --- Final damage & minimum rule ---
+    // --- Preliminary damage (before crit) & minimum rule ---
     var dmg = floor(base * rm);
     if (base >= 1 && rm > 0 && dmg < 1) {
         dmg = 1;
+    }
+
+    // --- Critical hit roll ---
+    var luck = _attacker_inst.data.luk ?? 0;
+    var critChance = luck * 0.005; // 0.25% = 0.0025
+    var isCrit = (random(1) < critChance);
+    if (isCrit) {
+        dmg = floor(dmg * 1.5);
+        scr_AddBattleLog(nameA + " lands a CRITICAL HIT!");
     }
 
     // --- Apply HP change ---
@@ -72,44 +79,41 @@ function scr_PerformAttack(_attacker_inst, _target_inst) {
     var dealt = oldHP - _target_inst.data.hp;
     scr_AddBattleLog(nameA + " did " + string(dealt) + " damage to " + nameT + ".");
 
-    // --- Popup damage with color/suffix logic ---
+    // --- Popup damage & color/suffix logic ---
     if (object_exists(obj_popup_damage)) {
         var lay = layer_get_id("Instances");
         if (lay != -1) {
             var pop = instance_create_layer(_target_inst.x, _target_inst.y - 64, lay, obj_popup_damage);
             if (pop != noone) {
-                var suffix;
-                var col;
+                var label, col;
                 if (rm <= 0) {
-                    suffix = "Immune";
-                    col    = c_gray;
+                    label = "Immune"; col = c_gray;
+                }
+                else if (isCrit) {
+                    label = string(dmg) + " (Crit!)"; col = c_red;
                 }
                 else if (rm < 0.9) {
-                    suffix = string(dmg) + " (Resist)";
-                    col    = c_aqua;
+                    label = string(dmg) + " (Resist)"; col = c_aqua;
                 }
                 else if (rm > 1.1) {
-                    suffix = string(dmg) + " (Weak!)";
-                    col    = c_yellow;
+                    label = string(dmg) + " (Weak!)"; col = c_yellow;
                 }
                 else {
-                    suffix = string(dmg);
-                    col    = c_white;
+                    label = string(dmg); col = c_white;
                 }
-                pop.damage_amount = suffix;
+                pop.damage_amount = label;
                 pop.text_color    = col;
             }
         }
     }
 
-    // --- Clear defend flag if it existed ---
+    // --- Clear defend flag ---
     if (variable_struct_exists(_target_inst.data, "is_defending")) {
         _target_inst.data.is_defending = false;
     }
 
-    // --- Overdrive gain (only if both fields exist) ---
-    if (variable_struct_exists(_target_inst.data, "overdrive")
-     && variable_struct_exists(_target_inst.data, "overdrive_max")) {
+    // --- Overdrive gain ---
+    if (variable_struct_exists(_target_inst.data, "overdrive") && variable_struct_exists(_target_inst.data, "overdrive_max")) {
         _target_inst.data.overdrive = min(_target_inst.data.overdrive + 3, _target_inst.data.overdrive_max);
     }
 
