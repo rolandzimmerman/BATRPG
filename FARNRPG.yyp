@@ -706,6 +706,7 @@
     {"id":{"name":"spr_izzy_death","path":"sprites/spr_izzy_death/spr_izzy_death.yy",},},
     {"id":{"name":"spr_izzy_item","path":"sprites/spr_izzy_item/spr_izzy_item.yy",},},
     {"id":{"name":"spr_LB","path":"sprites/spr_LB/spr_LB.yy",},},
+    {"id":{"name":"spr_leaves","path":"sprites/spr_leaves/spr_leaves.yy",},},
     {"id":{"name":"spr_lexy_attack","path":"sprites/spr_lexy_attack/spr_lexy_attack.yy",},},
     {"id":{"name":"spr_lexy_battle","path":"sprites/spr_lexy_battle/spr_lexy_battle.yy",},},
     {"id":{"name":"spr_lexy_cast","path":"sprites/spr_lexy_cast/spr_lexy_cast.yy",},},
@@ -783,8 +784,8 @@
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
     {"roomId":{"name":"rm_bat_debug","path":"rooms/rm_bat_debug/rm_bat_debug.yy",},},
-    {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
     {"roomId":{"name":"FARN","path":"rooms/FARN/FARN.yy",},},
+    {"roomId":{"name":"rm_cave_tutorial","path":"rooms/rm_cave_tutorial/rm_cave_tutorial.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_2","path":"rooms/rm_opening_cutscene_2/rm_opening_cutscene_2.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_3","path":"rooms/rm_opening_cutscene_3/rm_opening_cutscene_3.yy",},},
     {"roomId":{"name":"rm_opening_cutscene_1","path":"rooms/rm_opening_cutscene_1/rm_opening_cutscene_1.yy",},},
