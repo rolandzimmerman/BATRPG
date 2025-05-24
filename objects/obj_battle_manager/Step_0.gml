@@ -338,74 +338,146 @@ switch (global.battle_state) {
     }
     break; 
 
+    // --- REVISED ExecutingAction State ---
     case "ExecutingAction": 
-        show_debug_message("Manager: State ExecutingAction -> Actor: " + string(currentActor));
+        show_debug_message("Manager: State ExecutingAction -> Actor: " + string(currentActor) + " (Name: " + string(currentActor.data.name ?? "N/A") + ")");
         if (instance_exists(currentActor)) {
+            // Check if actor is KO'd before attempting action
             if (!variable_instance_exists(currentActor,"data") || !is_struct(currentActor.data) || (currentActor.data.hp ?? 0) <= 0) { 
-                show_debug_message(" -> Actor " + string(currentActor) + " KO'd before action execution.");
-                global.battle_state = "action_complete"; break; 
+                show_debug_message(" -> Actor " + string(currentActor) + " (Name: " + string(currentActor.data.name ?? "N/A") + ") is KO'd before action execution. Action complete.");
+                global.battle_state = "action_complete"; 
+                break; 
             } 
 
-            var _action_data = stored_action_data; 
-            var _target = selected_target_id;   
-            var next_actor_state = "idle";   
-            var _action_succeeded = false;     
+            var _action_data = stored_action_data; // This holds: "Attack", "Defend", or a skill struct, or an item struct
+            var _target = selected_target_id;     // This holds the target instance ID, or noone
+            var next_actor_state = "idle";        // Default state for actor if action has no animation or fails early
+            var _action_succeeded = false;        // Tracks if the core effect of the action was applied
 
-            if (is_string(_action_data)) { 
+            // --- 1. Determine Action Type and Apply Effect / Check Usability / Deduct Cost ---
+            if (is_string(_action_data)) { // Basic Attack or Defend command
                 if (_action_data == "Attack") {
-                    show_debug_message(" -> Executing: Basic Attack by " + string(currentActor.data.name ?? "Actor") + " on " + string(_target.data.name ?? "Target"));
-                    if (script_exists(scr_PerformAttack)) {
-                        _action_succeeded = scr_PerformAttack(currentActor, _target); 
-                        if (_action_succeeded) next_actor_state = "attack_start"; 
-                    } else { show_debug_message("ERROR: scr_PerformAttack missing!");}
+                    show_debug_message(" -> Executing: Basic Attack by " + string(currentActor.data.name ?? "Actor") + 
+                                       ((instance_exists(_target)) ? (" on " + string(_target.data.name ?? "Target")) : " (No Target specified for attack!)"));
+                    if (instance_exists(_target)) { // Ensure target exists for attack
+                        if (script_exists(scr_PerformAttack)) {
+                            _action_succeeded = scr_PerformAttack(currentActor, _target); // Script handles damage/miss/popup
+                            if (_action_succeeded) {
+                                next_actor_state = "attack_start"; // Trigger attack animation on success
+                                show_debug_message("    -> Attack succeeded, next_actor_state: " + next_actor_state);
+                            } else {
+                                show_debug_message("    -> Attack failed (miss/immune/etc.).");
+                            }
+                        } else { 
+                            show_debug_message("ERROR: scr_PerformAttack script missing! Cannot perform attack.");
+                            _action_succeeded = false;
+                        }
+                    } else {
+                        show_debug_message("ERROR: Target for Basic Attack does not exist! Action failed.");
+                        _action_succeeded = false;
+                    }
                 } else if (_action_data == "Defend") {
                     show_debug_message(" -> Executing: Defend by " + string(currentActor.data.name ?? "Actor"));
-                    if (variable_instance_exists(currentActor,"data") && is_struct(currentActor.data)) currentActor.data.is_defending = true; 
-                    _action_succeeded = true; 
-                    next_actor_state = "idle"; 
-                    global.battle_state = "action_complete"; 
+                    if (variable_instance_exists(currentActor,"data") && is_struct(currentActor.data)) {
+                        currentActor.data.is_defending = true; 
+                    }
+                    _action_succeeded = true; // Defend always 'succeeds' in terms of applying the state
+                    next_actor_state = "idle"; // Defend might not have a special animation start state from manager
+                    global.battle_state = "action_complete"; // Defend is instant, skip waiting_for_animation
+                    show_debug_message("    -> Defend applied. State to action_complete.");
                     break; 
+                } else {
+                    show_debug_message(" -> ERROR: Unknown string action_data: '" + _action_data + "' in ExecutingAction!");
+                    _action_succeeded = false;
                 }
-            } else if (is_struct(_action_data)) { 
-                if (variable_struct_exists(_action_data, "usable_in_battle")) { // ITEM
-                    show_debug_message(" -> Executing: Item Use (" + string(_action_data.name ?? "Item") + ") by " + string(currentActor.data.name ?? "Actor"));
-                    if (script_exists(scr_UseItem)) {
-                        _action_succeeded = scr_UseItem(currentActor, _action_data, _target); 
-                        if (_action_succeeded) next_actor_state = "item_start"; 
-                    } else { show_debug_message("ERROR: scr_UseItem missing!");}
-                } 
-                else if (variable_struct_exists(_action_data, "effect")) { // SKILL
-                    show_debug_message(" -> Executing: Skill Cast (" + string(_action_data.name ?? "Skill") + ") by " + string(currentActor.data.name ?? "Actor"));
-                    if (script_exists(scr_CastSkill)) {
-                        _action_succeeded = scr_CastSkill(currentActor, _action_data, _target); 
-                        if (_action_succeeded) { 
-                            var anim_type = _action_data.animation_type ?? "magic";
-                            if (anim_type == "physical") { next_actor_state = "attack_start"; } 
-                            else { next_actor_state = "cast_start"; } 
-                        }
-                    } else { show_debug_message("ERROR: scr_CastSkill missing!");}
-                }
-            } else { show_debug_message(" -> ERROR: Unknown action type in ExecutingAction!"); }
 
-            if (next_actor_state != "idle") {
-                show_debug_message(" -> Telling actor " + string(currentActor) + " to start state '" + next_actor_state + "'");
-                currentActor.stored_action_for_anim = _action_data; 
-                currentActor.target_for_attack = _target;     
-                currentActor.combat_state = next_actor_state; 
+            } else if (is_struct(_action_data)) { // Skill or Item (which are structs)
+                if (variable_struct_exists(_action_data, "usable_in_battle")) { // Distinguishing feature of an ITEM struct
+                    show_debug_message(" -> Executing: Item Use ('" + string(_action_data.name ?? "Item") + "') by " + string(currentActor.data.name ?? "Actor"));
+                    if (script_exists(scr_UseItem)) {
+                        _action_succeeded = scr_UseItem(currentActor, _action_data, _target); // Script handles effect/popup & item removal
+                        if (_action_succeeded) {
+                            next_actor_state = "item_start"; // Trigger item use animation
+                            show_debug_message("    -> Item use succeeded, next_actor_state: " + next_actor_state);
+                        } else {
+                            show_debug_message("    -> Item use failed or had no effect.");
+                        }
+                    } else { 
+                        show_debug_message("ERROR: scr_UseItem script missing! Cannot use item.");
+                        _action_succeeded = false;
+                    }
+                } 
+                else if (variable_struct_exists(_action_data, "effect")) { // Distinguishing feature of a SKILL struct
+                    show_debug_message(" -> Executing: Skill Cast ('" + string(_action_data.name ?? "Skill") + "') by " + string(currentActor.data.name ?? "Actor"));
+                    if (script_exists(scr_CastSkill)) {
+                        // scr_CastSkill should handle MP cost deduction and applying the actual effects.
+                        // It returns true if the skill was successfully cast (e.g., had enough MP, valid target conditions met).
+                        _action_succeeded = scr_CastSkill(currentActor, _action_data, _target); 
+                        
+                        if (_action_succeeded) { 
+                            show_debug_message("    -> scr_CastSkill reported success for '" + string(_action_data.name ?? "Skill") + "'.");
+                            // --- SAFER CHECK FOR animation_type ---
+                            var anim_type = "magic"; // Default to "magic" animation type for skills
+                            if (is_struct(_action_data) && variable_struct_exists(_action_data, "animation_type")) {
+                                anim_type = _action_data.animation_type;
+                                show_debug_message("        -> Skill animation_type is '" + string(anim_type) + "'.");
+                            } else if (is_struct(_action_data)) { // Struct exists but field doesn't
+                                show_debug_message("        -> WARNING: Skill '" + string(_action_data.name ?? "Unknown Skill") + "' is missing 'animation_type' field. Defaulting to 'magic'.");
+                            } else { // _action_data itself became invalid (e.g., undefined) - defensive coding
+                                show_debug_message("        -> ERROR: _action_data (skill struct) became invalid before reading 'animation_type'. Defaulting anim_type to 'magic'.");
+                                // This case should ideally not be hit if _action_succeeded was true and _action_data was a struct initially.
+                            }
+                            // --- END SAFER CHECK ---
+
+                            if (anim_type == "physical") { 
+                                next_actor_state = "attack_start"; // Physical skills use attack-like animation
+                            } else { // Includes "magic" and any other defaults or custom animation types that map to casting
+                                next_actor_state = "cast_start"; 
+                            } 
+                            show_debug_message("        -> Determined next_actor_state: " + next_actor_state);
+                        } else {
+                            show_debug_message("    -> scr_CastSkill reported failure for '" + string(_action_data.name ?? "Skill") + "' (e.g., not enough MP, invalid target for effect). No animation will play.");
+                            // No animation, so next_actor_state remains "idle" (or whatever default means skip animation)
+                        }
+                    } else { 
+                        show_debug_message("ERROR: scr_CastSkill script missing! Cannot cast skill.");
+                        _action_succeeded = false;
+                    }
+                } else {
+                     show_debug_message(" -> ERROR: _action_data is a struct but not recognized as Item or Skill in ExecutingAction!");
+                    _action_succeeded = false;
+                }
+            } else { 
+                show_debug_message(" -> ERROR: Unknown _action_data type in ExecutingAction! Type: " + string(typeof(_action_data)));
+                _action_succeeded = false;
+            }
+
+            // --- 2. Trigger Actor's Animation State (if applicable and action 'succeeded' in terms of being able to proceed to animation) ---
+            // Note: _action_succeeded here means the pre-animation checks passed (e.g. enough MP for skill).
+            // The actual hit/miss/damage is usually part of the animation sequence or applied by the Perform/Cast/Use scripts.
+            if (_action_succeeded && next_actor_state != "idle") { // Only animate if the action was valid enough to start an animation
+                show_debug_message(" -> Telling actor " + string(currentActor) + " (Name: " + string(currentActor.data.name ?? "N/A") + ") to start combat_state '" + next_actor_state + "'");
+                currentActor.stored_action_for_anim = _action_data; // Pass the action data (struct or string) for visual reference or effects within animation
+                currentActor.target_for_attack = _target;           // Pass target for visual reference/FX positioning
+                currentActor.combat_state = next_actor_state;       // This changes the actor's own state machine
                 
-                current_attack_animation_complete = false; 
+                current_attack_animation_complete = false; // Manager flag: reset, waiting for actor's animation to finish
                 global.battle_state = "waiting_for_animation"; 
-                show_debug_message(" -> Manager state set to waiting_for_animation.");
-            } else if (global.battle_state != "action_complete") { 
-                show_debug_message(" -> Action has no animation or failed pre-animation. Proceeding to action_complete.");
+                show_debug_message(" -> Battle Manager state set to waiting_for_animation.");
+            } else if (global.battle_state != "action_complete") { // If we didn't already skip (like for Defend) or if action failed early
+                if (!_action_succeeded) {
+                     show_debug_message(" -> Action was not successful before animation stage. Proceeding to action_complete.");
+                } else { // Action succeeded but next_actor_state is "idle" (no animation)
+                     show_debug_message(" -> Action has no special animation (next_actor_state is 'idle'). Proceeding to action_complete.");
+                }
                 global.battle_state = "action_complete"; 
             }
 
-        } else { 
-            show_debug_message("ERROR: currentActor " + string(currentActor) + " invalid in ExecutingAction state!");
-            global.battle_state = "calculate_turn"; 
+        } else { // currentActor does not exist
+            show_debug_message("ERROR: currentActor (ID: " + string(currentActor) + ") became invalid or does not exist in ExecutingAction state!");
+            global.battle_state = "calculate_turn"; // Try to recover by recalculating turn
         }
-        break;
+        break; // End ExecutingAction
 
     case "enemy_turn": 
         show_debug_message(">>> MANAGER STATE: enemy_turn for Actor: " + string(currentActor) + " <<<"); 
