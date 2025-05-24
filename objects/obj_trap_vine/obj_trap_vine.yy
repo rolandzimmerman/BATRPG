@@ -1,13 +1,9 @@
 {
   "$GMObject":"",
-  "%Name":"obj_hp_percent_trap",
-  "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-  ],
+  "%Name":"obj_trap_vine",
+  "eventList":[],
   "managed":true,
-  "name":"obj_hp_percent_trap",
+  "name":"obj_trap_vine",
   "overriddenProperties":[],
   "parent":{
     "name":"Traps",
@@ -35,8 +31,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_cave_spike",
-    "path":"sprites/spr_cave_spike/spr_cave_spike.yy",
+    "name":"spr_trap_vine",
+    "path":"sprites/spr_trap_vine/spr_trap_vine.yy",
   },
   "spriteMaskId":null,
   "visible":true,

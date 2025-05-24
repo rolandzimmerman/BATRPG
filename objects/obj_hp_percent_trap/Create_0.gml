@@ -1,5 +1,5 @@
 /// obj_hp_percent_trap :: Create Event
-
+event_inherited()
 damage_percent = 0.10; // 10% of max HP
 player_invulnerability_duration_frames = ceil(1.5 * game_get_speed(gamespeed_fps)); // 1.5 seconds in frames
 trap_cooldown_frames = ceil(2.0 * game_get_speed(gamespeed_fps)); // 2 seconds before trap can hit again

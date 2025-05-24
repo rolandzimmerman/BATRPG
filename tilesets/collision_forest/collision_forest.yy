@@ -1,0 +1,38 @@
+{
+  "$GMTileSet":"v1",
+  "%Name":"collision_forest",
+  "autoTileSets":[],
+  "macroPageTiles":{
+    "SerialiseHeight":0,
+    "SerialiseWidth":0,
+    "TileSerialiseData":[],
+  },
+  "name":"collision_forest",
+  "out_columns":480,
+  "out_tilehborder":2,
+  "out_tilevborder":2,
+  "parent":{
+    "name":"Tile Sets",
+    "path":"folders/Tile Sets.yy",
+  },
+  "resourceType":"GMTileSet",
+  "resourceVersion":"2.0",
+  "spriteId":{
+    "name":"Woods_tileset",
+    "path":"sprites/Woods_tileset/Woods_tileset.yy",
+  },
+  "spriteNoExport":false,
+  "textureGroupId":{
+    "name":"Default",
+    "path":"texturegroups/Default",
+  },
+  "tileAnimationFrames":[],
+  "tileAnimationSpeed":15.0,
+  "tileHeight":4,
+  "tilehsep":0,
+  "tilevsep":0,
+  "tileWidth":4,
+  "tilexoff":0,
+  "tileyoff":0,
+  "tile_count":230400,
+}
