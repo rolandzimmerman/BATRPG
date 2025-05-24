@@ -1,107 +1,95 @@
-// obj_dialog.endstep
-if (current_message < 0) exit;
+/// obj_dialog :: End Step
+
+if (current_message < 0 || current_message >= array_length(messages)) { // Added check for messages array
+    // If current_message is invalid (e.g. -1 from Create or out of bounds after advancing)
+    // and there are no messages, or if it's already been destroyed, exit.
+    // This can prevent errors if instance_destroy was called but End Step still runs once.
+    if (!instance_exists(id) || array_length(messages) == 0) {
+        exit;
+    }
+    // If current_message is somehow invalid but messages exist, try to recover or destroy.
+    // For now, this implies the dialog might be finishing or in an error state.
+    // If current_message became >= array_length(messages) it means it should destroy in the advance logic.
+    // If it's still < 0 it means it hasn't started.
+    if (current_message < 0) exit; // Not yet started
+}
+
 
 var _str = messages[current_message].msg;
 var _len = string_length(_str);
 
+// Input for skipping crawl or advancing dialog (using player_index 0 by default)
+var advance_input_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM);
+
 // --- Text Crawling ---
-if (current_char < _len)
-{
-    var _input_pressed = (keyboard_check_pressed(input_key) || gamepad_button_check_pressed(0, gp_face1));
-    current_char += char_speed * (1 + _input_pressed);
-    current_char = min(current_char, _len);
-    draw_message = string_copy(_str, 0, current_char);
+if (current_char < _len) {
+    var speed_multiplier = 1;
+    if (advance_input_pressed) { // Pressing confirm speeds up text crawl
+        speed_multiplier = 10; // Or use a variable for "skip crawl speed"
+         // audio_play_sound(snd_text_skip, 0, false); // Optional feedback
+    }
+    current_char += char_speed * speed_multiplier;
+    current_char = min(current_char, _len); // Clamp to actual length
+    draw_message = string_copy(_str, 0, ceil(current_char)); // Use ceil to ensure full chars are copied
 }
-// --- Advance Dialogue ---
-else if ((keyboard_check_pressed(input_key) || gamepad_button_check_pressed(0, gp_face1)))
-{
+// --- Advance Dialogue (if text is fully crawled AND confirm is pressed again) ---
+else if (advance_input_pressed) { // current_char >= _len
+    // audio_play_sound(snd_dialog_next, 0, false); // Optional sound for advancing
+
     // --- SCRIPT EXECUTION ---
-    var _completed_message_index = current_message;
+    var _completed_message_index = current_message; // Store before incrementing
     var _msg_data = messages[_completed_message_index];
 
-    // Check if a script should run after this message
-    if (variable_struct_exists(_msg_data, "script_to_run"))
-    {
-        var _script = _msg_data.script_to_run; // Get the script index
+    if (variable_struct_exists(_msg_data, "script_to_run")) {
+        var _script_asset = _msg_data.script_to_run; // 'script' renamed
 
-        if (script_exists(_script))
-        {
-            // --- Argument Handling ---
-            var _args_array = undefined; // Default to no arguments
-
-            // Check if script_args exists AND is an array
-            if (variable_struct_exists(_msg_data, "script_args")) {
-                var _potential_args = _msg_data.script_args;
-                if (is_array(_potential_args)) {
-                    _args_array = _potential_args; // Store the array if valid
-                     show_debug_message("Dialog: Found arguments for script " + script_get_name(_script) + ": " + string(_args_array));
-                } else {
-                     show_debug_message("Dialog Warning: script_args found for message " + string(_completed_message_index) + " but it's not an array. Ignoring args.");
-                }
+        if (script_exists(_script_asset)) {
+            var _args_array = variable_struct_get(_msg_data, "script_args"); // Get args, will be 'undefined' if not present
+            if (!is_array(_args_array) && !is_undefined(_args_array)) { // If it exists but isn't an array
+                show_debug_message("Dialog Warning: script_args for message " + string(_completed_message_index) + " is not an array. Ignoring args.");
+                _args_array = undefined; // Treat as no args
             }
 
-            // --- Execute Script ---
-            show_debug_message("Dialog: Executing script '" + script_get_name(_script) + "' after message index " + string(_completed_message_index));
+            show_debug_message("Dialog: Executing script '" + script_get_name(_script_asset) + "' after message index " + string(_completed_message_index) + 
+                               ((_args_array != undefined) ? (" with args: " + string(_args_array)) : " (no args)."));
 
-            if (_args_array != undefined)
-            {
-                // --- Execute with Arguments (Manual Handling for older GMS versions) ---
-                // We manually check the array length and call script_execute accordingly.
+            if (_args_array != undefined) { // Has arguments
                 var _num_args = array_length(_args_array);
-                show_debug_message(" -> Script expects " + string(_num_args) + " arguments.");
-
                 switch (_num_args) {
-                    case 0:
-                        script_execute(_script);
-                        break;
-                    case 1:
-                        script_execute(_script, _args_array[0]);
-                        break;
-                    case 2: // Handles scr_AddInventoryItem("potion", 1)
-                        script_execute(_script, _args_array[0], _args_array[1]);
-                        break;
-                    case 3:
-                        script_execute(_script, _args_array[0], _args_array[1], _args_array[2]);
-                        break;
-                    // Add more cases here if you have scripts that take more arguments
-                    // case 4: script_execute(_script, _args_array[0], _args_array[1], _args_array[2], _args_array[3]); break;
+                    case 0: script_execute(_script_asset); break;
+                    case 1: script_execute(_script_asset, _args_array[0]); break;
+                    case 2: script_execute(_script_asset, _args_array[0], _args_array[1]); break;
+                    case 3: script_execute(_script_asset, _args_array[0], _args_array[1], _args_array[2]); break;
+                    // Add more cases as needed for your game
+                    // case 4: script_execute(_script_asset, _args_array[0], _args_array[1], _args_array[2], _args_array[3]); break;
                     default:
-                        // Handle cases with more arguments than explicitly listed or fallback
-                        show_debug_message("Dialog Warning: Too many arguments (" + string(_num_args) + ") for explicit handling in obj_dialog End Step. Check the switch statement if >3 args needed.");
-                        // Attempt to execute with first 3 as a fallback, or just run with none if preferred.
-                        if (_num_args >= 3) {
-                           script_execute(_script, _args_array[0], _args_array[1], _args_array[2]);
-                        } else if (_num_args == 2) { // Should be caught by case 2, but for safety
-                           script_execute(_script, _args_array[0], _args_array[1]);
-                        } else if (_num_args == 1) { // Should be caught by case 1
-                           script_execute(_script, _args_array[0]);
-                        } else {
-                           script_execute(_script); // Execute without args if something went wrong
-                        }
+                        show_debug_message("Dialog Warning: Script '" + script_get_name(_script_asset) + "' called with " + string(_num_args) + 
+                                           " arguments. Max handled in switch is 3. Attempting with first 3 or fewer.");
+                        // Fallback for more than 3 args, or adapt as needed
+                        if (_num_args >= 3) script_execute(_script_asset, _args_array[0], _args_array[1], _args_array[2]);
+                        else if (_num_args == 2) script_execute(_script_asset, _args_array[0], _args_array[1]);
+                        else if (_num_args == 1) script_execute(_script_asset, _args_array[0]);
+                        else script_execute(_script_asset); // Should be caught by case 0
                         break;
                 }
-            } else {
-                // Execute the script without arguments (if script_args was missing or invalid)
-                script_execute(_script);
+            } else { // No arguments defined for the script
+                script_execute(_script_asset);
             }
-        }
-        else if (_script != undefined && _script != -1 && _script != noone)
-        {
-             // Warning for non-existent script
-             show_debug_message("Dialog Warning: Script specified for message " + string(_completed_message_index) + " (value: " + string(_script) + ") does not exist!");
+        } else if (!is_undefined(_script_asset) && _script_asset != -1 && _script_asset != noone) { // script_to_run was defined but script doesn't exist
+             show_debug_message("Dialog Warning: Script specified for message " + string(_completed_message_index) + 
+                               " (asset value: " + string(_script_asset) + ") does not exist!");
         }
     }
 
-    // --- Advance to next message or end ---
-    current_message++;
+    // --- Advance to next message or end dialog ---
+    current_message++; // Advance internal message counter
 
-    if (current_message >= array_length(messages))
-    {
-        instance_destroy();
-    }
-    else
-    {
-        current_char = 0;
-        draw_message = "";
+    if (current_message >= array_length(messages)) { // All messages shown
+        instance_destroy(); // Destroy the dialog object
+        // Any post-dialog actions (like reactivating player if dialog pauses game)
+        // should be handled by the script that was run, or by the object that created the dialog.
+    } else { // More messages to show
+        current_char = 0; // Reset character crawl for the new message
+        draw_message = ""; // Clear the drawn message
     }
 }

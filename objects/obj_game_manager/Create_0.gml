@@ -66,19 +66,7 @@ if (!variable_global_exists("party_inventory") || !is_array(global.party_invento
 }
 
 
-// Debug Save Trigger
-if (keyboard_check_pressed(vk_f5)) {
-    show_debug_message("--- F5 Pressed! Attempting Save (using scr_save_game) ---");
-    var _save_success = scr_save_game("mysave.json");
-    show_debug_message("--- scr_save_game Result: " + string(_save_success) + " ---");
-}
 
-// Debug Load Trigger
-if (keyboard_check_pressed(vk_f9)) {
-    show_debug_message("--- F9 Pressed! Attempting Load (using scr_load_game) ---");
-    var _load_initiated = scr_load_game("mysave.json");
-    show_debug_message("--- scr_load_game Initiated: " + string(_load_initiated) + " ---");
-}
 
 layer_to_hide_on_alarm = "";
 

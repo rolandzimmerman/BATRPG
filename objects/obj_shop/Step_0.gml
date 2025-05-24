@@ -51,7 +51,7 @@ if (gamepad_button_check_pressed(gp_idx, gp_face2)) {
 // 5) CONFIRM STATE: choose YES/NO, commit with dialog
 else if (shop_state == "confirm_purchase") {
     // Toggle between YES (0) and NO (1)
-    // The original (right - left) is clever. If MENU_LEFT/RIGHT map to A/D for keyboard,
+    // The original (right - left) is clever. If MENU_LEFT/RIGHT map to A/D for Kboard,
     // this could be an issue if both are pressed. However, input_check_pressed only returns true/false.
     // We need to get a direction.
     var horizontal_input_direction = 0;

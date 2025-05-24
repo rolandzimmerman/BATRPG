@@ -2,96 +2,107 @@
 /// Handles navigation and actions within the main pause menu.
 
 // — only run if this menu is active —
-if (!variable_instance_exists(id, "active") || !active) exit;
+if (!variable_instance_exists(id, "active") || !active) {
+    exit;
+}
 
 // --- SAFETY CHECK: Ensure game is actually paused ---
 var _gm = instance_exists(obj_game_manager) ? obj_game_manager : noone;
 if (_gm == noone || !variable_instance_exists(_gm, "game_state") || _gm.game_state != "paused") {
     show_debug_message("Pause Menu Step: Game not paused or GM missing. Destroying self.");
-    instance_activate_all(); instance_destroy(); exit;
+    instance_activate_all(); // Try to restore game state before destroying
+    instance_destroy(); 
+    exit;
 }
 
 // --- INPUT ---
-var device = 0;
-var up      = keyboard_check_pressed(vk_up)    || gamepad_button_check_pressed(device, gp_padu);
-var down    = keyboard_check_pressed(vk_down)  || gamepad_button_check_pressed(device, gp_padd);
-var confirm = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(device, gp_face1);
-var back    = keyboard_check_pressed(vk_escape)|| gamepad_button_check_pressed(device, gp_face2)|| gamepad_button_check_pressed(device, gp_start); 
+// Assuming player_index 0 for gamepad inputs by default
+var up_pressed = input_check_pressed(INPUT_ACTION.MENU_UP);
+var down_pressed = input_check_pressed(INPUT_ACTION.MENU_DOWN);
+var confirm_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM);
+// For "back", we want MENU_CANCEL (Esc, Gamepad B) OR the PAUSE button (which includes Gamepad Start)
+var back_pressed_menu_cancel = input_check_pressed(INPUT_ACTION.MENU_CANCEL);
+var back_pressed_pause_button = input_check_pressed(INPUT_ACTION.PAUSE); // PAUSE includes vk_escape and gp_start
+var back_input = back_pressed_menu_cancel || back_pressed_pause_button;
+
 
 // --- Initialize menu variables (Safety Check) ---
-if (!variable_instance_exists(id, "menu_options"))    menu_options = ["Resume"]; // Minimal fallback
+if (!variable_instance_exists(id, "menu_options"))    menu_options = ["Resume"]; 
 if (!variable_instance_exists(id, "menu_item_count")) menu_item_count = array_length(menu_options);
 if (!variable_instance_exists(id, "menu_index"))      menu_index = 0;
-// Ensure index is valid after potential option changes
-menu_index = clamp(menu_index, 0, max(0, menu_item_count - 1)); 
+// Ensure index is valid
+if (menu_item_count > 0) {
+    menu_index = clamp(menu_index, 0, menu_item_count - 1); 
+} else {
+    menu_index = 0; // Or -1 if no options should mean no valid index
+}
 
 
 // --- NAVIGATION ---
-if (up) {
-    menu_index = (menu_index - 1 + menu_item_count) mod menu_item_count;
-    // audio_play_sound(snd_menu_cursor, 1, false); 
-}
-if (down) {
-    menu_index = (menu_index + 1) mod menu_item_count;
-    // audio_play_sound(snd_menu_cursor, 1, false); 
+if (menu_item_count > 0) { // Only navigate if there are options
+    if (up_pressed) {
+        menu_index = (menu_index - 1 + menu_item_count) mod menu_item_count;
+        // audio_play_sound(snd_menu_cursor, 1, false); 
+    }
+    if (down_pressed) {
+        menu_index = (menu_index + 1) mod menu_item_count;
+        // audio_play_sound(snd_menu_cursor, 1, false); 
+    }
 }
 
 
 // --- RESUME / CLOSE PAUSE MENU ---
-if (back || (confirm && menu_options[menu_index] == "Resume")) {
+// This handles "Back" button press OR selecting "Resume" and confirming
+var is_resume_option_selected = (menu_item_count > 0 && menu_options[menu_index] == "Resume");
+if (back_input || (confirm_pressed && is_resume_option_selected)) {
     // audio_play_sound(snd_menu_cancel, 1, false); 
-    _gm.game_state = "playing"; 
-    instance_activate_all();
-    instance_destroy();
+    if (instance_exists(_gm)) { // Ensure _gm still exists
+         _gm.game_state = "playing"; 
+    }
+    instance_activate_all(); // Reactivate all game instances
+    instance_destroy();      // Destroy the pause menu itself
     exit; 
 }
 
 
 // --- CONFIRM ACTIONS (Other Menu Options) ---
-if (confirm) { // This block only runs if 'Resume' was NOT the selected option
+// This block only runs if 'confirm_pressed' is true AND 'Resume' was NOT the selected option
+// (because the above block would have already handled it and exited).
+if (confirm_pressed && !is_resume_option_selected && menu_item_count > 0) { 
     var opt = menu_options[menu_index];
     // audio_play_sound(snd_menu_select, 1, false); 
 
     switch (opt) {
-        
-        // --- <<< ADDED: Items Case >>> ---
         case "Items":
             show_debug_message("Pause Menu: Items selected.");
-            // Attempt to open an item menu for field use
-            if (!instance_exists(obj_item_menu_field)) { // Check if specific field item menu exists
+            if (!instance_exists(obj_item_menu_field)) {
                 var layer_id = layer_get_id("Instances_GUI") != -1 ? layer_get_id("Instances_GUI") : layer_get_id("Instances");
                 if (layer_id != -1) {
-                     var item_menu = instance_create_layer(0, 0, layer_id, obj_item_menu_field); // <<< NEEDS obj_item_menu_field TO EXIST
-                     if (instance_exists(item_menu)) {
-                          item_menu.calling_menu = id; // Tell it who called it
-                          active = false; // Deactivate this menu
-                          show_debug_message(" -> Created obj_item_menu_field, deactivated pause menu.");
-                     } else { show_debug_message(" -> ERROR: Failed to create obj_item_menu_field!"); }
+                    var item_menu = instance_create_layer(0, 0, layer_id, obj_item_menu_field);
+                    if (instance_exists(item_menu)) {
+                        item_menu.calling_menu = id; 
+                        active = false; 
+                        show_debug_message(" -> Created obj_item_menu_field, deactivated pause menu.");
+                    } else { show_debug_message(" -> ERROR: Failed to create obj_item_menu_field!"); }
                 } else { show_debug_message(" -> ERROR: No suitable layer for item menu!"); }
             } else { show_debug_message(" -> WARNING: Field item menu already exists!"); }
             break;
             
-        // --- <<< ADDED: Spells Case >>> ---
         case "Spells":
             show_debug_message("Pause Menu: Spells selected.");
-             // Attempt to open a spell menu for field use
-            if (!instance_exists(obj_spell_menu_field)) { // Check if specific field spell menu exists
+            if (!instance_exists(obj_spell_menu_field)) {
                 var layer_id = layer_get_id("Instances_GUI") != -1 ? layer_get_id("Instances_GUI") : layer_get_id("Instances");
                 if (layer_id != -1) {
-                     var spell_menu = instance_create_layer(0, 0, layer_id, obj_spell_menu_field); // <<< NEEDS obj_spell_menu_field TO EXIST
-                     if (instance_exists(spell_menu)) {
-                          spell_menu.calling_menu = id; // Tell it who called it
-                          active = false; // Deactivate this menu
-                          show_debug_message(" -> Created obj_spell_menu_field, deactivated pause menu.");
-                     } else { show_debug_message(" -> ERROR: Failed to create obj_spell_menu_field!"); }
+                    var spell_menu = instance_create_layer(0, 0, layer_id, obj_spell_menu_field);
+                    if (instance_exists(spell_menu)) {
+                        spell_menu.calling_menu = id; 
+                        active = false; 
+                        show_debug_message(" -> Created obj_spell_menu_field, deactivated pause menu.");
+                    } else { show_debug_message(" -> ERROR: Failed to create obj_spell_menu_field!"); }
                 } else { show_debug_message(" -> ERROR: No suitable layer for spell menu!"); }
             } else { show_debug_message(" -> WARNING: Field spell menu already exists!"); }
             break;
 
-        // --- <<< REMOVED: Save Game Case >>> ---
-        // case "Save Game": 
-        //     /* ... save logic ... */
-        //     break;
         case "Party":
             show_debug_message("Pause Menu: Party selected.");
             if (!instance_exists(obj_party_menu)) {
@@ -105,12 +116,14 @@ if (confirm) { // This block only runs if 'Resume' was NOT the selected option
                 }
             }
             break;
+
         case "Load Game":
             show_debug_message("Pause Menu: Load Game selected.");
-             instance_activate_all(); // Ensure needed objects are active
-             if (script_exists(scr_load_game)) {
-                 scr_load_game("mysave.json"); // Load script should handle transitions
-             } else { show_debug_message(" -> ERROR: scr_load_game script not found!"); }
+            instance_activate_all(); 
+            if (script_exists(scr_load_game)) {
+                scr_load_game("mysave.json"); 
+            } else { show_debug_message(" -> ERROR: scr_load_game script not found!"); }
+            // If load is successful, current instances (including this menu) might be destroyed by room change.
             break;
 
         case "Quit":
@@ -119,32 +132,30 @@ if (confirm) { // This block only runs if 'Resume' was NOT the selected option
             break;
 
         case "Equipment":
-             show_debug_message("Pause Menu: Equipment selected.");
-             if (!instance_exists(obj_equipment_menu)) {
-                 var layer_id = layer_get_id("Instances_GUI") != -1 ? layer_get_id("Instances_GUI") : layer_get_id("Instances");
-                 if (layer_id != -1) {
-                     var em = instance_create_layer(0, 0, layer_id, obj_equipment_menu);
-                     if (instance_exists(em)) { 
-                          em.calling_menu = id; 
-                          active = false; 
-                          show_debug_message(" -> Created obj_equipment_menu, deactivated pause menu.");
-                     } else { show_debug_message(" -> ERROR: Failed to create obj_equipment_menu instance!"); }
-                 } else { show_debug_message("ERROR: Cannot find layer for equipment menu!"); break; }
-             } else { show_debug_message(" -> WARNING: Equipment menu already exists!"); }
+            show_debug_message("Pause Menu: Equipment selected.");
+            if (!instance_exists(obj_equipment_menu)) {
+                var layer_id = layer_get_id("Instances_GUI") != -1 ? layer_get_id("Instances_GUI") : layer_get_id("Instances");
+                if (layer_id != -1) {
+                    var em = instance_create_layer(0, 0, layer_id, obj_equipment_menu);
+                    if (instance_exists(em)) { 
+                        em.calling_menu = id; 
+                        active = false; 
+                        show_debug_message(" -> Created obj_equipment_menu, deactivated pause menu.");
+                    } else { show_debug_message(" -> ERROR: Failed to create obj_equipment_menu instance!"); }
+                } else { show_debug_message("ERROR: Cannot find layer for equipment menu!"); break; }
+            } else { show_debug_message(" -> WARNING: Equipment menu already exists!"); }
             break; 
-    case "Settings":
-        show_debug_message("Pause Menu: Settings selected.");
-        var layer_id = layer_get_id("Instances_GUI");
-        if (layer_id == -1) layer_id = layer_get_id("Instances");
-        var sm = instance_create_layer(0, 0, layer_id, obj_settings_menu);
-        if (instance_exists(sm)) {
-            sm.opened_by_instance_id = id;  // <<< use opened_by_instance_id, not calling_menu
-            active = false;
-            show_debug_message(" -> Created obj_settings_menu, deactivated pause menu. caller=" + string(id));
-        }
-        break;
             
-        // Note: "Resume" is handled by the 'back' check earlier, so no case needed here.
-            
+        case "Settings":
+            show_debug_message("Pause Menu: Settings selected.");
+            var layer_id_settings = layer_get_id("Instances_GUI"); // Use a different var name
+            if (layer_id_settings == -1) layer_id_settings = layer_get_id("Instances");
+            var sm = instance_create_layer(0, 0, layer_id_settings, obj_settings_menu);
+            if (instance_exists(sm)) {
+                sm.opened_by_instance_id = id; 
+                active = false;
+                show_debug_message(" -> Created obj_settings_menu, deactivated pause menu. caller=" + string(id));
+            }
+            break;
     } // End Switch
-} // End if(confirm)
+} // End if(confirm_pressed and not resume)

@@ -8,73 +8,39 @@ if (input_cooldown > 0) {
     input_cooldown--;
 }
 
-// --- Input Handling ---
-var gp_idx = global.gamepad_player_map[0]; // Assuming player 0 for menus
-var map_menu_up = global.input_mappings[INPUT_ACTION.MENU_UP];
-var map_menu_down = global.input_mappings[INPUT_ACTION.MENU_DOWN];
+// --- Input Handling (Simplified - Cooldown applies to the action universally) ---
+// Assuming player_index 0 for all menu inputs
+var up_action_pressed = input_check_pressed(INPUT_ACTION.MENU_UP, 0);
+var down_action_pressed = input_check_pressed(INPUT_ACTION.MENU_DOWN, 0);
+var confirm_action_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM, 0);
 
-// Up Pressed - with specific cooldown logic
-var _kb_up_pressed = false;
-if (variable_struct_exists(map_menu_up, "kb_keys")) {
-    for (var i = 0; i < array_length(map_menu_up.kb_keys); ++i) {
-        if (keyboard_check_pressed(map_menu_up.kb_keys[i])) {
-            _kb_up_pressed = true;
-            break;
-        }
-    }
-}
-var _gp_up_pressed_raw = false;
-if (gamepad_is_connected(gp_idx) && variable_struct_exists(map_menu_up, "gp_buttons")) {
-    for (var i = 0; i < array_length(map_menu_up.gp_buttons); ++i) {
-        if (gamepad_button_check_pressed(gp_idx, map_menu_up.gp_buttons[i])) {
-            _gp_up_pressed_raw = true;
-            break;
-        }
-    }
-}
-var _up_pressed = _kb_up_pressed || (_gp_up_pressed_raw && input_cooldown == 0);
-
-// Down Pressed - with specific cooldown logic
-var _kb_down_pressed = false;
-if (variable_struct_exists(map_menu_down, "kb_keys")) {
-    for (var i = 0; i < array_length(map_menu_down.kb_keys); ++i) {
-        if (keyboard_check_pressed(map_menu_down.kb_keys[i])) {
-            _kb_down_pressed = true;
-            break;
-        }
-    }
-}
-var _gp_down_pressed_raw = false;
-if (gamepad_is_connected(gp_idx) && variable_struct_exists(map_menu_down, "gp_buttons")) {
-    for (var i = 0; i < array_length(map_menu_down.gp_buttons); ++i) {
-        if (gamepad_button_check_pressed(gp_idx, map_menu_down.gp_buttons[i])) {
-            _gp_down_pressed_raw = true;
-            break;
-        }
-    }
-}
-var _down_pressed = _kb_down_pressed || (_gp_down_pressed_raw && input_cooldown == 0);
-
-// Confirm Pressed - uses standard input check (no special cooldown in its condition)
-var _confirm_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM, 0);
-
+// Apply cooldown to navigation actions
+var _up_pressed = up_action_pressed && (input_cooldown == 0);
+var _down_pressed = down_action_pressed && (input_cooldown == 0);
+var _confirm_pressed = confirm_action_pressed; // Confirm might have its own cooldown logic or not need it here
 
 // Navigation
-if (_up_pressed) { // Uses the combined logic from above
+if (_up_pressed) {
     menu_index = (menu_index - 1 + menu_item_count) mod menu_item_count;
-    input_cooldown = input_cooldown_max; // Reset cooldown regardless of source
+    input_cooldown = input_cooldown_max; // Reset cooldown
     // audio_play_sound(snd_menu_blip, 0, false); 
 }
-if (_down_pressed) { // Uses the combined logic from above
+if (_down_pressed) {
     menu_index = (menu_index + 1) mod menu_item_count;
-    input_cooldown = input_cooldown_max; // Reset cooldown regardless of source
+    input_cooldown = input_cooldown_max; // Reset cooldown
     // audio_play_sound(snd_menu_blip, 0, false); 
 }
 
 // Action on Confirm
 if (_confirm_pressed) {
-    input_cooldown = input_cooldown_max; // Reset cooldown as per original logic
-    var selected_option = menu_items[menu_index];
+    // input_cooldown = input_cooldown_max; // Reset cooldown if confirm also shares it
+    // Your original code reset cooldown here even if confirm didn't check it for its condition.
+    // If confirm should also wait for cooldown, the condition would be:
+    // if (_confirm_pressed && input_cooldown == 0) { ... input_cooldown = input_cooldown_max; ... }
+    // For now, matching your original structure where confirm action resets cooldown:
+    input_cooldown = input_cooldown_max;
+
+    var selected_option = menu_items[menu_index]; // Ensure menu_index is valid
     // audio_play_sound(snd_menu_select, 0, false); 
 
     switch (selected_option) {
@@ -96,36 +62,23 @@ if (_confirm_pressed) {
 
         case "Load Game":
             show_debug_message("Title Menu: Selected Load Game. Attempting to load from: " + default_save_filename);
-
-            // Ensure the load game script actually exists in your project
             if (script_exists(scr_load_game)) {
-                // Call your load game script
                 var _load_initiated = scr_load_game(default_save_filename);
-
                 if (_load_initiated) {
-                    // scr_load_game handles the room_goto if successful.
-                    // If obj_title_menu is not persistent, it will be destroyed.
-                    // If it IS persistent, you might want to set active = false here.
                     show_debug_message("Load game process initiated successfully by scr_load_game.");
-                    // No explicit active = false; here, as room_goto will destroy non-persistent instances.
                 } else {
-                    // scr_load_game returned false, indicating an issue (e.g., file not found, parse error).
-                    // Your scr_load_game already outputs debug messages for these cases.
-                    // You might want to display a user-friendly error message on the screen here.
                     show_debug_message("scr_load_game reported an issue. Load failed to start. Staying on title screen.");
-                    // Potentially play an error sound or show a visual cue to the player.
-                    input_cooldown = input_cooldown_max; // Prevent immediate re-selection if showing an error.
+                    // input_cooldown = input_cooldown_max; // Already set if confirm was pressed
                 }
             } else {
                 show_debug_message("ERROR: scr_load_game script does not exist in the project!");
-                input_cooldown = input_cooldown_max; // Prevent immediate re-selection.
+                // input_cooldown = input_cooldown_max; // Already set
             }
             break;
 
         case "Settings":
             show_debug_message("Title Menu: Selected Settings");
             active = false; 
-
             if (!instance_exists(obj_settings_menu)) {
                 settings_menu_instance_id = instance_create_layer(0, 0, "Instances_GUI", obj_settings_menu);
             } else {
