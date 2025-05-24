@@ -8,26 +8,72 @@ if (input_cooldown > 0) {
     input_cooldown--;
 }
 
-// --- Input Handling --- (Assuming this part is already as you like it from previous steps)
-var _up_pressed = (keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W")) || (gamepad_button_check_pressed(0, gp_padu) && input_cooldown == 0));
-var _down_pressed = (keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S")) || (gamepad_button_check_pressed(0, gp_padd) && input_cooldown == 0));
-var _confirm_pressed = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1);
+// --- Input Handling ---
+var gp_idx = global.gamepad_player_map[0]; // Assuming player 0 for menus
+var map_menu_up = global.input_mappings[INPUT_ACTION.MENU_UP];
+var map_menu_down = global.input_mappings[INPUT_ACTION.MENU_DOWN];
 
-// Navigation (Assuming this part is already as you like it)
-if (_up_pressed) {
+// Up Pressed - with specific cooldown logic
+var _kb_up_pressed = false;
+if (variable_struct_exists(map_menu_up, "kb_keys")) {
+    for (var i = 0; i < array_length(map_menu_up.kb_keys); ++i) {
+        if (keyboard_check_pressed(map_menu_up.kb_keys[i])) {
+            _kb_up_pressed = true;
+            break;
+        }
+    }
+}
+var _gp_up_pressed_raw = false;
+if (gamepad_is_connected(gp_idx) && variable_struct_exists(map_menu_up, "gp_buttons")) {
+    for (var i = 0; i < array_length(map_menu_up.gp_buttons); ++i) {
+        if (gamepad_button_check_pressed(gp_idx, map_menu_up.gp_buttons[i])) {
+            _gp_up_pressed_raw = true;
+            break;
+        }
+    }
+}
+var _up_pressed = _kb_up_pressed || (_gp_up_pressed_raw && input_cooldown == 0);
+
+// Down Pressed - with specific cooldown logic
+var _kb_down_pressed = false;
+if (variable_struct_exists(map_menu_down, "kb_keys")) {
+    for (var i = 0; i < array_length(map_menu_down.kb_keys); ++i) {
+        if (keyboard_check_pressed(map_menu_down.kb_keys[i])) {
+            _kb_down_pressed = true;
+            break;
+        }
+    }
+}
+var _gp_down_pressed_raw = false;
+if (gamepad_is_connected(gp_idx) && variable_struct_exists(map_menu_down, "gp_buttons")) {
+    for (var i = 0; i < array_length(map_menu_down.gp_buttons); ++i) {
+        if (gamepad_button_check_pressed(gp_idx, map_menu_down.gp_buttons[i])) {
+            _gp_down_pressed_raw = true;
+            break;
+        }
+    }
+}
+var _down_pressed = _kb_down_pressed || (_gp_down_pressed_raw && input_cooldown == 0);
+
+// Confirm Pressed - uses standard input check (no special cooldown in its condition)
+var _confirm_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM, 0);
+
+
+// Navigation
+if (_up_pressed) { // Uses the combined logic from above
     menu_index = (menu_index - 1 + menu_item_count) mod menu_item_count;
-    input_cooldown = input_cooldown_max;
+    input_cooldown = input_cooldown_max; // Reset cooldown regardless of source
     // audio_play_sound(snd_menu_blip, 0, false); 
 }
-if (_down_pressed) {
+if (_down_pressed) { // Uses the combined logic from above
     menu_index = (menu_index + 1) mod menu_item_count;
-    input_cooldown = input_cooldown_max;
+    input_cooldown = input_cooldown_max; // Reset cooldown regardless of source
     // audio_play_sound(snd_menu_blip, 0, false); 
 }
 
 // Action on Confirm
 if (_confirm_pressed) {
-    input_cooldown = input_cooldown_max;
+    input_cooldown = input_cooldown_max; // Reset cooldown as per original logic
     var selected_option = menu_items[menu_index];
     // audio_play_sound(snd_menu_select, 0, false); 
 

@@ -1,50 +1,24 @@
-/// obj_npc_parent :: User Event 0
-// Generic interaction logic triggered by player action.
-
-// (1) Make sure this is actually executing!
-show_debug_message("PARENT STEP for NPC " + string(id) + 
-                  " | spoken=" + string(has_spoken_to) + 
-                  " | dialog_exists=" + string(instance_exists(obj_dialog)));
-
-/// (2) Destroy after dialogue closes
-if (has_spoken_to && !instance_exists(obj_dialog)) {
-    show_debug_message("NPC " + string(id) + " self‐destructing after dialog.");
-    instance_destroy();
+/// (full event code with only the deactivate call changed)
+var _player_instance = instance_find(obj_player, 0);
+if (!instance_exists(_player_instance)) {
+    show_debug_message("Shopkeeper UE0: CRITICAL - Player not found. Cannot open shop.");
     exit;
 }
 
-// (3) Pause handling
-if (instance_exists(obj_game_manager) && obj_game_manager.game_state == "paused") {
-    exit;
-}
+// Create the shop
+var shop_instance = instance_create_layer(0, 0, "Instances", obj_shop);
+// configure it…
+shop_instance.buyMultiplier = 1.2;
+shop_instance.shop_stock    = ["potion","bomb","antidote"];
 
-// Select the appropriate dialog variable based on interaction history
-var _dialog_variable_to_use = undefined;
-
-if (!has_spoken_to) {
-    _dialog_variable_to_use = dialog_initial; // Use initial dialogue first time
+// — DEACTIVATE THE PLAYER INSTANCE (use instance_deactivate_instance, not instance_deactivate_object)
+if (instance_exists(shop_instance.shop_player_id)) {
+    instance_deactivate_instance(shop_instance.shop_player_id);
+    show_debug_message("Shopkeeper UE0: Deactivated player instance " + string(shop_instance.shop_player_id));
 } else {
-    _dialog_variable_to_use = dialog_repeat; // Use repeat dialogue subsequent times
+    // fallback if something went wrong
+    instance_deactivate_instance(_player_instance);
+    show_debug_message("Shopkeeper UE0: (fallback) Deactivated player instance " + string(_player_instance));
 }
 
-// Validate and Show Dialog
-if (is_array(_dialog_variable_to_use) && array_length(_dialog_variable_to_use) > 0) {
-    // Dialog data looks valid, create the dialog box
-    // Ensure create_dialog script/function exists and works
-    create_dialog(_dialog_variable_to_use);
-
-    // Mark that the initial conversation happened (if this was the first time)
-    if (!has_spoken_to) {
-        has_spoken_to = true;
-    }
-} else {
-    // Log an error if the expected dialogue data is missing for this NPC
-    var _missing_dialog_type = (!has_spoken_to) ? "dialog_initial" : "dialog_repeat";
-    // Use a flag to prevent spamming this error for the same NPC instance
-    if (!variable_instance_exists(id, "_warned_missing_" + _missing_dialog_type)) {
-         show_debug_message("ERROR: Interaction failed - '" + _missing_dialog_type + "' is missing or empty for NPC: " + object_get_name(object_index) + " (ID: " + string(id) + ")");
-         variable_instance_set(id, "_warned_missing_" + _missing_dialog_type, true);
-    }
-    // Optionally, provide fallback dialog:
-    // create_dialog([{ name: "System", msg: object_get_name(object_index) + " has nothing to say." }]);
-}
+show_debug_message("Shopkeeper UE0: Shop opened.");
