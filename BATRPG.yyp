@@ -241,6 +241,7 @@
     {"id":{"name":"scr_HaveItem","path":"scripts/scr_HaveItem/scr_HaveItem.yy",},},
     {"id":{"name":"scr_InitEncounterTable","path":"scripts/scr_InitEncounterTable/scr_InitEncounterTable.yy",},},
     {"id":{"name":"scr_InitRoomMap","path":"scripts/scr_InitRoomMap/scr_InitRoomMap.yy",},},
+    {"id":{"name":"scr_input_manager_init","path":"scripts/scr_input_manager_init/scr_input_manager_init.yy",},},
     {"id":{"name":"scr_ItemDatabase","path":"scripts/scr_ItemDatabase/scr_ItemDatabase.yy",},},
     {"id":{"name":"scr_LevelingSystem","path":"scripts/scr_LevelingSystem/scr_LevelingSystem.yy",},},
     {"id":{"name":"scr_load_game","path":"scripts/scr_load_game/scr_load_game.yy",},},

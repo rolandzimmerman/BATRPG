@@ -75,67 +75,59 @@ if (variable_global_exists("active_party_member_index")
     var st = global.battle_state; // Get current manager state
     
     // Check if we are in a state where this player should process input
+    // The player_index for input functions defaults to 0, which is fine if this object
+    // always represents the player whose turn it is and uses the first mapped gamepad.
     if (st == "player_input" || st == "skill_select" || st == "item_select") {
-        
         var d = data; // Shortcut to my data
-        var P = 0; // Gamepad index
-        // Read Inputs 
-        var A = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(P, gp_face1); // Confirm
-        var B = keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(P, gp_face2); // Cancel/Back
-        var X = keyboard_check_pressed(ord("X"))   || gamepad_button_check_pressed(P, gp_face3); // Skill? (Maybe Xbox X / PS Square?)
-        var Y = keyboard_check_pressed(ord("Y"))   || gamepad_button_check_pressed(P, gp_face4); // Item? (Maybe Xbox Y / PS Triangle?)
-        var U = keyboard_check_pressed(vk_up)      || gamepad_button_check_pressed(P, gp_padu);   // Up
-        var D = keyboard_check_pressed(vk_down)    || gamepad_button_check_pressed(P, gp_padd);   // Down
 
-        // <<< NEW: if we just cancelled a TargetSelect, ignore this B press and clear the flag >>>
-        if (global.battle_ignore_b) {
-            B = false;
-            global.battle_ignore_b = false;
+        // Read Inputs using the new system
+        var confirm_pressed = input_check_pressed(INPUT_ACTION.MENU_CONFIRM);
+        var cancel_pressed = input_check_pressed(INPUT_ACTION.MENU_CANCEL);
+        var skill_menu_pressed = input_check_pressed(INPUT_ACTION.MENU_SKILL);
+        var item_menu_pressed = input_check_pressed(INPUT_ACTION.MENU_ITEM);
+        var up_pressed = input_check_pressed(INPUT_ACTION.MENU_UP);
+        var down_pressed = input_check_pressed(INPUT_ACTION.MENU_DOWN);
+
+        // Handle flag for ignoring cancel after target selection
+        if (variable_global_exists("battle_ignore_b") && global.battle_ignore_b) {
+            if (cancel_pressed) { // Check if it was the cancel button specifically
+                 cancel_pressed = false; // Ignore this specific press
+            }
+            global.battle_ignore_b = false; // Clear flag
         }
-        // Process based on Manager's State
+        
+        // Process based on Manager's State (global.battle_state)
         switch (st) {
-            // ==================================================================
             case "player_input":
                 var hasEnemies = ds_exists(global.battle_enemies, ds_type_list) && ds_list_size(global.battle_enemies) > 0;
-                if (A && hasEnemies) { // Attack selected
+                if (confirm_pressed && hasEnemies) { // Attack selected
                     if (!instance_exists(obj_battle_manager)) break; 
                     obj_battle_manager.stored_action_data = "Attack";
                     global.battle_target = 0; 
                     global.battle_state  = "TargetSelect"; 
                     show_debug_message(" -> Action Selected: Attack -> TargetSelect");
                 }
-                else if (B) { // Defend selected
+                else if (cancel_pressed) { // Defend selected
                     if (!instance_exists(obj_battle_manager)) break; 
                     obj_battle_manager.stored_action_data  = "Defend";
                     obj_battle_manager.selected_target_id  = noone; 
                     global.battle_state = "ExecutingAction"; 
                     show_debug_message(" -> Action Selected: Defend -> ExecutingAction");
                 }
-                // ----- MODIFICATION START for Skills (X button) -----
-                else if (X) { // Skills menu selected
-                    show_debug_message("Player " + string(d.name) + " selected Skills command (X pressed).");
-
-                    // The obj_battle_player itself will be responsible for preparing its 'display_skills'
-                    // in its 'skill_select' state block later in this Step Event.
-                    // For now, just transition the global state.
-
+                else if (skill_menu_pressed) { // Skills menu selected
+                    show_debug_message("Player " + string(d.name) + " selected Skills command.");
                     if (!variable_struct_exists(d, "skill_index")) {
-                        d.skill_index = 0; // Initialize skill_index if it doesn't exist
+                        d.skill_index = 0;
                     } else {
-                         d.skill_index = 0; // Always reset to top of list when opening skill menu
+                        d.skill_index = 0; // Always reset to top
                     }
-                    
-                    global.battle_state = "skill_select"; // ALWAYS go to skill_select state
-
-                    // The debug message about "No skills available" will now effectively be handled by
-                    // the Draw GUI based on the (potentially empty) display_skills list.
+                    global.battle_state = "skill_select";
                     show_debug_message(" -> Action Selected: Skills. Transitioning to global state: skill_select");
                 }
-                // ----- MODIFICATION END for Skills (X button) -----
-                else if (Y) { // Items menu selected
+                else if (item_menu_pressed) { // Items menu selected
                     global.battle_usable_items = []; 
                     var inv = (variable_global_exists("party_inventory") && is_array(global.party_inventory)) ? global.party_inventory : [];
-                    for (var i_item = 0; i_item < array_length(inv); i_item++) { // Changed loop var to i_item 
+                    for (var i_item = 0; i_item < array_length(inv); i_item++) {
                         var inv_entry = inv[i_item];
                         if (!is_struct(inv_entry) || !variable_struct_exists(inv_entry,"item_key") || !variable_struct_exists(inv_entry,"quantity") || inv_entry.quantity <= 0) continue;
                         var it_key = inv_entry.item_key;
@@ -150,92 +142,50 @@ if (variable_global_exists("active_party_member_index")
                         global.battle_state = "item_select"; 
                         show_debug_message(" -> Action Selected: Items -> item_select");
                     } else { 
-                        show_debug_message(" -> Action Selected: Items (No usable items available)"); 
-                        // Consider also changing state to "item_select" here to show "No items" message in menu
-                        // global.battle_state = "item_select"; // If you want item menu to open and show "No items"
+                        show_debug_message(" -> Action Selected: Items (No usable items available)");
                     }
                 }
                 break; // End "player_input" case
-            // ==================================================================
+
             case "skill_select":
-            {
-                // This is where you prepare `self.display_skills` for the current player
-                // This code was already provided in your obj_battle_player Step Event
+                // Prepare display_skills (this logic remains the same)
                 show_debug_message("DEBUG skill_select (Player Step): Active battler " + string(data.character_key) + " preparing display_skills.");
-
                 var key_list_from_data = (variable_struct_exists(data,"skills") && is_array(data.skills)) ? data.skills : [];
-                // show_debug_message("DEBUG skill_select (Player Step): Battler's known skill structs (data.skills): " + string(key_list_from_data));
-
-                // `display_skills` MUST be an instance variable, not a local 'var'
-                display_skills = []; // Initialize/clear for this frame for this active player
-
-                for (var i_skill = 0; i_skill < array_length(key_list_from_data); i_skill++) { // Changed loop var to i_skill
-                    var s_struct = key_list_from_data[i_skill]; // 's_struct' is a skill struct from data.skills
-                    
+                display_skills = []; 
+                for (var i_skill = 0; i_skill < array_length(key_list_from_data); i_skill++) {
+                    var s_struct = key_list_from_data[i_skill];
                     if(!is_struct(s_struct) || !variable_struct_exists(s_struct, "name")){
-                        // show_debug_message("DEBUG skill_select (Player Step): Invalid skill struct found in data.skills at index " + string(i_skill));
                         continue;
                     }
-                    // show_debug_message("DEBUG skill_select (Player Step): Processing skill for display: " + string(s_struct.name));
-                    
-                    // Optional: Add filtering logic here (e.g., based on status, conditions, etc.)
-                    // For now, we assume all skills in data.skills are candidates for display_skills initially.
-                    // The affordability check is done in the menu / when confirming.
-                    // Unlock item checks (if any) should ideally influence what's in data.skills already,
-                    // or be checked here if they are dynamic.
-
-                    // Example check for unlock_item (if you use this pattern)
                     var can_display_skill = true;
                     if (variable_struct_exists(s_struct, "unlock_item")) {
                         if (!scr_HaveItem(s_struct.unlock_item, 1)) {
                             can_display_skill = false;
-                            // show_debug_message("DEBUG skill_select (Player Step): Skill '" + s_struct.name + "' skipped (missing unlock_item: " + s_struct.unlock_item + ")");
                         }
                     }
-                    // Example check for Overdrive only if character is not at full OD (if it's a requirement to *see* it, not just use it)
-                    // Typically, Overdrives are always shown if known, and usability is checked later.
-
                     if (can_display_skill) {
                         array_push(display_skills, s_struct);
                     }
                 }
-                // show_debug_message("DEBUG skill_select (Player Step): Final instance 'display_skills' for " + string(data.character_key) + ": Count: " + string(array_length(display_skills)));
-
-                // Input handling for navigating the display_skills list and confirming/cancelling
-                var _P_skill = 0; 
-                var _up_pressed_skill = keyboard_check_pressed(vk_up) || gamepad_button_check_pressed(_P_skill, gp_padu);
-                var _down_pressed_skill = keyboard_check_pressed(vk_down) || gamepad_button_check_pressed(_P_skill, gp_padd);
-                var _confirm_pressed_skill = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || gamepad_button_check_pressed(_P_skill, gp_face1);
-                var _cancel_pressed_skill = keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(_P_skill, gp_face2);
-
-                if (variable_global_exists("battle_ignore_b") && global.battle_ignore_b) {
-                    if (_cancel_pressed_skill) _cancel_pressed_skill = false; 
-                    global.battle_ignore_b = false;
-                }
-
+                // Input handling for navigating the display_skills list
                 var _display_count_skill = array_length(display_skills);
-
                 if (_display_count_skill > 0) {
-                    // data.skill_index is already reset to 0 when entering skill_select, or clamp if returning
                     data.skill_index = clamp(data.skill_index, 0, max(0, _display_count_skill - 1));
-
-                    if (_up_pressed_skill) {
+                    if (up_pressed) {
                         data.skill_index = (data.skill_index - 1 + _display_count_skill) % _display_count_skill;
                     }
-                    if (_down_pressed_skill) {
+                    if (down_pressed) {
                         data.skill_index = (data.skill_index + 1) % _display_count_skill;
                     }
-                    if (_confirm_pressed_skill) {
+                    if (confirm_pressed) {
                         var selected_skill_struct_confirm = display_skills[data.skill_index];
                         var can_afford_selected_confirm = true;
                         var skill_cost_confirm = selected_skill_struct_confirm.cost ?? 0;
-
                         if (variable_struct_exists(selected_skill_struct_confirm, "overdrive") && selected_skill_struct_confirm.overdrive) {
                             can_afford_selected_confirm = (data.overdrive >= (data.overdrive_max ?? 100));
                         } else {
                             can_afford_selected_confirm = (data.mp >= skill_cost_confirm);
                         }
-
                         if (can_afford_selected_confirm) {
                             if (instance_exists(obj_battle_manager)) {
                                 obj_battle_manager.stored_action_data = selected_skill_struct_confirm;
@@ -253,31 +203,23 @@ if (variable_global_exists("active_party_member_index")
                             }
                         } else { /* Play "cannot afford" sound */ }
                     }
-                } else { // No skills in display_skills
-                    if (_confirm_pressed_skill) { /* Optional: Play "buzz" or do nothing */ }
+                } else { 
+                    if (confirm_pressed) { /* Optional: Play "buzz" or do nothing */ }
                 }
-
-                if (_cancel_pressed_skill) {
+                if (cancel_pressed) {
                     global.battle_state = "player_input";
                 }
-            }
-            break; // End of case "skill_select"
-            // ==================================================================
+                break; // End of case "skill_select"
+
             case "item_select":
-                // ... (Your existing item_select input handling logic) ...
-                // This should also prepare global.battle_usable_items if not already done when entering state.
-                // And handle U, D, A, B inputs for the item list.
-                // The structure here mirrors the skill_select input handling.
                 var items_nav = global.battle_usable_items ?? []; 
                 var count_items_nav = array_length(items_nav);
-
                 if (count_items_nav > 0) {
-                    // data.item_index should be clamped to [0, count_items_nav - 1]
                     data.item_index = clamp(data.item_index, 0, max(0, count_items_nav - 1));
-                    if (U) data.item_index = (data.item_index - 1 + count_items_nav) % count_items_nav;
-                    if (D) data.item_index = (data.item_index + 1) % count_items_nav;
+                    if (up_pressed) data.item_index = (data.item_index - 1 + count_items_nav) % count_items_nav;
+                    if (down_pressed) data.item_index = (data.item_index + 1) % count_items_nav;
                     
-                    if (A && instance_exists(obj_battle_manager)) { 
+                    if (confirm_pressed && instance_exists(obj_battle_manager)) { 
                         var item_info_nav = items_nav[data.item_index]; 
                         var item_data_nav = scr_GetItemData(item_info_nav.item_key); 
                         
@@ -302,15 +244,14 @@ if (variable_global_exists("active_party_member_index")
                         }
                     }
                 } else { // No items
-                     if (A) { /* Optional: Play "buzz" sound */ }
+                    if (confirm_pressed) { /* Optional: Play "buzz" sound */ }
                 }
-                if (B) { 
-                    global.battle_usable_items = []; // Clear it if cancelling
+                if (cancel_pressed) { 
+                    global.battle_usable_items = []; 
                     global.battle_state = "player_input";
                 } 
                 break; // End "item_select" case
-            // ==================================================================
-        } // End input state switch
+        } // End input state switch (global.battle_state)
     } // End if correct state for input
 } // End if my turn 
 
